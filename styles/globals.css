@@ -1,0 +1,111 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --brand-orange: #FF7607;
+  --brand-blue: #1D4ED8;
+  --brand-green: #0E7C4A;
+  --brand-purple: #7C3AED;
+  --brand-yellow: #B45309;
+  
+  --bg-light: #FAFAF8;
+  --bg-dark: #1A1A1A;
+  --text-dark: #2D2D2D;
+  --text-light: #F5F5F0;
+  --border-light: #E5E5E0;
+  --border-dark: #333333;
+  
+  --density: 38px; /* balanced */
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
+html:not(.dark) {
+  color-scheme: light;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html:not(.dark) body {
+  background-color: var(--bg-light);
+  color: var(--text-dark);
+}
+
+html.dark body {
+  background-color: var(--bg-dark);
+  color: var(--text-light);
+}
+
+/* Density classes */
+html[data-density="compact"] {
+  --density: 32px;
+  font-size: 13px;
+}
+
+html[data-density="balanced"] {
+  --density: 38px;
+  font-size: 14px;
+}
+
+html[data-density="comfortable"] {
+  --density: 48px;
+  font-size: 15px;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+html:not(.dark) ::-webkit-scrollbar-track {
+  background: var(--bg-light);
+}
+
+html:not(.dark) ::-webkit-scrollbar-thumb {
+  background: var(--border-light);
+  border-radius: 4px;
+}
+
+html:not(.dark) ::-webkit-scrollbar-thumb:hover {
+  background: #ccc;
+}
+
+html.dark ::-webkit-scrollbar-track {
+  background: var(--bg-dark);
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+  background: var(--border-dark);
+  border-radius: 4px;
+}
+
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Focus styles */
+@layer components {
+  .focus-ring {
+    @apply outline-none ring-2 ring-brand-orange ring-offset-2;
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+}
