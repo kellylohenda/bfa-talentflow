@@ -1,0 +1,179 @@
+/* BFA Talento — Public pages (landing + inscrição)
+   Shared brand styles. Loaded by both Programa.html and Inscricao.html */
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #1A1A1A;
+  background: #FFFFFF;
+}
+img { max-width: 100%; display: block; }
+button { font-family: inherit; cursor: pointer; }
+a { color: inherit; }
+
+:root {
+  --primary: #FF7607;
+  --primary-deep: #9C4500;
+  --primary-soft: #FFF0E5;
+  --ink: #1A1A1A;
+  --ink-2: #525252;
+  --ink-3: #8A8A87;
+  --line: #E7E5E1;
+  --bg-2: #FAFAF9;
+  --bg-3: #F2F2F0;
+  --r-md: 6px;
+  --r-lg: 10px;
+}
+
+/* ===== Topbar ===== */
+.pub-top {
+  position: sticky; top: 0; z-index: 50;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--line);
+}
+.pub-top-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 16px 32px;
+  display: flex; align-items: center; gap: 32px;
+}
+.pub-brand {
+  display: flex; align-items: center; gap: 10px;
+  font-weight: 700; font-size: 17px; letter-spacing: -0.01em;
+  text-decoration: none; color: var(--ink);
+}
+.pub-logo {
+  width: 32px; height: 32px;
+  background: var(--ink);
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 14px;
+  border-radius: 4px;
+}
+.pub-brand small {
+  font-weight: 400; color: var(--ink-3); font-size: 12px;
+  letter-spacing: 0;
+}
+.pub-nav {
+  display: flex; gap: 4px; margin-left: auto;
+}
+.pub-nav a {
+  padding: 8px 14px;
+  font-size: 14px;
+  color: var(--ink-2);
+  text-decoration: none;
+  border-radius: var(--r-md);
+}
+.pub-nav a:hover { background: var(--bg-2); color: var(--ink); }
+.pub-cta {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 10px 18px;
+  background: var(--ink);
+  color: #fff !important;
+  border-radius: var(--r-md);
+  text-decoration: none;
+  font-size: 14px; font-weight: 500;
+  border: none;
+  transition: background 120ms;
+}
+.pub-cta:hover { background: var(--primary); }
+.pub-cta-primary { background: var(--primary); }
+.pub-cta-primary:hover { background: var(--primary-deep); }
+
+/* ===== Layout primitives ===== */
+.pub-section {
+  padding: 96px 32px;
+}
+.pub-container {
+  max-width: 1180px;
+  margin: 0 auto;
+}
+.pub-eyebrow {
+  display: inline-block;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--primary);
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+.pub-h1 {
+  font-size: clamp(40px, 6vw, 76px);
+  line-height: 1.04;
+  letter-spacing: -0.035em;
+  font-weight: 600;
+  color: var(--ink);
+  text-wrap: balance;
+}
+.pub-h2 {
+  font-size: clamp(28px, 3.5vw, 44px);
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+  font-weight: 600;
+  text-wrap: balance;
+}
+.pub-h3 {
+  font-size: 20px;
+  letter-spacing: -0.01em;
+  font-weight: 600;
+}
+.pub-lede {
+  font-size: 19px;
+  line-height: 1.55;
+  color: var(--ink-2);
+  max-width: 640px;
+  text-wrap: pretty;
+}
+
+/* ===== Footer ===== */
+.pub-footer {
+  background: var(--ink);
+  color: #B0AEA9;
+  padding: 64px 32px 32px;
+}
+.pub-footer-inner {
+  max-width: 1180px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 48px;
+}
+.pub-footer h5 {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #fff;
+  margin-bottom: 16px;
+  font-weight: 600;
+}
+.pub-footer ul { list-style: none; }
+.pub-footer li {
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+.pub-footer a {
+  color: #B0AEA9;
+  text-decoration: none;
+}
+.pub-footer a:hover { color: #fff; }
+.pub-footer-bottom {
+  max-width: 1180px;
+  margin: 48px auto 0;
+  padding-top: 24px;
+  border-top: 1px solid #2D2D2B;
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #6F6D69;
+}
+
+@media (max-width: 760px) {
+  .pub-section { padding: 64px 24px; }
+  .pub-top-inner { padding: 12px 20px; gap: 16px; }
+  .pub-nav { display: none; }
+  .pub-footer-inner { grid-template-columns: 1fr 1fr; gap: 32px; }
+}

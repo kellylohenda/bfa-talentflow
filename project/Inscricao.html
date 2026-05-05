@@ -1,0 +1,664 @@
+<!doctype html>
+<html lang="pt">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Candidatura · Programa Futuro BFA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="public-styles.css" />
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<style>
+body { background: var(--bg-2); }
+
+.app-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+.shell-main {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  max-width: 1280px;
+  margin: 32px auto;
+  padding: 0 32px;
+  gap: 48px;
+  align-items: start;
+}
+
+/* Stepper sidebar */
+.stepper {
+  position: sticky;
+  top: 100px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  padding: 28px;
+}
+.stepper h3 {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-3);
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+.step-item {
+  display: flex;
+  gap: 12px;
+  padding: 10px 0;
+  cursor: pointer;
+  align-items: flex-start;
+}
+.step-num {
+  flex-shrink: 0;
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--bg-3);
+  color: var(--ink-3);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 600;
+  border: 2px solid transparent;
+}
+.step-item.active .step-num {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary-soft);
+}
+.step-item.done .step-num {
+  background: #fff;
+  color: var(--primary);
+  border-color: var(--primary);
+}
+.step-text b {
+  display: block;
+  font-size: 14px;
+  color: var(--ink-2);
+  font-weight: 500;
+}
+.step-item.active .step-text b { color: var(--ink); font-weight: 600; }
+.step-text span {
+  font-size: 12px;
+  color: var(--ink-3);
+}
+.step-line {
+  width: 2px;
+  height: 12px;
+  background: var(--line);
+  margin: 0 13px;
+}
+
+.progress-strip {
+  height: 4px;
+  background: var(--bg-3);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 24px;
+}
+.progress-strip-fill {
+  height: 100%;
+  background: var(--primary);
+  transition: width 240ms;
+}
+.progress-text {
+  margin-top: 8px;
+  font-size: 11px;
+  color: var(--ink-3);
+  display: flex; justify-content: space-between;
+}
+
+/* Form area */
+.form-card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  padding: 40px 48px;
+}
+.form-head h1 {
+  font-size: 28px;
+  letter-spacing: -0.02em;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+.form-head p {
+  font-size: 14px;
+  color: var(--ink-2);
+  margin-bottom: 32px;
+}
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18px;
+}
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field-full { grid-column: 1 / -1; }
+.field label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink-2);
+}
+.field label .req { color: var(--primary); margin-left: 2px; }
+.field input, .field select, .field textarea {
+  padding: 11px 13px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--ink);
+  background: #fff;
+  outline: none;
+  transition: border-color 120ms, box-shadow 120ms;
+}
+.field input:focus, .field select:focus, .field textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-soft);
+}
+.field textarea { resize: vertical; min-height: 100px; }
+.field .hint { font-size: 11px; color: var(--ink-3); }
+
+.radio-group { display: flex; flex-direction: column; gap: 8px; }
+.radio-card {
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  padding: 14px 16px;
+  display: flex;
+  gap: 12px;
+  cursor: pointer;
+  transition: border-color 120ms, background 120ms;
+}
+.radio-card:hover { border-color: var(--primary); }
+.radio-card.selected {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+}
+.radio-card input { margin-top: 3px; accent-color: var(--primary); }
+.radio-card .meta b { display: block; font-size: 14px; font-weight: 600; color: var(--ink); margin-bottom: 2px; }
+.radio-card .meta span { font-size: 12px; color: var(--ink-2); }
+
+.upload-zone {
+  border: 2px dashed var(--line);
+  border-radius: var(--r-md);
+  padding: 28px;
+  text-align: center;
+  transition: border-color 120ms, background 120ms;
+}
+.upload-zone:hover { border-color: var(--primary); background: var(--primary-soft); }
+.upload-zone svg { margin: 0 auto 8px; }
+.upload-zone .ttl { font-size: 14px; font-weight: 500; }
+.upload-zone .sub { font-size: 12px; color: var(--ink-3); margin-top: 2px; }
+.upload-zone.has-file { border-style: solid; border-color: var(--primary); background: var(--primary-soft); }
+
+.uploaded {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: var(--bg-2);
+  border-radius: var(--r-md);
+  font-size: 13px;
+  margin-top: 8px;
+}
+.uploaded b { font-weight: 500; flex: 1; }
+.uploaded .x {
+  background: none; border: none; color: var(--ink-3);
+  font-size: 18px; line-height: 1;
+}
+
+.consent {
+  display: flex;
+  gap: 12px;
+  padding: 16px;
+  background: var(--bg-2);
+  border-radius: var(--r-md);
+  margin-top: 16px;
+}
+.consent input { margin-top: 3px; accent-color: var(--primary); flex-shrink: 0; }
+.consent p { font-size: 12px; color: var(--ink-2); line-height: 1.55; }
+.consent a { color: var(--primary); text-decoration: underline; }
+
+.form-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+}
+.btn-back {
+  background: none;
+  border: 1px solid var(--line);
+  padding: 11px 20px;
+  border-radius: var(--r-md);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink-2);
+}
+.btn-back:hover { background: var(--bg-2); color: var(--ink); }
+.btn-back:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-next {
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  padding: 11px 22px;
+  border-radius: var(--r-md);
+  font-size: 14px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.btn-next:hover { background: var(--primary-deep); }
+.btn-submit {
+  background: var(--ink);
+  color: #fff;
+  border: none;
+  padding: 12px 24px;
+  border-radius: var(--r-md);
+  font-size: 14px;
+  font-weight: 500;
+}
+.btn-submit:hover { background: var(--primary); }
+
+.review-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  margin-bottom: 24px;
+}
+.review-section { padding: 18px 20px; background: var(--bg-2); border-radius: var(--r-md); }
+.review-section h4 {
+  font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em;
+  color: var(--ink-3); font-weight: 600; margin-bottom: 12px;
+}
+.review-row {
+  display: flex; justify-content: space-between;
+  padding: 6px 0;
+  font-size: 13px;
+  border-bottom: 1px solid var(--line);
+}
+.review-row:last-child { border: none; }
+.review-row span { color: var(--ink-3); }
+.review-row b { color: var(--ink); font-weight: 500; }
+.review-edit {
+  background: none; border: none; color: var(--primary);
+  font-size: 12px; margin-top: 8px; cursor: pointer; font-weight: 500;
+}
+
+/* Success */
+.success-wrap {
+  text-align: center;
+  padding: 64px 32px;
+}
+.success-icon {
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  background: var(--primary-soft);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 24px;
+}
+.success-wrap h1 {
+  font-size: 32px;
+  letter-spacing: -0.02em;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+.success-wrap p {
+  font-size: 15px;
+  color: var(--ink-2);
+  max-width: 480px;
+  margin: 0 auto 32px;
+  line-height: 1.6;
+}
+.success-ref {
+  display: inline-block;
+  padding: 12px 20px;
+  background: var(--bg-2);
+  border-radius: var(--r-md);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  margin-bottom: 32px;
+}
+.success-ref b { color: var(--primary); }
+
+@media (max-width: 900px) {
+  .shell-main { grid-template-columns: 1fr; padding: 0 20px; gap: 24px; }
+  .stepper { position: static; }
+  .form-card { padding: 28px; }
+  .form-grid { grid-template-columns: 1fr; }
+  .review-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body data-screen-label="Inscrição">
+
+<div class="pub-top">
+  <div class="pub-top-inner">
+    <a href="Programa.html" class="pub-brand">
+      <div class="pub-logo">B</div>
+      <div>BFA Talento <small>· Candidatura 2026</small></div>
+    </a>
+    <nav class="pub-nav">
+      <a href="Programa.html">← Voltar ao programa</a>
+    </nav>
+    <a href="mailto:talento@bfa.ao" class="pub-cta" style="background:#fff; color:var(--ink) !important; border:1px solid var(--line);">Preciso de ajuda</a>
+  </div>
+</div>
+
+<div id="root" class="app-shell"></div>
+
+<script type="text/babel" data-presets="env,react">
+const { useState } = React;
+
+const STEPS = [
+  { id: 1, title: 'Programa',     desc: 'Escolha do percurso' },
+  { id: 2, title: 'Identificação', desc: 'Dados pessoais' },
+  { id: 3, title: 'Académico',     desc: 'Formação e notas' },
+  { id: 4, title: 'Motivação',     desc: 'Carta e ensaio curto' },
+  { id: 5, title: 'Documentos',    desc: 'CV e histórico' },
+  { id: 6, title: 'Revisão',       desc: 'Confirmar e submeter' }
+];
+
+const PROGRAMS = [
+  { id: 'fbfa', name: 'Futuro BFA',           desc: '24 meses · trainee · contrato no fim · sede Luanda' },
+  { id: 'bif',  name: 'Bolsa Internacional',  desc: 'Mestrado em Portugal/Europa · cobertura integral · cláusula 5 anos' },
+  { id: 'bnac', name: 'Bolsa Nacional',       desc: 'Licenciatura em universidade angolana · subsídio + propinas' },
+  { id: 'lid',  name: 'Programa Liderança+',  desc: 'Apenas colaboradores BFA · MBA executivo · 18 meses' }
+];
+
+function Stepper({ step, setStep, done }) {
+  return (
+    <div className="stepper">
+      <h3>Candidatura · {STEPS.length} etapas</h3>
+      {STEPS.map((s, i) => (
+        <React.Fragment key={s.id}>
+          <div className={`step-item ${step === s.id ? 'active' : ''} ${done.includes(s.id) ? 'done' : ''}`}
+               onClick={() => done.includes(s.id) && setStep(s.id)}>
+            <div className="step-num">{done.includes(s.id) ? '✓' : s.id}</div>
+            <div className="step-text"><b>{s.title}</b><span>{s.desc}</span></div>
+          </div>
+          {i < STEPS.length - 1 && <div className="step-line"></div>}
+        </React.Fragment>
+      ))}
+      <div className="progress-strip">
+        <div className="progress-strip-fill" style={{ width: ((step - 1) / (STEPS.length - 1) * 100) + '%' }}></div>
+      </div>
+      <div className="progress-text">
+        <span>Etapa {step} de {STEPS.length}</span>
+        <span>{Math.round((step - 1) / (STEPS.length - 1) * 100)}%</span>
+      </div>
+    </div>
+  );
+}
+
+function App() {
+  const [step, setStep] = useState(1);
+  const [done, setDone] = useState([]);
+  const [d, setD] = useState({
+    program: '',
+    program2: '',
+    nome: '', genero: '', bi: '', dob: '', email: '', tel: '', morada: '', provincia: '',
+    grau: '', curso: '', uni: '', anoFim: '', media: '', ingles: '',
+    motivacao: '', futuro: '',
+    cv: null, historico: null,
+    rgpd: false, novidades: true
+  });
+  const set = (k, v) => setD({ ...d, [k]: v });
+
+  const next = () => {
+    setDone([...new Set([...done, step])]);
+    setStep(step + 1);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+  const prev = () => { setStep(step - 1); window.scrollTo({ top: 0 }); };
+
+  const valid = {
+    1: !!d.program,
+    2: d.nome && d.bi && d.email && d.tel && d.dob && d.provincia,
+    3: d.grau && d.curso && d.uni && d.media,
+    4: d.motivacao.length >= 80,
+    5: d.cv,
+    6: d.rgpd
+  };
+
+  if (step === 7) {
+    return (
+      <div className="shell-main">
+        <div></div>
+        <div className="form-card">
+          <div className="success-wrap">
+            <div className="success-icon">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#FF7607" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M5 12l5 5 9-11" />
+              </svg>
+            </div>
+            <h1>Candidatura submetida!</h1>
+            <p>Obrigado, {d.nome.split(' ')[0]}. Recebemos a sua candidatura ao programa <b>{PROGRAMS.find(p => p.id === d.program)?.name}</b>. Vamos enviar uma confirmação para <b>{d.email}</b> nos próximos minutos.</p>
+            <div className="success-ref">Referência · <b>BFA-2026-{Math.floor(Math.random()*9000+1000)}</b></div>
+            <p style={{ fontSize: 13 }}><b>Próximos passos:</b><br />Análise inicial em até 14 dias úteis. Se passar à fase seguinte, recebe convite para a prova online em Julho.</p>
+            <a href="Programa.html" className="pub-cta pub-cta-primary" style={{ marginTop: 24, padding: '12px 22px' }}>Voltar ao programa</a>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="shell-main">
+      <Stepper step={step} setStep={setStep} done={done} />
+
+      <div className="form-card">
+        {step === 1 && (
+          <>
+            <div className="form-head">
+              <h1>A que programa te queres candidatar?</h1>
+              <p>Podes seleccionar até dois programas em ordem de preferência. Avaliamos ambos com a mesma candidatura.</p>
+            </div>
+            <div className="radio-group">
+              {PROGRAMS.map(p => (
+                <label key={p.id} className={`radio-card ${d.program === p.id ? 'selected' : ''}`}>
+                  <input type="radio" name="program" checked={d.program === p.id} onChange={() => set('program', p.id)} />
+                  <div className="meta"><b>{p.name}</b><span>{p.desc}</span></div>
+                </label>
+              ))}
+            </div>
+            <div style={{ marginTop: 24 }}>
+              <label style={{ fontSize: 12, fontWeight: 500, color: 'var(--ink-2)' }}>2ª preferência (opcional)</label>
+              <select className="field" style={{ width: '100%', padding: 11, border: '1px solid var(--line)', borderRadius: 6, fontSize: 14, marginTop: 6 }}
+                value={d.program2} onChange={e => set('program2', e.target.value)}>
+                <option value="">— Nenhuma —</option>
+                {PROGRAMS.filter(p => p.id !== d.program).map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+              </select>
+            </div>
+          </>
+        )}
+
+        {step === 2 && (
+          <>
+            <div className="form-head">
+              <h1>Identificação</h1>
+              <p>Os teus dados pessoais. Tudo encriptado e em conformidade com a Lei 22/11 (APD).</p>
+            </div>
+            <div className="form-grid">
+              <div className="field field-full"><label>Nome completo<span className="req">*</span></label><input type="text" placeholder="Como aparece no BI" value={d.nome} onChange={e => set('nome', e.target.value)} /></div>
+              <div className="field"><label>Nº do BI<span className="req">*</span></label><input type="text" placeholder="Ex: 000000000LA000" value={d.bi} onChange={e => set('bi', e.target.value)} /></div>
+              <div className="field"><label>Data de nascimento<span className="req">*</span></label><input type="date" value={d.dob} onChange={e => set('dob', e.target.value)} /></div>
+              <div className="field"><label>Género</label>
+                <select value={d.genero} onChange={e => set('genero', e.target.value)}>
+                  <option value="">—</option><option>Feminino</option><option>Masculino</option><option>Prefiro não dizer</option>
+                </select>
+              </div>
+              <div className="field"><label>Província de residência<span className="req">*</span></label>
+                <select value={d.provincia} onChange={e => set('provincia', e.target.value)}>
+                  <option value="">—</option>
+                  {['Luanda','Benguela','Huambo','Huíla','Cabinda','Bié','Cuanza Norte','Cuanza Sul','Cunene','Lunda Norte','Lunda Sul','Malanje','Moxico','Namibe','Uíge','Zaire','Bengo','Cuando Cubango'].map(p => <option key={p}>{p}</option>)}
+                </select>
+              </div>
+              <div className="field"><label>Email<span className="req">*</span></label><input type="email" placeholder="o.teu@email.com" value={d.email} onChange={e => set('email', e.target.value)} /></div>
+              <div className="field"><label>Telemóvel<span className="req">*</span></label><input type="tel" placeholder="+244 9XX XXX XXX" value={d.tel} onChange={e => set('tel', e.target.value)} /></div>
+              <div className="field field-full"><label>Morada</label><input type="text" placeholder="Rua, número, bairro, município" value={d.morada} onChange={e => set('morada', e.target.value)} /></div>
+            </div>
+          </>
+        )}
+
+        {step === 3 && (
+          <>
+            <div className="form-head">
+              <h1>Percurso académico</h1>
+              <p>A tua formação mais recente. Se ainda estás a estudar, indica a média actual.</p>
+            </div>
+            <div className="form-grid">
+              <div className="field"><label>Grau<span className="req">*</span></label>
+                <select value={d.grau} onChange={e => set('grau', e.target.value)}>
+                  <option value="">—</option><option>Ensino médio</option><option>Licenciatura em curso</option><option>Licenciatura concluída</option><option>Mestrado</option>
+                </select>
+              </div>
+              <div className="field"><label>Curso<span className="req">*</span></label><input type="text" placeholder="Ex: Economia" value={d.curso} onChange={e => set('curso', e.target.value)} /></div>
+              <div className="field field-full"><label>Universidade<span className="req">*</span></label><input type="text" placeholder="Ex: Universidade Agostinho Neto" value={d.uni} onChange={e => set('uni', e.target.value)} /></div>
+              <div className="field"><label>Ano de conclusão (previsto)</label><input type="number" placeholder="2026" min="2020" max="2030" value={d.anoFim} onChange={e => set('anoFim', e.target.value)} /></div>
+              <div className="field"><label>Média final<span className="req">*</span></label><input type="number" placeholder="0–20" min="0" max="20" step="0.1" value={d.media} onChange={e => set('media', e.target.value)} /></div>
+              <div className="field field-full"><label>Nível de inglês</label>
+                <select value={d.ingles} onChange={e => set('ingles', e.target.value)}>
+                  <option value="">—</option><option>Básico (A1–A2)</option><option>Intermédio (B1–B2)</option><option>Avançado (C1–C2)</option><option>Nativo</option>
+                </select>
+                <span className="hint">Necessário para os programas internacionais</span>
+              </div>
+            </div>
+          </>
+        )}
+
+        {step === 4 && (
+          <>
+            <div className="form-head">
+              <h1>Conta-nos quem és</h1>
+              <p>Duas perguntas curtas. Sê genuíno — é o que mais conta.</p>
+            </div>
+            <div className="form-grid">
+              <div className="field field-full">
+                <label>Porque te queres candidatar a este programa?<span className="req">*</span></label>
+                <textarea rows="6" placeholder="Mínimo 80 caracteres. Conta-nos o que te motiva, o que esperas aprender e como esta oportunidade encaixa nos teus planos." value={d.motivacao} onChange={e => set('motivacao', e.target.value)} />
+                <span className="hint" style={{ color: d.motivacao.length >= 80 ? 'var(--primary)' : 'var(--ink-3)' }}>{d.motivacao.length} / 80 caracteres mínimos</span>
+              </div>
+              <div className="field field-full">
+                <label>Onde te imaginas daqui a 5 anos?</label>
+                <textarea rows="5" placeholder="Opcional, mas valorizamos." value={d.futuro} onChange={e => set('futuro', e.target.value)} />
+              </div>
+            </div>
+          </>
+        )}
+
+        {step === 5 && (
+          <>
+            <div className="form-head">
+              <h1>Documentos de suporte</h1>
+              <p>Apenas dois ficheiros. Aceitamos PDF, DOCX e JPG até 10 MB cada.</p>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+              <div>
+                <label style={{ fontSize: 12, fontWeight: 500, color: 'var(--ink-2)', display: 'block', marginBottom: 8 }}>Curriculum Vitae<span className="req" style={{ color: 'var(--primary)' }}>*</span></label>
+                {!d.cv ? (
+                  <label className="upload-zone" style={{ display: 'block', cursor: 'pointer' }}>
+                    <input type="file" accept=".pdf,.doc,.docx" style={{ display: 'none' }} onChange={e => set('cv', e.target.files[0]?.name || null)} />
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#8A8A87" strokeWidth="1.6" strokeLinecap="round"><path d="M12 4v12M6 11l6 6 6-6" /><path d="M4 21h16" /></svg>
+                    <div className="ttl">Arrasta o ficheiro ou clica para escolher</div>
+                    <div className="sub">PDF, DOCX · máx 10 MB</div>
+                  </label>
+                ) : (
+                  <div className="uploaded">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF7607" strokeWidth="2"><path d="M6 3h9l5 5v13H6z" /></svg>
+                    <b>{d.cv}</b>
+                    <span style={{ color: 'var(--ink-3)', fontSize: 12 }}>Pronto</span>
+                    <button className="x" onClick={() => set('cv', null)}>×</button>
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <label style={{ fontSize: 12, fontWeight: 500, color: 'var(--ink-2)', display: 'block', marginBottom: 8 }}>Histórico académico (certidão de notas)</label>
+                {!d.historico ? (
+                  <label className="upload-zone" style={{ display: 'block', cursor: 'pointer' }}>
+                    <input type="file" accept=".pdf,.jpg,.png" style={{ display: 'none' }} onChange={e => set('historico', e.target.files[0]?.name || null)} />
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#8A8A87" strokeWidth="1.6" strokeLinecap="round"><path d="M12 4v12M6 11l6 6 6-6" /><path d="M4 21h16" /></svg>
+                    <div className="ttl">Adicionar histórico</div>
+                    <div className="sub">Opcional nesta fase · podes enviar depois</div>
+                  </label>
+                ) : (
+                  <div className="uploaded">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF7607" strokeWidth="2"><path d="M6 3h9l5 5v13H6z" /></svg>
+                    <b>{d.historico}</b>
+                    <button className="x" onClick={() => set('historico', null)}>×</button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </>
+        )}
+
+        {step === 6 && (
+          <>
+            <div className="form-head">
+              <h1>Revê e submete</h1>
+              <p>Confere os teus dados antes de enviar. Podes voltar a qualquer etapa.</p>
+            </div>
+            <div className="review-grid">
+              <div className="review-section">
+                <h4>Programa</h4>
+                <div className="review-row"><span>1ª preferência</span><b>{PROGRAMS.find(p => p.id === d.program)?.name || '—'}</b></div>
+                {d.program2 && <div className="review-row"><span>2ª preferência</span><b>{PROGRAMS.find(p => p.id === d.program2)?.name}</b></div>}
+                <button className="review-edit" onClick={() => setStep(1)}>Editar →</button>
+              </div>
+              <div className="review-section">
+                <h4>Identificação</h4>
+                <div className="review-row"><span>Nome</span><b>{d.nome}</b></div>
+                <div className="review-row"><span>Email</span><b>{d.email}</b></div>
+                <div className="review-row"><span>Província</span><b>{d.provincia}</b></div>
+                <button className="review-edit" onClick={() => setStep(2)}>Editar →</button>
+              </div>
+              <div className="review-section">
+                <h4>Académico</h4>
+                <div className="review-row"><span>Curso</span><b>{d.curso}</b></div>
+                <div className="review-row"><span>Universidade</span><b>{d.uni}</b></div>
+                <div className="review-row"><span>Média</span><b>{d.media}/20</b></div>
+                <button className="review-edit" onClick={() => setStep(3)}>Editar →</button>
+              </div>
+              <div className="review-section">
+                <h4>Documentos</h4>
+                <div className="review-row"><span>CV</span><b>{d.cv || '—'}</b></div>
+                <div className="review-row"><span>Histórico</span><b>{d.historico || 'Não enviado'}</b></div>
+                <button className="review-edit" onClick={() => setStep(5)}>Editar →</button>
+              </div>
+            </div>
+
+            <div className="consent">
+              <input type="checkbox" id="rgpd" checked={d.rgpd} onChange={e => set('rgpd', e.target.checked)} />
+              <p><label htmlFor="rgpd">Confirmo que os dados fornecidos são verdadeiros e autorizo o BFA a tratar a minha informação ao abrigo da <a href="#">Política de Privacidade</a> e da Lei 22/11 da APD. Posso revogar este consentimento a qualquer momento.</label></p>
+            </div>
+            <div className="consent" style={{ marginTop: 8 }}>
+              <input type="checkbox" id="news" checked={d.novidades} onChange={e => set('novidades', e.target.checked)} />
+              <p><label htmlFor="news">Quero receber novidades sobre o programa e oportunidades futuras.</label></p>
+            </div>
+          </>
+        )}
+
+        <div className="form-actions">
+          <button className="btn-back" onClick={prev} disabled={step === 1}>← Voltar</button>
+          {step < 6 ? (
+            <button className="btn-next" onClick={next} disabled={!valid[step]}>Continuar →</button>
+          ) : (
+            <button className="btn-submit" onClick={() => { setDone([...done, 6]); setStep(7); window.scrollTo({ top: 0 }); }} disabled={!valid[6]}>Submeter candidatura</button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

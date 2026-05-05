@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="pt">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>BFA TalentFlow</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script src="data.js"></script>
+<script type="text/babel" src="ui.jsx"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel" src="shell.jsx"></script>
+<script type="text/babel" src="page-overview.jsx"></script>
+<script type="text/babel" src="page-talentos.jsx"></script>
+<script type="text/babel" src="page-talento.jsx"></script>
+<script type="text/babel" src="page-strategy.jsx"></script>
+<script type="text/babel" src="page-extras.jsx"></script>
+<script type="text/babel" src="page-extras2.jsx"></script>
+<script type="text/babel" src="page-mentoria-pro.jsx"></script>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel" data-presets="env,react">
+const { useState, useEffect } = React;
+
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "theme": "dark",
+  "density": "compact",
+  "sidebar": "expanded",
+  "role": "bolseiro"
+}/*EDITMODE-END*/;
+
+const PAGE_TITLES = {
+  overview:    'Visão Geral',
+  candidaturas:'Candidaturas',
+  talentos:    'Talentos',
+  talento:     'Ficha do Talento',
+  pagamentos:  'Pagamentos',
+  avaliacoes:  'Avaliações 360°',
+  mentoria:    'Mentoria',
+  sucessao:    '9-Box / Sucessão',
+  geografia:   'Mapa Geográfico',
+  roi:         'ROI por Programa',
+  workflows:   'Workflows de Aprovação',
+  retencao:    'Planos de Retenção',
+  compliance:  'Compliance · APD · Auditoria',
+  bolseiroHome:'Início',
+  bolseiroPagamentos: 'Pagamentos',
+  bolseiroDocs: 'Documentos',
+  bolseiroMentor: 'Mentoria',
+  bolseiroEventos: 'Eventos'
+};
+
+function App() {
+  const [tweaks, setTweak] = window.useTweaks(TWEAK_DEFAULTS);
+  const [page, setPage] = useState(tweaks.role === 'bolseiro' ? 'bolseiroHome' : 'overview');
+  const [selectedTalent, setSelectedTalent] = useState('T-1042');
+
+  // When role changes, reset page to a sensible default
+  const setRole = (r) => {
+    setTweak('role', r);
+    if (r === 'bolseiro') setPage('bolseiroHome');
+    else setPage('overview');
+  };
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', tweaks.theme);
+  }, [tweaks.theme]);
+
+  const role = tweaks.role;
+  const crumb = PAGE_TITLES[page] || 'Painel';
+
+  const renderPage = () => {
+    // Bolseiro pages
+    if (role === 'bolseiro') {
+      switch (page) {
+        case 'bolseiroHome':       return <PageBolseiroHome />;
+        case 'bolseiroPagamentos': return <PageBolseiroHome />;
+        case 'bolseiroDocs':       return <PageBolseiroDocs />;
+        case 'bolseiroMentor':     return <PageBolseiroMentor />;
+        case 'bolseiroEventos':    return <PageBolseiroEventos />;
+        default: return <PageBolseiroHome />;
+      }
+    }
+    switch (page) {
+      case 'overview':     return <PageOverview role={role} setPage={setPage} setSelectedTalent={setSelectedTalent} />;
+      case 'candidaturas': return <PageCandidaturas />;
+      case 'talentos':     return <PageTalentos setPage={setPage} setSelectedTalent={setSelectedTalent} />;
+      case 'talento':      return <PageTalento talentId={selectedTalent} setPage={setPage} />;
+      case 'pagamentos':   return <PagePagamentos />;
+      case 'avaliacoes':   return <PageAvaliacoes />;
+      case 'mentoria':     return <PageMentoriaPro />;
+      case 'sucessao':     return <PageSucessao setPage={setPage} setSelectedTalent={setSelectedTalent} />;
+      case 'geografia':    return <PageGeografia />;
+      case 'roi':          return <PageROI />;
+      case 'workflows':    return <PageWorkflows />;
+      case 'retencao':     return <PageRetencao setPage={setPage} setSelectedTalent={setSelectedTalent} />;
+      case 'compliance':   return <PageCompliance />;
+      default:             return <PageOverview role={role} setPage={setPage} setSelectedTalent={setSelectedTalent} />;
+    }
+  };
+
+  return (
+    <div className="app" data-density={tweaks.density} data-sidebar={tweaks.sidebar} data-screen-label="App">
+      <Sidebar role={role} page={page} setPage={setPage} setRole={setRole} />
+      <div className="main">
+        <Topbar crumb={crumb} role={role} />
+        <div className="page" data-screen-label={crumb}>
+          {renderPage()}
+        </div>
+      </div>
+
+      <window.TweaksPanel title="Tweaks">
+        <window.TweakSection title="Aparência">
+          <window.TweakRadio label="Tema" value={tweaks.theme} options={[
+            { value: 'light', label: 'Claro' },
+            { value: 'dark', label: 'Escuro' }
+          ]} onChange={(v) => setTweak('theme', v)} />
+          <window.TweakRadio label="Densidade" value={tweaks.density} options={[
+            { value: 'compact', label: 'Compacto' },
+            { value: 'balanced', label: 'Equilibrado' },
+            { value: 'comfortable', label: 'Amplo' }
+          ]} onChange={(v) => setTweak('density', v)} />
+          <window.TweakRadio label="Barra lateral" value={tweaks.sidebar} options={[
+            { value: 'expanded', label: 'Expandida' },
+            { value: 'icon', label: 'Apenas ícones' },
+            { value: 'floating', label: 'Flutuante' }
+          ]} onChange={(v) => setTweak('sidebar', v)} />
+        </window.TweakSection>
+        <window.TweakSection title="Perfil">
+          <window.TweakRadio label="Role" value={tweaks.role} options={[
+            { value: 'rh', label: 'RH' },
+            { value: 'direcao', label: 'Direcção' },
+            { value: 'bolseiro', label: 'Bolseiro' }
+          ]} onChange={setRole} />
+        </window.TweakSection>
+      </window.TweaksPanel>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
