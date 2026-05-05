@@ -23,7 +23,12 @@
 <script type="text/babel" src="page-strategy.jsx"></script>
 <script type="text/babel" src="page-extras.jsx"></script>
 <script type="text/babel" src="page-extras2.jsx"></script>
+<script type="text/babel" src="page-tarefas.jsx"></script>
+<script type="text/babel" src="page-faltas.jsx"></script>
 <script type="text/babel" src="page-mentoria-pro.jsx"></script>
+<script type="text/babel" src="page-estagiarios.jsx"></script>
+<script type="text/babel" src="page-mentor-profile.jsx"></script>
+<script type="text/babel" src="page-mentor.jsx"></script>
 </head>
 <body>
 <div id="root"></div>
@@ -52,23 +57,29 @@ const PAGE_TITLES = {
   workflows:   'Workflows de Aprovação',
   retencao:    'Planos de Retenção',
   compliance:  'Compliance · APD · Auditoria',
+  estagiarios:      'Gestão de Estagiários',
+  tarefas:          'Gestão de Tarefas',
+  faltas:           'Gestão de Faltas',
+  mentorDashboard:  'Dashboard do Mentor',
   bolseiroHome:'Início',
   bolseiroPagamentos: 'Pagamentos',
   bolseiroDocs: 'Documentos',
-  bolseiroMentor: 'Mentoria',
+  bolseiroMentor:   'O Meu Mentor',
+  bolseiroTarefas:  'As Minhas Tarefas',
+  bolseiroFaltas:   'As Minhas Faltas',
   bolseiroEventos: 'Eventos'
 };
 
 function App() {
   const [tweaks, setTweak] = window.useTweaks(TWEAK_DEFAULTS);
-  const [page, setPage] = useState(tweaks.role === 'bolseiro' ? 'bolseiroHome' : 'overview');
+  const defaultPage = (r) => r === 'bolseiro' ? 'bolseiroHome' : r === 'mentor' ? 'mentorDashboard' : 'overview';
+  const [page, setPage] = useState(defaultPage(tweaks.role));
   const [selectedTalent, setSelectedTalent] = useState('T-1042');
 
   // When role changes, reset page to a sensible default
   const setRole = (r) => {
     setTweak('role', r);
-    if (r === 'bolseiro') setPage('bolseiroHome');
-    else setPage('overview');
+    setPage(defaultPage(r));
   };
 
   useEffect(() => {
@@ -79,13 +90,19 @@ function App() {
   const crumb = PAGE_TITLES[page] || 'Painel';
 
   const renderPage = () => {
+    // Mentor pages
+    if (role === 'mentor') {
+      return <PageMentorDashboard />;
+    }
     // Bolseiro pages
     if (role === 'bolseiro') {
       switch (page) {
         case 'bolseiroHome':       return <PageBolseiroHome />;
-        case 'bolseiroPagamentos': return <PageBolseiroHome />;
+        case 'bolseiroPagamentos': return <PageBolseiroPagamentos />;
         case 'bolseiroDocs':       return <PageBolseiroDocs />;
-        case 'bolseiroMentor':     return <PageBolseiroMentor />;
+        case 'bolseiroMentor':     return <PageMentorProfile />;
+        case 'bolseiroTarefas':   return <PageBolseiroTarefas />;
+        case 'bolseiroFaltas':    return <PageBolseiroFaltas />;
         case 'bolseiroEventos':    return <PageBolseiroEventos />;
         default: return <PageBolseiroHome />;
       }
@@ -98,6 +115,9 @@ function App() {
       case 'pagamentos':   return <PagePagamentos />;
       case 'avaliacoes':   return <PageAvaliacoes />;
       case 'mentoria':     return <PageMentoriaPro />;
+      case 'estagiarios':  return <PageEstagiarios setPage={setPage} setSelectedTalent={setSelectedTalent} />;
+      case 'tarefas':      return <PageTarefas />;
+      case 'faltas':       return <PageFaltas />;
       case 'sucessao':     return <PageSucessao setPage={setPage} setSelectedTalent={setSelectedTalent} />;
       case 'geografia':    return <PageGeografia />;
       case 'roi':          return <PageROI />;
@@ -137,8 +157,9 @@ function App() {
         </window.TweakSection>
         <window.TweakSection title="Perfil">
           <window.TweakRadio label="Role" value={tweaks.role} options={[
-            { value: 'rh', label: 'RH' },
-            { value: 'direcao', label: 'Direcção' },
+            { value: 'rh',       label: 'RH' },
+            { value: 'direcao',  label: 'Direcção' },
+            { value: 'mentor',   label: 'Mentor' },
             { value: 'bolseiro', label: 'Bolseiro' }
           ]} onChange={setRole} />
         </window.TweakSection>

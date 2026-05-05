@@ -5,6 +5,9 @@ const NAV_BY_ROLE = {
     { id: 'overview',     label: 'Visão Geral',         icon: 'dashboard' },
     { id: 'candidaturas', label: 'Candidaturas',        icon: 'funnel', badge: '12' },
     { id: 'talentos',     label: 'Talentos',            icon: 'users' },
+    { id: 'estagiarios',  label: 'Estagiários',         icon: 'graduation' },
+    { id: 'tarefas',      label: 'Tarefas',             icon: 'check' },
+    { id: 'faltas',       label: 'Faltas',              icon: 'calendar' },
     { id: 'pagamentos',   label: 'Pagamentos',          icon: 'cash', badge: '3' },
     { id: 'workflows',    label: 'Aprovações',          icon: 'check', badge: '6' },
     { id: 'retencao',     label: 'Retenção',            icon: 'shield' },
@@ -32,12 +35,18 @@ const NAV_BY_ROLE = {
     { id: 'workflows',  label: 'Aprovações',          icon: 'check' },
     { id: 'compliance', label: 'Compliance · APD',    icon: 'shield' }
   ],
+  mentor: [
+    { section: 'Mentoria' },
+    { id: 'mentorDashboard', label: 'O Meu Dashboard', icon: 'dashboard' }
+  ],
   bolseiro: [
     { section: 'O Meu Programa' },
     { id: 'bolseiroHome',     label: 'Início',           icon: 'dashboard' },
     { id: 'bolseiroPagamentos', label: 'Pagamentos',     icon: 'cash' },
     { id: 'bolseiroDocs',     label: 'Documentos',       icon: 'doc' },
     { id: 'bolseiroMentor',   label: 'Mentoria',         icon: 'briefcase' },
+    { id: 'bolseiroTarefas',  label: 'Tarefas',          icon: 'check' },
+    { id: 'bolseiroFaltas',   label: 'Faltas',           icon: 'calendar' },
     { section: 'Comunidade' },
     { id: 'bolseiroEventos',  label: 'Eventos & Workshops', icon: 'calendar' }
   ]
@@ -48,8 +57,9 @@ window.NAV_BY_ROLE = NAV_BY_ROLE;
 window.Sidebar = function Sidebar({ role, page, setPage, setRole }) {
   const nav = NAV_BY_ROLE[role];
   const userByRole = {
-    rh:       { name: 'Mariana Quissama', sub: 'Gestora de Programa · RH' },
+    rh:       { name: 'Mariana Quissama',  sub: 'Gestora de Programa · RH' },
     direcao:  { name: 'Dr. Manuel Bemba', sub: 'Direcção de RH' },
+    mentor:   { name: 'Edmilson Cardoso', sub: 'Director · Banca de Empresas · Mentor' },
     bolseiro: { name: 'Lwini Capemba',    sub: 'Trainee Y1 · Futuro BFA' }
   };
   const user = userByRole[role];
@@ -69,6 +79,7 @@ window.Sidebar = function Sidebar({ role, page, setPage, setRole }) {
         <div className="sb-role-pills">
           <button className={`sb-role-pill ${role === 'rh' ? 'active' : ''}`} onClick={() => setRole('rh')}>RH</button>
           <button className={`sb-role-pill ${role === 'direcao' ? 'active' : ''}`} onClick={() => setRole('direcao')}>Direcção</button>
+          <button className={`sb-role-pill ${role === 'mentor' ? 'active' : ''}`} onClick={() => setRole('mentor')}>Mentor</button>
           <button className={`sb-role-pill ${role === 'bolseiro' ? 'active' : ''}`} onClick={() => setRole('bolseiro')}>Bolseiro</button>
         </div>
       </div>

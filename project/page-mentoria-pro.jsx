@@ -2,6 +2,7 @@
 window.PageMentoriaPro = function PageMentoriaPro() {
   const [tab, setTab] = React.useState('pares');
   const [selected, setSelected] = React.useState(null);
+  const [showAtribuirModal, setShowAtribuirModal] = React.useState(false);
 
   const mentors = window.BFA.mentors.map((m, i) => ({
     ...m,
@@ -32,17 +33,17 @@ window.PageMentoriaPro = function PageMentoriaPro() {
     { date: '2026-05-15', time: '14:00', mentor: 'Lina Cazimba',     mentee: 'Adélio Sebastião',      topic: 'Plano de recuperação',     duration: 90, status: 'urgent' }
   ];
 
-  const matchSuggestions = [
-    { mentee: 'Carla Bunga',          program: 'HEC Paris',   suggested: 'Sofia Mendes',     score: 94, why: 'Trade finance · língua FR · disponibilidade' },
-    { mentee: 'Heitor Quitumba',      program: 'LSE',         suggested: 'José Almeida',     score: 89, why: 'Wealth · mercados internacionais' },
-    { mentee: 'Walter Tchitangueleca', program: 'UCAN',        suggested: 'Domingos Vieira',  score: 81, why: 'Risco · proximidade geográfica' }
-  ];
+  const [matchSuggestions, setMatchSuggestions] = React.useState([
+    { mentee: 'Carla Bunga',           program: 'HEC Paris', suggested: 'Sofia Mendes',    score: 94, why: 'Trade finance · língua FR · disponibilidade' },
+    { mentee: 'Heitor Quitumba',       program: 'LSE',       suggested: 'José Almeida',    score: 89, why: 'Wealth · mercados internacionais' },
+    { mentee: 'Walter Tchitangueleca', program: 'UCAN',      suggested: 'Domingos Vieira', score: 81, why: 'Risco · proximidade geográfica' }
+  ]);
 
   const TABS = [
     { id: 'pares',     label: 'Pares activos', count: 25 },
     { id: 'pool',      label: 'Pool de mentores', count: mentors.length },
     { id: 'sessoes',   label: 'Sessões', count: sessions.length },
-    { id: 'matching',  label: 'Matching IA', count: matchSuggestions.length }
+    { id: 'matching',  label: 'Matching IA', count: matchSuggestions.length, badge: matchSuggestions.length > 0 }
   ];
 
   return (
@@ -55,7 +56,9 @@ window.PageMentoriaPro = function PageMentoriaPro() {
         <div className="page-actions">
           <button className="btn"><Icon name="calendar" size={14} /> Agenda completa</button>
           <button className="btn"><Icon name="download" size={14} /> Relatório mensal</button>
-          <button className="btn btn-primary"><Icon name="plus" size={14} /> Atribuir mentoria</button>
+          <button className="btn btn-primary" onClick={() => setShowAtribuirModal(true)}>
+            <Icon name="plus" size={14} /> Atribuir mentoria
+          </button>
         </div>
       </div>
 
@@ -216,14 +219,82 @@ window.PageMentoriaPro = function PageMentoriaPro() {
                     <div style={{ fontSize: 10, color: 'var(--text-3)' }}>match score</div>
                   </div>
                   <div style={{ display: 'flex', gap: 6 }}>
-                    <button className="btn btn-sm">Rejeitar</button>
-                    <button className="btn btn-sm btn-primary">Aprovar par</button>
+                    <button className="btn btn-sm"
+                      onClick={() => setMatchSuggestions(prev => prev.filter(x => x.mentee !== s.mentee))}>
+                      Rejeitar
+                    </button>
+                    <button className="btn btn-sm btn-primary"
+                      onClick={() => setMatchSuggestions(prev => prev.filter(x => x.mentee !== s.mentee))}>
+                      <Icon name="check" size={12} /> Aprovar par
+                    </button>
                   </div>
                 </div>
               </div>
             ))}
           </div>
         </>
+      )}
+
+      {tab === 'matching' && matchSuggestions.length === 0 && (
+        <div className="card">
+          <div className="card-pad" style={{ textAlign: 'center', padding: '48px 24px', color: 'var(--text-3)' }}>
+            <div style={{ marginBottom: 12, opacity: 0.35 }}><Icon name="check" size={36} /></div>
+            <div style={{ fontSize: 14, fontWeight: 500 }}>Todas as sugestões foram processadas</div>
+            <div style={{ fontSize: 12, marginTop: 6 }}>Não há mentorandos a aguardar par de mentor</div>
+          </div>
+        </div>
+      )}
+
+      {showAtribuirModal && (
+        <Modal title="Atribuir nova mentoria" onClose={() => setShowAtribuirModal(false)} width={560}
+          footer={
+            <>
+              <button className="btn" onClick={() => setShowAtribuirModal(false)}>Cancelar</button>
+              <button className="btn btn-primary" onClick={() => setShowAtribuirModal(false)}>
+                <Icon name="check" size={12} /> Confirmar atribuição
+              </button>
+            </>
+          }>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <div>
+              <div className="label">Mentorando</div>
+              <select className="input select" style={{ width: '100%' }}>
+                <option value="">— Seleccionar bolseiro / trainee —</option>
+                {window.BFA.talents.map(t => (
+                  <option key={t.id}>{t.name} · {t.id} · {window.BFA.programs.find(p => p.id === t.program)?.name}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <div className="label">Mentor</div>
+              <select className="input select" style={{ width: '100%' }}>
+                <option value="">— Seleccionar mentor —</option>
+                {window.BFA.mentors.map((m, i) => (
+                  <option key={i}>{m.name} · {m.dept} · {m.mentees}/8 mentees · ★ {m.rating.toFixed(1)}</option>
+                ))}
+              </select>
+            </div>
+            <div className="grid cols-2" style={{ gap: 12 }}>
+              <div>
+                <div className="label">Data de início</div>
+                <input className="input" type="date" style={{ width: '100%' }} />
+              </div>
+              <div>
+                <div className="label">Frequência das sessões</div>
+                <select className="input select" style={{ width: '100%' }}>
+                  <option>Mensal</option>
+                  <option>Quinzenal</option>
+                  <option>Semanal</option>
+                </select>
+              </div>
+            </div>
+            <div>
+              <div className="label">Objectivos da mentoria (opcional)</div>
+              <textarea className="input" rows="3" style={{ width: '100%', resize: 'vertical' }}
+                placeholder="Áreas de foco, metas a atingir…" />
+            </div>
+          </div>
+        </Modal>
       )}
 
       {selected && (

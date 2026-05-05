@@ -2,15 +2,29 @@
 // ===== Workflows de aprovação multi-nível (pagamentos) =====
 window.PageWorkflows = function PageWorkflows() {
   const [selected, setSelected] = React.useState(null);
+  const [workflows, setWorkflows] = React.useState([
+    { id: 'WF-2451', talent: 'Heitor Quitumba',       talentId: 'T-1054', type: 'Propina LSE',            amount: 3120000,  urgency: 'high',   submitted: '2026-04-28 09:14', step: 3, totalSteps: 4 },
+    { id: 'WF-2452', talent: 'Carla Bunga',            talentId: 'T-1051', type: 'Propina HEC Paris',      amount: 2640000,  urgency: 'normal', submitted: '2026-04-27 16:02', step: 2, totalSteps: 4 },
+    { id: 'WF-2453', talent: 'Domingas Kassinda',      talentId: 'T-1046', type: 'Alojamento Porto',       amount: 480000,   urgency: 'normal', submitted: '2026-04-27 11:48', step: 4, totalSteps: 4 },
+    { id: 'WF-2454', talent: 'Lote · 38 trainees',    talentId: '—',      type: 'Subsídio mensal Abr',    amount: 14440000, urgency: 'high',   submitted: '2026-04-26 08:00', step: 2, totalSteps: 4 },
+    { id: 'WF-2455', talent: 'Walter Tchitangueleca',  talentId: 'T-1052', type: 'Subsídio · revisão',     amount: 200000,   urgency: 'low',    submitted: '2026-04-25 14:33', step: 1, totalSteps: 4 },
+    { id: 'WF-2456', talent: 'Nzinga Matondo',         talentId: 'T-1049', type: 'Reprocessamento SWIFT',  amount: 1780000,  urgency: 'high',   submitted: '2026-04-25 10:15', step: 1, totalSteps: 4 }
+  ]);
 
-  const workflows = [
-    { id: 'WF-2451', talent: 'Heitor Quitumba', talentId: 'T-1054', type: 'Propina LSE',          amount: 3120000, urgency: 'high',   submitted: '2026-04-28 09:14', step: 3, totalSteps: 4 },
-    { id: 'WF-2452', talent: 'Carla Bunga',     talentId: 'T-1051', type: 'Propina HEC Paris',    amount: 2640000, urgency: 'normal', submitted: '2026-04-27 16:02', step: 2, totalSteps: 4 },
-    { id: 'WF-2453', talent: 'Domingas Kassinda', talentId: 'T-1046', type: 'Alojamento Porto',   amount: 480000,  urgency: 'normal', submitted: '2026-04-27 11:48', step: 4, totalSteps: 4 },
-    { id: 'WF-2454', talent: 'Lote · 38 trainees', talentId: '—',    type: 'Subsídio mensal Abr',  amount: 14440000, urgency: 'high',  submitted: '2026-04-26 08:00', step: 2, totalSteps: 4 },
-    { id: 'WF-2455', talent: 'Walter Tchitangueleca', talentId: 'T-1052', type: 'Subsídio · revisão', amount: 200000, urgency: 'low', submitted: '2026-04-25 14:33', step: 1, totalSteps: 4 },
-    { id: 'WF-2456', talent: 'Nzinga Matondo',  talentId: 'T-1049', type: 'Reprocessamento SWIFT', amount: 1780000, urgency: 'high', submitted: '2026-04-25 10:15', step: 1, totalSteps: 4 }
-  ];
+  const approveSelected = (wf) => {
+    setWorkflows(prev => {
+      const updated = prev.map(w =>
+        w.id === wf.id ? { ...w, step: Math.min(w.step + 1, w.totalSteps) } : w
+      );
+      return updated.filter(w => !(w.id === wf.id && w.step >= w.totalSteps));
+    });
+    setSelected(null);
+  };
+
+  const rejectSelected = (wf) => {
+    setWorkflows(prev => prev.filter(w => w.id !== wf.id));
+    setSelected(null);
+  };
 
   const STEPS = [
     { id: 1, label: 'Submissão',     role: 'Gestor de Programa', icon: 'doc' },
@@ -34,8 +48,8 @@ window.PageWorkflows = function PageWorkflows() {
       </div>
 
       <div className="grid cols-4">
-        <KPI label="Pendentes" value={workflows.length} sub="aguardam acção" deltaTone="flat" icon="clock" />
-        <KPI label="Aprovados hoje" value="14" sub="14 transacções · Kz 5,8M" deltaTone="up" delta="+22%" icon="check" />
+        <KPI label="Pendentes" value={workflows.length} sub={workflows.length > 0 ? "aguardam acção" : "fila limpa"} deltaTone="flat" icon="clock" />
+        <KPI label="Aprovados · sessão" value={6 - workflows.length} sub={`${6 - workflows.length} processados`} deltaTone="up" delta="✓ ok" icon="check" />
         <KPI label="Tempo médio · ciclo" value="8h 12m" sub="meta SLA: 24h" deltaTone="up" delta="−2h vs Mar" icon="zap" />
         <KPI label="Em escalada" value="2" sub=">48h sem acção" deltaTone="down" delta="atenção" icon="alert" />
       </div>
@@ -97,13 +111,29 @@ window.PageWorkflows = function PageWorkflows() {
         </table>
       </div>
 
+      {workflows.length === 0 && (
+        <div className="card">
+          <div className="card-pad" style={{ textAlign: 'center', padding: '48px 24px', color: 'var(--text-3)' }}>
+            <div style={{ marginBottom: 12, opacity: 0.35 }}><Icon name="check" size={36} /></div>
+            <div style={{ fontSize: 14, fontWeight: 500 }}>Fila de aprovação vazia</div>
+            <div style={{ fontSize: 12, marginTop: 6 }}>Todos os workflows foram processados</div>
+          </div>
+        </div>
+      )}
+
       {selected && (
         <Modal title={`${selected.id} · ${selected.type}`} onClose={() => setSelected(null)}
           footer={
             <>
               <button className="btn">Adicionar comentário</button>
-              <button className="btn btn-danger">Rejeitar</button>
-              <button className="btn btn-primary"><Icon name="check" size={12} /> Aprovar e avançar</button>
+              <button className="btn" style={{ color: 'var(--danger, #B91C1C)', borderColor: 'var(--danger, #B91C1C)' }}
+                onClick={() => rejectSelected(selected)}>
+                Rejeitar
+              </button>
+              <button className="btn btn-primary" onClick={() => approveSelected(selected)}>
+                <Icon name="check" size={12} />
+                {selected.step < selected.totalSteps ? ' Aprovar e avançar' : ' Aprovar e executar'}
+              </button>
             </>
           } width={780}>
           <div className="grid cols-3" style={{ gap: 14, marginBottom: 18 }}>
@@ -390,6 +420,61 @@ window.PageCompliance = function PageCompliance() {
 };
 
 // ===== Bolseiro extras: Documentos, Mentoria, Eventos =====
+window.PageBolseiroPagamentos = function PageBolseiroPagamentos() {
+  const me = window.BFA.talents.find(t => t.name === 'Lwini Capemba') || window.BFA.talents[0];
+  const payments = window.BFA.bolseiroPayments;
+  const totalPaid = payments.filter(p => p.status === 'paid').reduce((a, p) => a + p.amount, 0);
+  return (
+    <div className="section">
+      <div className="page-head">
+        <div>
+          <h1 className="page-title">Os Meus Pagamentos</h1>
+          <p className="page-subtitle">Histórico completo de subsídios · conta BFA ····7821</p>
+        </div>
+        <div className="page-actions">
+          <button className="btn"><Icon name="download" size={14} /> Exportar PDF</button>
+        </div>
+      </div>
+      <div className="grid cols-3">
+        <KPI label="Total recebido · 2026" value={window.BFA.fmtKzShort(totalPaid)} sub={payments.length + ' transacções'} deltaTone="up" icon="cash" />
+        <KPI label="Próximo pagamento" value="28 Mai 2026" sub={window.BFA.fmtKz(me.stipend) + ' · subsídio mensal'} icon="calendar" />
+        <KPI label="IBAN" value="····7821" sub="Banco BFA · conta activa" icon="check" />
+      </div>
+      <div className="card">
+        <div className="card-head"><h3 className="card-title">Histórico de pagamentos</h3></div>
+        <table className="tbl">
+          <thead><tr><th>Ref.</th><th>Tipo</th><th>Período</th><th className="num">Valor</th><th>Estado</th><th>Data</th><th></th></tr></thead>
+          <tbody>
+            {payments.map(p => (
+              <tr key={p.id}>
+                <td className="mono muted">{p.id}</td>
+                <td>{p.type}</td>
+                <td className="muted">{p.period}</td>
+                <td className="num" style={{ fontWeight: 500 }}>{window.BFA.fmtKz(p.amount)}</td>
+                <td><PaymentStatusPill status={p.status} /></td>
+                <td className="muted">{p.date}</td>
+                <td><button className="btn-ghost btn-xs"><Icon name="download" size={12} /></button></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <div className="card" style={{ background: 'var(--info-bg)', borderColor: 'var(--info-border)' }}>
+        <div className="card-pad" style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
+          <Icon name="zap" size={18} style={{ color: 'var(--info)', marginTop: 2, flexShrink: 0 }} />
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--info)', marginBottom: 4 }}>Compromisso pós-formação</div>
+            <div style={{ fontSize: 12, color: 'var(--text-2)', lineHeight: 1.55 }}>
+              O subsídio implica um compromisso de <b>3 anos de trabalho no BFA</b> após a conclusão do programa.
+              Em caso de saída antecipada, poderá ser aplicado o reembolso proporcional conforme o contrato assinado.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 window.PageBolseiroDocs = function PageBolseiroDocs() {
   const [uploading, setUploading] = React.useState(false);
   return (
@@ -553,6 +638,311 @@ window.PageBolseiroEventos = function PageBolseiroEventos() {
           </div>
         ))}
       </div>
+    </div>
+  );
+};
+
+// ===== Bolseiro — Tarefas =====
+window.PageBolseiroTarefas = function PageBolseiroTarefas() {
+  const myId = 'T-1042'; // Lwini Capemba (logged in bolseiro)
+  const [tasks, setTasks] = React.useState(
+    window.BFA.tasks.filter(t => t.talentId === myId)
+  );
+  const [showDetail, setShowDetail] = React.useState(null);
+
+  const statusMeta = {
+    pending:     { label: 'Pendente',  tone: 'neutral' },
+    in_progress: { label: 'Em curso',  tone: 'info' },
+    done:        { label: 'Concluída', tone: 'success' },
+    overdue:     { label: 'Em atraso', tone: 'danger' }
+  };
+  const priorityMeta = {
+    alta:  { label: 'Alta',  tone: 'danger' },
+    média: { label: 'Média', tone: 'warn' },
+    baixa: { label: 'Baixa', tone: 'neutral' }
+  };
+
+  const pending    = tasks.filter(t => ['pending','overdue','in_progress'].includes(t.status));
+  const completed  = tasks.filter(t => t.status === 'done');
+  const overdue    = tasks.filter(t => t.status === 'overdue');
+
+  const markDone = (id) => {
+    setTasks(prev => prev.map(t => t.id === id
+      ? { ...t, status: 'done', completedAt: new Date().toISOString().slice(0,10) }
+      : t
+    ));
+    setShowDetail(prev => prev && prev.id === id ? { ...prev, status: 'done' } : prev);
+  };
+
+  const startTask = (id) => {
+    setTasks(prev => prev.map(t => t.id === id && t.status === 'pending'
+      ? { ...t, status: 'in_progress' }
+      : t
+    ));
+  };
+
+  return (
+    <div className="section">
+      <div className="page-head">
+        <div>
+          <h1 className="page-title">As minhas tarefas</h1>
+          <p className="page-subtitle">Tarefas atribuídas pelo teu mentor e pelo RH</p>
+        </div>
+      </div>
+
+      <div className="grid cols-3" style={{ marginBottom: '1.5rem' }}>
+        <KPI label="Por fazer" value={pending.length} icon="clock" deltaTone={overdue.length > 0 ? 'down' : 'flat'} sub={overdue.length > 0 ? `${overdue.length} em atraso` : undefined} />
+        <KPI label="Concluídas" value={completed.length} icon="check" deltaTone="up" />
+        <KPI label="Total" value={tasks.length} icon="briefcase" />
+      </div>
+
+      {overdue.length > 0 && (
+        <div className="card" style={{ marginBottom: '1rem', background: 'var(--danger-bg, #FEF2F2)', borderColor: 'var(--danger-border, #FECACA)' }}>
+          <div className="card-pad" style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+            <Icon name="alert" size={18} style={{ color: 'var(--danger)', flexShrink: 0 }} />
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--danger)' }}>
+                {overdue.length} tarefa(s) em atraso
+              </div>
+              <div style={{ fontSize: 12, color: 'var(--text-2)' }}>
+                {overdue.map(t => t.title).join(' · ')}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+        {tasks.map(tk => {
+          const sm = statusMeta[tk.status] || statusMeta.pending;
+          const pm = priorityMeta[tk.priority] || priorityMeta.média;
+          const isOverdue = tk.status === 'overdue';
+          const isDone = tk.status === 'done';
+          return (
+            <div key={tk.id} className="card" style={{
+              opacity: isDone ? 0.7 : 1,
+              borderLeft: isOverdue ? '3px solid var(--danger)' : isDone ? '3px solid var(--success)' : '3px solid var(--border)'
+            }}>
+              <div className="card-pad" style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginBottom: 4 }}>
+                    <span style={{ fontSize: 14, fontWeight: isDone ? 400 : 600, textDecoration: isDone ? 'line-through' : 'none', color: isDone ? 'var(--text-3)' : undefined }}>
+                      {tk.title}
+                    </span>
+                    <span className={`badge badge-${pm.tone}`}>{pm.label}</span>
+                    <span className={`badge badge-${sm.tone}`}>{sm.label}</span>
+                  </div>
+                  <div style={{ fontSize: 12, color: 'var(--text-2)', marginBottom: 4 }}>
+                    Atribuída por <b>{tk.assignedBy}</b> · Categoria: {tk.category}
+                  </div>
+                  {tk.description && (
+                    <div style={{ fontSize: 12, color: 'var(--text-3)', lineHeight: 1.5 }}>
+                      {tk.description.slice(0, 100)}{tk.description.length > 100 ? '…' : ''}
+                    </div>
+                  )}
+                </div>
+                <div style={{ flexShrink: 0, textAlign: 'right' }}>
+                  <div style={{ fontSize: 11, color: isOverdue ? 'var(--danger)' : 'var(--text-3)', fontWeight: isOverdue ? 600 : undefined, marginBottom: 8 }}>
+                    Prazo: {tk.dueDate}
+                    {tk.completedAt && <div>Concluída: {tk.completedAt}</div>}
+                  </div>
+                  <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
+                    <button className="btn btn-sm" onClick={() => setShowDetail(tk)}>Detalhes</button>
+                    {tk.status === 'pending' && (
+                      <button className="btn btn-sm" onClick={() => startTask(tk.id)}>Iniciar</button>
+                    )}
+                    {(tk.status === 'pending' || tk.status === 'in_progress' || tk.status === 'overdue') && (
+                      <button className="btn btn-sm btn-primary" onClick={() => markDone(tk.id)}>
+                        <Icon name="check" size={11} /> Concluir
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {showDetail && (
+        <window.Modal title={showDetail.id + ' · ' + showDetail.title} onClose={() => setShowDetail(null)} width="520px"
+          footer={
+            <>
+              {showDetail.status !== 'done' && (
+                <button className="btn btn-primary" onClick={() => markDone(showDetail.id)}>Marcar concluída</button>
+              )}
+              <button className="btn" onClick={() => setShowDetail(null)}>Fechar</button>
+            </>
+          }>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div className="info-grid">
+              <div className="info-item"><span>Atribuída por</span><b>{showDetail.assignedBy}</b></div>
+              <div className="info-item"><span>Categoria</span><b>{showDetail.category}</b></div>
+              <div className="info-item"><span>Prazo</span><b>{showDetail.dueDate}</b></div>
+              <div className="info-item"><span>Prioridade</span><b>{showDetail.priority}</b></div>
+            </div>
+            {showDetail.description && (
+              <div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-2)', marginBottom: '0.25rem' }}>Descrição completa</div>
+                <div style={{ background: 'var(--surface-2)', borderRadius: '6px', padding: '0.75rem', fontSize: '0.875rem', lineHeight: 1.6 }}>
+                  {showDetail.description}
+                </div>
+              </div>
+            )}
+          </div>
+        </window.Modal>
+      )}
+    </div>
+  );
+};
+
+// ===== Bolseiro — Faltas =====
+window.PageBolseiroFaltas = function PageBolseiroFaltas() {
+  const myId = 'T-1042'; // Lwini Capemba
+  const [absences, setAbsences] = React.useState(
+    window.BFA.absences.filter(a => a.talentId === myId)
+  );
+  const [showNewAbsence, setShowNewAbsence] = React.useState(false);
+  const [form, setForm] = React.useState({ type: 'justificada', reason: '', date: '', days: '1' });
+
+  const submitAbsence = () => {
+    if (!form.date) return;
+    setAbsences(prev => [{
+      id: 'FA-B' + String(prev.length + 1).padStart(3, '0'),
+      talentId: myId,
+      talentName: 'Lwini Capemba',
+      program: 'fbfa',
+      type: form.type,
+      reason: form.reason,
+      date: form.date,
+      days: parseInt(form.days, 10) || 1,
+      status: 'pending',
+      requestedAt: new Date().toISOString().slice(0,10),
+      approvedBy: null,
+      mentorNote: null,
+      rhNote: null
+    }, ...prev]);
+    setForm({ type: 'justificada', reason: '', date: '', days: '1' });
+    setShowNewAbsence(false);
+  };
+
+  const statusMeta = {
+    pending:  { label: 'Aguarda aprovação', tone: 'warn' },
+    approved: { label: 'Aprovada',          tone: 'success' },
+    rejected: { label: 'Rejeitada',         tone: 'danger' }
+  };
+  const typeMeta = {
+    justificada:   { label: 'Justificada',   tone: 'info' },
+    injustificada: { label: 'Injustificada', tone: 'neutral' }
+  };
+
+  const approved = absences.filter(a => a.status === 'approved').length;
+  const pending  = absences.filter(a => a.status === 'pending').length;
+
+  return (
+    <div className="section">
+      <div className="page-head">
+        <div>
+          <h1 className="page-title">As minhas faltas</h1>
+          <p className="page-subtitle">Pedidos de falta e histórico de ausências</p>
+        </div>
+        <div className="page-actions">
+          <button className="btn btn-primary" onClick={() => setShowNewAbsence(true)}>
+            <Icon name="plus" size={14} /> Pedir falta
+          </button>
+        </div>
+      </div>
+
+      <div className="grid cols-3" style={{ marginBottom: '1.5rem' }}>
+        <KPI label="Aprovadas" value={approved} icon="check" deltaTone="up" />
+        <KPI label="Aguarda aprovação" value={pending} icon="clock" deltaTone={pending > 0 ? 'flat' : 'up'} />
+        <KPI label="Total" value={absences.length} icon="calendar" />
+      </div>
+
+      <div className="card">
+        <div className="card-head">
+          <span className="card-title">Histórico de faltas</span>
+        </div>
+        {absences.length === 0 ? (
+          <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-2)' }}>
+            <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>✓</div>
+            <div>Sem faltas registadas.</div>
+            <button className="btn" style={{ marginTop: '1rem' }} onClick={() => setShowNewAbsence(true)}>Pedir falta</button>
+          </div>
+        ) : (
+          <table className="tbl">
+            <thead>
+              <tr><th>Data</th><th>Tipo</th><th>Motivo</th><th>Dias</th><th>Estado</th><th>Nota do mentor</th></tr>
+            </thead>
+            <tbody>
+              {absences.map(a => {
+                const sm = statusMeta[a.status];
+                const tm = typeMeta[a.type];
+                return (
+                  <tr key={a.id}>
+                    <td>{a.date}</td>
+                    <td><span className={`badge badge-${tm.tone}`}>{tm.label}</span></td>
+                    <td style={{ fontSize: 12 }}>{a.reason || <span style={{ color: 'var(--text-3)' }}>—</span>}</td>
+                    <td style={{ textAlign: 'center' }}>{a.days}d</td>
+                    <td><span className={`badge badge-${sm.tone}`}>{sm.label}</span></td>
+                    <td style={{ fontSize: 11, color: 'var(--text-2)' }}>{a.mentorNote || '—'}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        )}
+      </div>
+
+      {showNewAbsence && (
+        <window.Modal title="Pedir falta" onClose={() => setShowNewAbsence(false)} width="480px"
+          footer={
+            <>
+              <button className="btn btn-primary" onClick={submitAbsence}
+                style={{ opacity: !form.date ? 0.5 : 1 }}>
+                Submeter pedido
+              </button>
+              <button className="btn" onClick={() => setShowNewAbsence(false)}>Cancelar</button>
+            </>
+          }>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-2)', marginBottom: '0.5rem', lineHeight: 1.5 }}>
+                O pedido será enviado ao teu mentor para aprovação. Faltas justificadas requerem documentação de suporte.
+              </div>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div className="form-group">
+                <label className="form-label">Data da falta *</label>
+                <input className="input" type="date" value={form.date} onChange={e => setForm(f => ({ ...f, date: e.target.value }))} />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Número de dias</label>
+                <select className="input" value={form.days} onChange={e => setForm(f => ({ ...f, days: e.target.value }))}>
+                  <option value="1">1 dia</option>
+                  <option value="2">2 dias</option>
+                  <option value="3">3 dias</option>
+                </select>
+              </div>
+            </div>
+            <div className="form-group">
+              <label className="form-label">Tipo</label>
+              <select className="input" value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value }))}>
+                <option value="justificada">Justificada (com motivo documentado)</option>
+                <option value="injustificada">Injustificada</option>
+              </select>
+            </div>
+            {form.type === 'justificada' && (
+              <div className="form-group">
+                <label className="form-label">Motivo</label>
+                <textarea className="input" rows={2} value={form.reason}
+                  onChange={e => setForm(f => ({ ...f, reason: e.target.value }))}
+                  placeholder="Ex: Consulta médica, exame académico, cerimónia…" />
+              </div>
+            )}
+          </div>
+        </window.Modal>
+      )}
     </div>
   );
 };

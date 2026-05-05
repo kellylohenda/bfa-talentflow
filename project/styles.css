@@ -650,7 +650,9 @@ input, select, textarea { font-family: inherit; }
 .tbl tbody tr.row-warn td:first-child { box-shadow: inset 3px 0 0 var(--warn); }
 .tbl tbody tr.row-danger { background: var(--danger-bg); }
 .tbl tbody tr.row-danger td:first-child { box-shadow: inset 3px 0 0 var(--danger); }
-.tbl tbody tr.selected { background: var(--primary-soft); }
+.tbl tbody tr.selected,
+.tbl tbody tr.row-active { background: var(--primary-soft); }
+.tbl tbody tr.row-active td:first-child { box-shadow: inset 3px 0 0 var(--primary); }
 .tbl td {
   padding: var(--d-pad-y) var(--d-pad-x);
   vertical-align: middle;
@@ -874,3 +876,43 @@ svg.spark { display: block; }
   background: var(--border-strong); border-radius: 5px;
 }
 .page::-webkit-scrollbar-track, .table-wrap::-webkit-scrollbar-track { background: transparent; }
+
+/* Tab badge (same as tab-count) */
+.tab-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  height: 16px; min-width: 16px; padding: 0 4px;
+  font-size: 10px; font-weight: 600;
+  background: var(--surface-3); color: var(--text-2);
+  border-radius: var(--r-pill); margin-left: 6px;
+}
+.tab.active .tab-badge { background: var(--primary-soft); color: var(--primary-deep); }
+
+/* Form helpers */
+.form-group { display: flex; flex-direction: column; gap: 0.375rem; }
+.form-label { font-size: 12px; font-weight: 500; color: var(--text-2); }
+
+/* Select small */
+.select-sm {
+  height: 30px; padding: 0 8px; font-size: 12px;
+  border: 1px solid var(--border); border-radius: var(--r-sm);
+  background: var(--surface); color: var(--text); cursor: pointer;
+}
+.select-sm:focus { outline: none; border-color: var(--primary); }
+
+/* Link-style button */
+.link-btn {
+  background: none; border: none; padding: 0; margin: 0;
+  color: var(--primary); font-size: inherit; font-weight: 500;
+  cursor: pointer; text-decoration: none;
+}
+.link-btn:hover { text-decoration: underline; }
+
+/* Info grid (key-value pairs in modals) */
+.info-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;
+}
+.info-item {
+  display: flex; flex-direction: column; gap: 0.125rem;
+}
+.info-item > span { font-size: 11px; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
+.info-item > b { font-size: 13px; font-weight: 500; }
