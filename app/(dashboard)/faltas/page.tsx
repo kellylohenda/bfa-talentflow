@@ -2,10 +2,14 @@
 
 import { useState } from 'react'
 import { absences as initialAbsences, talents } from '@/lib/data'
+import { useRole } from '@/lib/useRole'
 import KPI from '@/components/ui/KPI'
 import Pill from '@/components/ui/Pill'
 import Modal from '@/components/ui/Modal'
 import type { Absence } from '@/types'
+
+const MENTOR_NAME = 'Edmilson Cardoso'
+const mentorMenteeIds = new Set(talents.filter(t => t.mentor === MENTOR_NAME).map(t => t.id))
 
 type AbsStatus = 'pending' | 'approved' | 'rejected'
 
@@ -16,24 +20,28 @@ const STATUS_META: Record<AbsStatus, { label: string; tone: 'warn' | 'success' |
 }
 
 export default function PageFaltas() {
+  const role = useRole()
+  const isMentor = role === 'mentor'
   const [absenceList, setAbsenceList] = useState<Absence[]>([...initialAbsences])
   const [activeTab, setActiveTab] = useState<'pendentes' | 'historico' | 'impacto'>('pendentes')
   const [selectedAbsence, setSelectedAbsence] = useState<Absence | null>(null)
   const [rhNote, setRhNote] = useState('')
 
-  const pendentes = absenceList.filter(a => a.status === 'pending')
-  const historico = absenceList.filter(a => a.status !== 'pending')
-  const aprovadas = absenceList.filter(a => a.status === 'approved')
-  const rejeitadas = absenceList.filter(a => a.status === 'rejected')
-  const injustAprovadas = absenceList.filter(a => a.status === 'approved' && a.type === 'injustificada')
+  const visibleAbsences = isMentor ? absenceList.filter(a => mentorMenteeIds.has(a.talentId)) : absenceList
+  const pendentes = visibleAbsences.filter(a => a.status === 'pending')
+  const historico = visibleAbsences.filter(a => a.status !== 'pending')
+  const aprovadas = visibleAbsences.filter(a => a.status === 'approved')
+  const rejeitadas = visibleAbsences.filter(a => a.status === 'rejected')
+  const injustAprovadas = visibleAbsences.filter(a => a.status === 'approved' && a.type === 'injustificada')
 
   const decidir = (id: string, decision: 'approved' | 'rejected') => {
     setAbsenceList(prev => prev.map(a =>
       a.id === id ? {
         ...a,
         status: decision,
-        approvedBy: 'Mariana Quissama (RH)',
-        rhNote: rhNote || null,
+        approvedBy: isMentor ? `${MENTOR_NAME} (Mentor)` : 'Mariana Quissama (RH)',
+        mentorNote: isMentor ? (rhNote || null) : (a.mentorNote ?? null),
+        rhNote: isMentor ? null : (rhNote || null),
       } : a
     ))
     setSelectedAbsence(null)
@@ -41,8 +49,9 @@ export default function PageFaltas() {
   }
 
   // Impacto por talento
-  const talentImpact = talents.map(talent => {
-    const tAbsences = absenceList.filter(a => a.talentId === talent.id)
+  const talentsForImpact = isMentor ? talents.filter(t => mentorMenteeIds.has(t.id)) : talents
+  const talentImpact = talentsForImpact.map(talent => {
+    const tAbsences = visibleAbsences.filter(a => a.talentId === talent.id)
     const totalDays = tAbsences.reduce((s, a) => s + a.days, 0)
     const injust = tAbsences.filter(a => a.type === 'injustificada').length
     const aprov = tAbsences.filter(a => a.status === 'approved').length
@@ -54,9 +63,16 @@ export default function PageFaltas() {
       <div className="page-head">
         <div>
           <div className="page-title">Faltas</div>
-          <div className="page-subtitle">Gestão de ausências e pedidos de falta</div>
+          <div className="page-subtitle">
+            {isMentor ? `Ausências dos seus mentorandos · ${mentorMenteeIds.size} mentorandos` : 'Gestão de ausências e pedidos de falta'}
+          </div>
         </div>
       </div>
+      {isMentor && (
+        <div style={{ marginBottom: 16, padding: '10px 14px', borderRadius: 8, background: '#FFF7ED', border: '1px solid #FED7AA', fontSize: 13, color: '#9A3412' }}>
+          A ver apenas faltas dos seus mentorandos. Pode aprovar ou rejeitar pedidos pendentes.
+        </div>
+      )}
 
       <div className="grid cols-4" style={{ marginBottom: 24 }}>
         <KPI label="Pendentes" value={pendentes.length} icon="clock" />

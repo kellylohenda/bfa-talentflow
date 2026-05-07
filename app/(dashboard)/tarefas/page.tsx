@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { tasks as initialTasks, talents } from '@/lib/data'
 import { initials, avatarColor } from '@/lib/utils'
+import { useRole } from '@/lib/useRole'
 import KPI from '@/components/ui/KPI'
 import Pill from '@/components/ui/Pill'
 import Modal from '@/components/ui/Modal'
@@ -23,12 +24,18 @@ const PRIORITY_META: Record<string, { label: string; tone: 'danger' | 'warn' | '
 
 const TODAY = '2026-05-05'
 
+const MENTOR_NAME = 'Edmilson Cardoso'
+const mentorMenteeIds = new Set(talents.filter(t => t.mentor === MENTOR_NAME).map(t => t.id))
 const activeTalents = talents.filter(t => t.status === 'active' || t.status === 'onboarding')
 
 const CATEGORIES = ['Relatório', 'Formação', 'Documento', 'PDI', 'Apresentação', 'Avaliação', 'Certificação']
 
 export default function PageTarefas() {
+  const role = useRole()
+  const isMentor = role === 'mentor'
   const [taskList, setTaskList] = useState<Task[]>([...initialTasks])
+  const visibleTasks = isMentor ? taskList.filter(t => mentorMenteeIds.has(t.talentId)) : taskList
+  const mentorTalents = activeTalents.filter(t => mentorMenteeIds.has(t.id))
   const [activeTab, setActiveTab] = useState<'lista' | 'talento' | 'criar'>('lista')
   const [filterStatus, setFilterStatus] = useState('all')
   const [filterPriority, setFilterPriority] = useState('all')
@@ -37,19 +44,19 @@ export default function PageTarefas() {
     title: '',
     description: '',
     talentId: '',
-    assignedBy: 'Mariana Quissama',
+    assignedBy: isMentor ? MENTOR_NAME : 'Mariana Quissama',
     category: 'Relatório',
     priority: 'alta',
     dueDate: '',
   })
 
-  const total = taskList.length
-  const pendentes = taskList.filter(t => t.status === 'pending').length
-  const emCurso = taskList.filter(t => t.status === 'in_progress').length
-  const emAtraso = taskList.filter(t => t.status === 'overdue').length
-  const concluidas = taskList.filter(t => t.status === 'done').length
+  const total = visibleTasks.length
+  const pendentes = visibleTasks.filter(t => t.status === 'pending').length
+  const emCurso = visibleTasks.filter(t => t.status === 'in_progress').length
+  const emAtraso = visibleTasks.filter(t => t.status === 'overdue').length
+  const concluidas = visibleTasks.filter(t => t.status === 'done').length
 
-  const filtered = taskList.filter(t => {
+  const filtered = visibleTasks.filter(t => {
     if (filterStatus !== 'all' && t.status !== filterStatus) return false
     if (filterPriority !== 'all' && t.priority !== filterPriority) return false
     return true
@@ -59,9 +66,10 @@ export default function PageTarefas() {
     setTaskList(prev => prev.map(t => t.id === id ? { ...t, status: 'done' as const, completedAt: TODAY } : t))
   }
 
-  const grouped = activeTalents.map(talent => ({
+  const talentsForGroup = isMentor ? mentorTalents : activeTalents
+  const grouped = talentsForGroup.map(talent => ({
     talent,
-    tasks: taskList.filter(t => t.talentId === talent.id),
+    tasks: visibleTasks.filter(t => t.talentId === talent.id),
   })).filter(g => g.tasks.length > 0)
 
   const handleCreate = () => {
@@ -74,7 +82,7 @@ export default function PageTarefas() {
       talentId: form.talentId,
       talentName: talent?.name ?? '',
       assignedBy: form.assignedBy,
-      assignedByRole: 'rh',
+      assignedByRole: isMentor ? 'mentor' : 'rh',
       category: form.category,
       priority: form.priority as 'alta' | 'média' | 'baixa',
       status: 'pending',
@@ -82,7 +90,7 @@ export default function PageTarefas() {
       completedAt: null,
     }
     setTaskList(prev => [...prev, newTask])
-    setForm({ title: '', description: '', talentId: '', assignedBy: 'Mariana Quissama', category: 'Relatório', priority: 'alta', dueDate: '' })
+    setForm({ title: '', description: '', talentId: '', assignedBy: isMentor ? MENTOR_NAME : 'Mariana Quissama', category: 'Relatório', priority: 'alta', dueDate: '' })
     setActiveTab('lista')
   }
 
@@ -91,9 +99,16 @@ export default function PageTarefas() {
       <div className="page-head">
         <div>
           <div className="page-title">Tarefas</div>
-          <div className="page-subtitle">Gestão de tarefas dos talentos</div>
+          <div className="page-subtitle">
+            {isMentor ? `As minhas tarefas atribuídas · ${mentorMenteeIds.size} mentorandos` : 'Gestão de tarefas dos talentos'}
+          </div>
         </div>
       </div>
+      {isMentor && (
+        <div style={{ marginBottom: 16, padding: '10px 14px', borderRadius: 8, background: '#FFF7ED', border: '1px solid #FED7AA', fontSize: 13, color: '#9A3412' }}>
+          A ver apenas tarefas dos seus mentorandos. Para criar tarefas, use o separador "Criar".
+        </div>
+      )}
 
       <div className="grid cols-4" style={{ marginBottom: 24 }}>
         <KPI label="Total" value={total} icon="list" />
@@ -239,12 +254,12 @@ export default function PageTarefas() {
             <label className="form-label">Talento</label>
             <select className="select" value={form.talentId} onChange={e => setForm(f => ({ ...f, talentId: e.target.value }))}>
               <option value="">Seleccionar talento...</option>
-              {activeTalents.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+              {(isMentor ? mentorTalents : activeTalents).map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
             </select>
           </div>
           <div className="form-group">
             <label className="form-label">Atribuído por</label>
-            <input className="input" value={form.assignedBy} onChange={e => setForm(f => ({ ...f, assignedBy: e.target.value }))} />
+            <input className="input" value={form.assignedBy} readOnly={isMentor} style={isMentor ? { opacity: 0.6 } : {}} onChange={e => setForm(f => ({ ...f, assignedBy: e.target.value }))} />
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             <div className="form-group">

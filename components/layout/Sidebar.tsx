@@ -98,7 +98,10 @@ const NAV_BY_ROLE: Record<Role, NavSection[]> = {
     {
       section: 'Mentoria',
       items: [
-        { id: 'mentor', label: 'Portal do Mentor', icon: 'dashboard' },
+        { id: 'mentor',    label: 'Portal do Mentor',     icon: 'dashboard' },
+        { id: 'tarefas',   label: 'Tarefas',              icon: 'check'     },
+        { id: 'faltas',    label: 'Faltas',               icon: 'calendar'  },
+        { id: 'avaliacoes',label: 'Avaliações',           icon: 'star'      },
       ],
     },
   ],
