@@ -916,3 +916,74 @@ svg.spark { display: block; }
 }
 .info-item > span { font-size: 11px; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
 .info-item > b { font-size: 13px; font-weight: 500; }
+
+/* ─── Topbar toggles ─────────────────────────────────────────── */
+/* Desktop: show desktop toggle, hide hamburger */
+.tb-toggle-mobile { display: none; }
+.tb-toggle-desktop { display: flex; }
+
+/* ─── Mobile overlay ─────────────────────────────────────────── */
+.sb-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.55);
+  z-index: 49;
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+
+/* ─── Responsive breakpoints ─────────────────────────────────── */
+@media (max-width: 768px) {
+  /* Topbar toggles swap */
+  .tb-toggle-desktop { display: none; }
+  .tb-toggle-mobile  { display: flex; }
+
+  /* Hide search on small screens */
+  .tb-search { display: none; }
+
+  /* App shell: sidebar hidden off-screen, main takes full width */
+  .app {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    width: 244px;
+    z-index: 50;
+    transform: translateX(-100%);
+    transition: transform 0.22s ease;
+  }
+
+  /* Mobile open: slide sidebar in */
+  .app[data-mobile-open="true"] .sidebar {
+    transform: translateX(0);
+  }
+
+  /* Desktop collapse overrides — on mobile always show full sidebar */
+  [data-sidebar="icon"] .sb-brand-text  { display: flex; }
+  [data-sidebar="icon"] .sb-section-label { display: block; }
+  [data-sidebar="icon"] .sb-link span:not(.sb-icon) { display: inline; }
+  [data-sidebar="icon"] .sb-link { justify-content: flex-start; padding: 8px 14px; }
+  [data-sidebar="icon"] .sb-role     { display: block; }
+  [data-sidebar="icon"] .sb-user-text { display: flex; }
+  [data-sidebar="icon"] .sb-badge    { display: flex; }
+
+  /* Page padding reduced */
+  .page { padding: 16px 16px 32px; }
+
+  /* Grid columns: 4→2 on tablet */
+  .cols-4 { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 480px) {
+  /* Grid columns: 2→1 on phone */
+  .cols-4, .cols-3, .cols-2 { grid-template-columns: 1fr; }
+
+  /* Page head stacks */
+  .page-head { flex-direction: column; align-items: flex-start; }
+
+  /* Topbar tighter */
+  .topbar { padding: 0 12px; gap: 10px; }
+  .tb-env { display: none; }
+  .tb-divider { display: none; }
+}

@@ -152,6 +152,11 @@ const PATHS: Record<string, React.ReactNode> = {
       <circle cx="19" cy="12" r="1.5" />
     </>
   ),
+  menu: (
+    <>
+      <path d="M4 6h16M4 12h16M4 18h16" />
+    </>
+  ),
   user: (
     <>
       <circle cx="12" cy="8" r="3.5" />
