@@ -106,6 +106,26 @@ export default function PageEstagiarios() {
         </div>
       </div>
 
+      {/* Context banner */}
+      <div style={{ display: 'flex', gap: 12, marginBottom: 20 }}>
+        <div style={{ flex: 1, padding: '12px 16px', borderRadius: 10, background: '#FF760708', border: '1px solid #FF760730', display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+          <span style={{ fontSize: 18 }}>💼</span>
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: '#FF7607', marginBottom: 3 }}>Estagiários — Programa Futuro BFA</div>
+            <div style={{ fontSize: 12, opacity: 0.75, lineHeight: 1.5 }}>Jovens talentos em fase de formação profissional intensiva. Rodam por departamentos do banco, são avaliados por competências e têm pathway directo para contratação efectiva.</div>
+          </div>
+        </div>
+        <div style={{ padding: '12px 16px', borderRadius: 10, background: '#1D4ED808', border: '1px solid #1D4ED820', minWidth: 200 }}>
+          <div style={{ fontSize: 11, opacity: 0.6, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>Diferencia de Bolseiros</div>
+          <ul style={{ margin: 0, padding: '0 0 0 16px', fontSize: 12, opacity: 0.8, lineHeight: 1.8 }}>
+            <li>Foco profissional (não académico)</li>
+            <li>Rotações por departamentos</li>
+            <li>Avaliação de competências</li>
+            <li>Pathway para contratação</li>
+          </ul>
+        </div>
+      </div>
+
       <div className="grid cols-4" style={{ marginBottom: 24 }}>
         <KPI label="Total trainees" value={total} icon="briefcase" />
         <KPI label="Onboarding" value={onboarding} icon="clock" />

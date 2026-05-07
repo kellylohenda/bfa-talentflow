@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { talents, programs, statuses } from '@/lib/data'
-import type { Talent } from '@/types'
+import type { Talent, ParticipantKind } from '@/types'
 import Avatar from '@/components/ui/Avatar'
 import Pill from '@/components/ui/Pill'
 import Bar from '@/components/ui/Bar'
@@ -12,6 +12,12 @@ import Modal from '@/components/ui/Modal'
 import Link from 'next/link'
 
 type ToneType = 'success' | 'warn' | 'danger' | 'info' | 'neutral' | 'primary'
+
+function KindBadge({ kind }: { kind: ParticipantKind }) {
+  return kind === 'estagiario'
+    ? <span style={{ padding: '2px 7px', borderRadius: 10, fontSize: 10, fontWeight: 700, background: '#FF760715', color: '#FF7607' }}>Estagiário</span>
+    : <span style={{ padding: '2px 7px', borderRadius: 10, fontSize: 10, fontWeight: 700, background: '#1D4ED815', color: '#1D4ED8' }}>Bolseiro</span>
+}
 
 function statusTone(status: string): ToneType {
   const map: Record<string, ToneType> = {
@@ -37,6 +43,7 @@ export default function TalentosPage() {
   const [programFilter, setProgramFilter] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
   const [countryFilter, setCountryFilter] = useState('')
+  const [kindFilter, setKindFilter] = useState<'' | 'bolseiro' | 'estagiario'>('')
   const [addModal, setAddModal] = useState(false)
   const [addForm, setAddForm] = useState({ name: '', email: '', program: 'fbfa', university: '', course: '', country: 'Angola', mentor: '' })
 
@@ -57,7 +64,8 @@ export default function TalentosPage() {
     const matchProgram = !programFilter || t.program === programFilter
     const matchStatus = !statusFilter || t.status === statusFilter
     const matchCountry = !countryFilter || t.country === countryFilter
-    return matchSearch && matchProgram && matchStatus && matchCountry
+    const matchKind = !kindFilter || t.kind === kindFilter
+    return matchSearch && matchProgram && matchStatus && matchCountry && matchKind
   })
 
   return (
@@ -144,7 +152,17 @@ export default function TalentosPage() {
           ))}
         </select>
 
-        {(search || programFilter || statusFilter || countryFilter) && (
+        <select
+          className="select"
+          value={kindFilter}
+          onChange={e => setKindFilter(e.target.value as '' | 'bolseiro' | 'estagiario')}
+        >
+          <option value="">Bolseiros + Estagiários</option>
+          <option value="bolseiro">Bolseiros</option>
+          <option value="estagiario">Estagiários</option>
+        </select>
+
+        {(search || programFilter || statusFilter || countryFilter || kindFilter) && (
           <button
             className="btn btn-sm"
             onClick={() => {
@@ -152,6 +170,7 @@ export default function TalentosPage() {
               setProgramFilter('')
               setStatusFilter('')
               setCountryFilter('')
+              setKindFilter('')
             }}
           >
             Limpar
@@ -172,6 +191,7 @@ export default function TalentosPage() {
             <tr>
               <th>ID</th>
               <th>Nome</th>
+              <th>Tipo</th>
               <th>Programa</th>
               <th>Universidade</th>
               <th>GPA</th>
@@ -203,6 +223,7 @@ export default function TalentosPage() {
                       </div>
                     </div>
                   </td>
+                  <td><KindBadge kind={t.kind} /></td>
                   <td>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                       <span
@@ -244,7 +265,7 @@ export default function TalentosPage() {
             })}
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={10} style={{ textAlign: 'center', padding: 32, opacity: 0.45 }}>
+                <td colSpan={11} style={{ textAlign: 'center', padding: 32, opacity: 0.45 }}>
                   Nenhum talento encontrado
                 </td>
               </tr>

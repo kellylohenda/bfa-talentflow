@@ -73,6 +73,26 @@ export default function VoluntariosPage() {
         </button>
       </div>
 
+      {/* Context banner */}
+      <div style={{ display: 'flex', gap: 12, marginBottom: 20 }}>
+        <div style={{ flex: 1, padding: '12px 16px', borderRadius: 10, background: '#10B98108', border: '1px solid #10B98130', display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+          <span style={{ fontSize: 18 }}>🤝</span>
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: '#10B981', marginBottom: 3 }}>Voluntários — Programa CSR · Fundação BFA</div>
+            <div style={{ fontSize: 12, opacity: 0.75, lineHeight: 1.5 }}>Cidadãos que se inscrevem voluntariamente para participar em actividades de impacto social. Sem bolsa nem contratação — contribuem com horas em áreas como saúde, educação, ambiente, cultura e acção social.</div>
+          </div>
+        </div>
+        <div style={{ padding: '12px 16px', borderRadius: 10, background: '#f9fafb', border: '1px solid #e5e7eb', minWidth: 220 }}>
+          <div style={{ fontSize: 11, opacity: 0.6, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>Difere de Talentos (Bolseiros/Estagiários)</div>
+          <ul style={{ margin: 0, padding: '0 0 0 16px', fontSize: 12, opacity: 0.8, lineHeight: 1.8 }}>
+            <li>Sem bolsa ou subsídio</li>
+            <li>Sem pathway para contratação</li>
+            <li>Contabilização por horas de actividade</li>
+            <li>Foco em responsabilidade social (CSR)</li>
+          </ul>
+        </div>
+      </div>
+
       {/* KPIs */}
       <div className="grid cols-4" style={{ marginBottom: 24 }}>
         <KPI label="Total inscritos"   value={total}      icon="users"  />

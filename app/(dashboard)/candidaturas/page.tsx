@@ -56,15 +56,30 @@ const PROGRAMS_OPTS = [
   { id: 'bnac', name: 'Bolsa Nacional' },
   { id: 'lid',  name: 'Liderança+' },
   { id: 'mest', name: 'Mestrado Patrocinado' },
+  { id: 'vol',  name: 'Voluntariado' },
 ]
+
+function TipoBadge({ tipo }: { tipo: string }) {
+  const cfg =
+    tipo === 'estagiario'   ? { bg: '#FF760715', color: '#FF7607', label: 'Estagiário' } :
+    tipo === 'bolseiro'     ? { bg: '#1D4ED815', color: '#1D4ED8', label: 'Bolseiro' } :
+    tipo === 'voluntariado' ? { bg: '#10B98115', color: '#10B981', label: 'Voluntariado' } :
+                              { bg: '#f3f4f6',   color: '#6b7280', label: tipo }
+  return (
+    <span style={{ padding: '2px 8px', borderRadius: 10, fontSize: 10, fontWeight: 700, background: cfg.bg, color: cfg.color }}>
+      {cfg.label}
+    </span>
+  )
+}
 
 export default function CandidaturasPage() {
   const [selected, setSelected] = useState<Application | null>(null)
   const [realCandidaturas, setRealCandidaturas] = useState<CandidaturaRecord[]>([])
   const [loadingReal, setLoadingReal] = useState(true)
   const [actionLoading, setActionLoading] = useState<string | null>(null)
+  const [tipoFilter, setTipoFilter] = useState('')
   const [novaModal, setNovaModal] = useState(false)
-  const [novaForm, setNovaForm] = useState({ name: '', email: '', program: 'fbfa', course: '', uni: '', country: 'Angola', source: 'Manual' })
+  const [novaForm, setNovaForm] = useState({ name: '', email: '', program: 'fbfa', tipo: 'estagiario', course: '', uni: '', country: 'Angola', source: 'Manual' })
 
   useEffect(() => {
     fetch('/api/candidaturas')
@@ -88,12 +103,13 @@ export default function CandidaturasPage() {
     }
   }
 
-  const total = applications.length
-  const inProcess = applications.filter(a => !['oferta', 'rejeitado'].includes(a.stage)).length
-  const offers = applications.filter(a => a.stage === 'oferta').length
-  const rejected = applications.filter(a => a.stage === 'rejeitado').length
+  const filteredApps = tipoFilter ? applications.filter(a => a.tipo === tipoFilter) : applications
+  const total = filteredApps.length
+  const inProcess = filteredApps.filter(a => !['oferta', 'rejeitado'].includes(a.stage)).length
+  const offers = filteredApps.filter(a => a.stage === 'oferta').length
+  const rejected = filteredApps.filter(a => a.stage === 'rejeitado').length
 
-  const byStage = (stageId: string) => applications.filter(a => a.stage === stageId)
+  const byStage = (stageId: string) => filteredApps.filter(a => a.stage === stageId)
 
   return (
     <div className="section">
@@ -102,10 +118,18 @@ export default function CandidaturasPage() {
           <h1 className="page-title">Candidaturas</h1>
           <p className="page-subtitle">Funil de recrutamento — Q2 2026</p>
         </div>
-        <button className="btn btn-primary" onClick={() => setNovaModal(true)}>
-          <Icon name="plus" size={15} />
-          Nova candidatura
-        </button>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <select className="select" value={tipoFilter} onChange={e => setTipoFilter(e.target.value)}>
+            <option value="">Todos os tipos</option>
+            <option value="estagiario">Estagiários</option>
+            <option value="bolseiro">Bolseiros</option>
+            <option value="voluntariado">Voluntariado</option>
+          </select>
+          <button className="btn btn-primary" onClick={() => setNovaModal(true)}>
+            <Icon name="plus" size={15} />
+            Nova candidatura
+          </button>
+        </div>
       </div>
 
       {/* Stats bar */}
@@ -171,8 +195,9 @@ export default function CandidaturasPage() {
                           transition: 'box-shadow 0.15s',
                         }}
                       >
-                        <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 4 }}>
-                          {app.name}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4 }}>
+                          <span style={{ fontWeight: 600, fontSize: 13 }}>{app.name}</span>
+                          <TipoBadge tipo={app.tipo} />
                         </div>
                         <div
                           style={{
@@ -193,7 +218,7 @@ export default function CandidaturasPage() {
                               display: 'inline-block',
                             }}
                           />
-                          {prog?.name} · {app.uni}
+                          {prog?.name ?? app.program} · {app.uni}
                         </div>
                         <span
                           style={{
@@ -253,6 +278,7 @@ export default function CandidaturasPage() {
             <tr>
               <th>ID</th>
               <th>Nome</th>
+              <th>Tipo</th>
               <th>Programa</th>
               <th>Stage</th>
               <th>Score</th>
@@ -262,7 +288,7 @@ export default function CandidaturasPage() {
             </tr>
           </thead>
           <tbody>
-            {applications.map(app => {
+            {filteredApps.map(app => {
               const prog = programs.find(p => p.id === app.program)
               const tone = scoreTone(app.score)
               return (
@@ -277,6 +303,7 @@ export default function CandidaturasPage() {
                       </div>
                     </div>
                   </td>
+                  <td><TipoBadge tipo={app.tipo} /></td>
                   <td>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                       <span
@@ -419,11 +446,21 @@ export default function CandidaturasPage() {
                 <input className="input" type="email" style={{ width: '100%' }} value={novaForm.email} onChange={e => setNovaForm(f => ({ ...f, email: e.target.value }))} />
               </div>
             </div>
-            <div>
-              <label style={{ fontSize: 12, opacity: 0.6, display: 'block', marginBottom: 6 }}>Programa</label>
-              <select className="select" style={{ width: '100%' }} value={novaForm.program} onChange={e => setNovaForm(f => ({ ...f, program: e.target.value }))}>
-                {PROGRAMS_OPTS.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-              </select>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div>
+                <label style={{ fontSize: 12, opacity: 0.6, display: 'block', marginBottom: 6 }}>Tipo</label>
+                <select className="select" style={{ width: '100%' }} value={novaForm.tipo} onChange={e => setNovaForm(f => ({ ...f, tipo: e.target.value }))}>
+                  <option value="estagiario">Estagiário</option>
+                  <option value="bolseiro">Bolseiro</option>
+                  <option value="voluntariado">Voluntariado</option>
+                </select>
+              </div>
+              <div>
+                <label style={{ fontSize: 12, opacity: 0.6, display: 'block', marginBottom: 6 }}>Programa</label>
+                <select className="select" style={{ width: '100%' }} value={novaForm.program} onChange={e => setNovaForm(f => ({ ...f, program: e.target.value }))}>
+                  {PROGRAMS_OPTS.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                </select>
+              </div>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
               <div>
