@@ -5,10 +5,11 @@ export function middleware(request: NextRequest) {
   const role = request.cookies.get('role')?.value
   const { pathname } = request.nextUrl
 
-  if (pathname === '/login') return NextResponse.next()
+  const PUBLIC = ['/login', '/programa', '/candidatura']
+  if (PUBLIC.some(p => pathname === p || pathname.startsWith(p + '/'))) return NextResponse.next()
   if (!role) {
     const url = request.nextUrl.clone()
-    url.pathname = '/login'
+    url.pathname = '/programa'
     return NextResponse.redirect(url)
   }
   return NextResponse.next()
