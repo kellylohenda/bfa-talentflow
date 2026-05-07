@@ -203,6 +203,7 @@ export default function BolseiroPage() {
 
       {/* ── INÍCIO ──────────────────────────────────────────────────────────── */}
       {tab === 'inicio' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
           <div className="card">
             <div className="card-head"><span className="card-title">Notificações</span></div>
@@ -273,6 +274,89 @@ export default function BolseiroPage() {
               )}
             </div>
           </div>
+        </div>
+
+        {/* ── Rotinas & Ritmo de Trabalho ──────────────────────────────────── */}
+        {IS_ESTAGIARIO && (
+          <div className="card" style={{ marginTop: 0 }}>
+            <div className="card-head">
+              <span className="card-title">Rotina & Ritmo de Trabalho</span>
+              <span style={{ fontSize: 12, opacity: 0.5 }}>Últimas 4 semanas</span>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 16 }}>
+              {/* Consistency score */}
+              <div style={{ padding: '14px 16px', borderRadius: 8, background: 'var(--surface-2)', textAlign: 'center' }}>
+                <div style={{ fontSize: 26, fontWeight: 800, color: taxaPresenca >= 90 ? '#065F46' : taxaPresenca >= 75 ? '#92400E' : '#991B1B' }}>
+                  {taxaPresenca}%
+                </div>
+                <div style={{ fontSize: 12, fontWeight: 600, marginTop: 4 }}>Consistência</div>
+                <div style={{ fontSize: 11, opacity: 0.55, marginTop: 2 }}>
+                  {taxaPresenca >= 90 ? 'Excelente' : taxaPresenca >= 75 ? 'Boa' : 'A melhorar'}
+                </div>
+              </div>
+              {/* Average arrival */}
+              <div style={{ padding: '14px 16px', borderRadius: 8, background: 'var(--surface-2)', textAlign: 'center' }}>
+                <div style={{ fontSize: 26, fontWeight: 800 }}>{avgChegada}</div>
+                <div style={{ fontSize: 12, fontWeight: 600, marginTop: 4 }}>Chegada média</div>
+                <div style={{ fontSize: 11, opacity: 0.55, marginTop: 2 }}>
+                  {avgChegada <= '08:15' ? 'Muito pontual' : avgChegada <= '08:30' ? 'Pontual' : 'Atenção'}
+                </div>
+              </div>
+              {/* Avg hours/day */}
+              <div style={{ padding: '14px 16px', borderRadius: 8, background: 'var(--surface-2)', textAlign: 'center' }}>
+                <div style={{ fontSize: 26, fontWeight: 800 }}>
+                  {diasTrabalhados > 0 ? (totalHorasMes / diasTrabalhados).toFixed(1) : '—'}h
+                </div>
+                <div style={{ fontSize: 12, fontWeight: 600, marginTop: 4 }}>Média diária</div>
+                <div style={{ fontSize: 11, opacity: 0.55, marginTop: 2 }}>Por dia de trabalho</div>
+              </div>
+              {/* This week */}
+              <div style={{ padding: '14px 16px', borderRadius: 8, background: 'var(--surface-2)', textAlign: 'center' }}>
+                <div style={{ fontSize: 26, fontWeight: 800 }}>{horasEstaSemana.toFixed(1)}h</div>
+                <div style={{ fontSize: 12, fontWeight: 600, marginTop: 4 }}>Esta semana</div>
+                <div style={{ fontSize: 11, opacity: 0.55, marginTop: 2 }}>
+                  {horasEstaSemana >= 35 ? 'Semana completa' : `Faltam ~${(40 - horasEstaSemana).toFixed(0)}h`}
+                </div>
+              </div>
+            </div>
+
+            {/* Weekly heatmap — last 4 weeks */}
+            <div style={{ marginTop: 16 }}>
+              <div style={{ fontSize: 12, fontWeight: 600, opacity: 0.65, marginBottom: 10 }}>Calendário das últimas 4 semanas</div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'auto repeat(20, 1fr)', gap: 4, alignItems: 'center' }}>
+                {/* Day labels */}
+                {['', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', '', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', '', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', '', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex'].map((d, i) => (
+                  <div key={i} style={{ fontSize: 10, opacity: 0.45, textAlign: 'center' }}>{d}</div>
+                ))}
+              </div>
+              {/* 4 weeks × 5 days grid */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(20, 1fr)', gap: 4, marginTop: 4 }}>
+                {[
+                  '2026-04-06','2026-04-07','2026-04-08','2026-04-09','2026-04-10',
+                  '2026-04-13','2026-04-14','2026-04-15','2026-04-16','2026-04-17',
+                  '2026-04-20','2026-04-21','2026-04-22','2026-04-23','2026-04-24',
+                  '2026-04-27','2026-04-28','2026-04-29','2026-04-30','2026-05-01',
+                ].map(date => {
+                  const rec = myPresencas.find(p => p.date === date)
+                  const s = rec ? presStatusStyle(rec.status) : null
+                  const isToday = date === '2026-05-07'
+                  return (
+                    <div key={date} title={`${date}${rec ? ` · ${rec.horas ?? 0}h · ${s?.label}` : ' · Sem registo'}`}
+                      style={{ width: '100%', aspectRatio: '1', borderRadius: 4, background: s ? s.bg : 'var(--surface-2)', border: isToday ? '2px solid var(--primary)' : '1px solid transparent', cursor: 'default', opacity: !rec ? 0.3 : 1 }} />
+                  )
+                })}
+              </div>
+              <div style={{ display: 'flex', gap: 12, marginTop: 8, fontSize: 11, opacity: 0.55 }}>
+                {[['#D1FAE5', 'Presente'], ['#FEE2E2', 'Ausente'], ['#FEF3C7', 'Justificado'], ['var(--surface-2)', 'Sem registo']].map(([bg, label]) => (
+                  <span key={label} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <span style={{ width: 10, height: 10, borderRadius: 3, background: bg, display: 'inline-block', border: '1px solid rgba(0,0,0,0.08)' }} />
+                    {label}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
         </div>
       )}
 
