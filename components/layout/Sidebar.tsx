@@ -29,6 +29,7 @@ const NAV_BY_ROLE: Record<Role, NavSection[]> = {
         { id: 'estagiarios',   label: 'Estagiários',  icon: 'graduation' },
         { id: 'tarefas',       label: 'Tarefas',      icon: 'check' },
         { id: 'faltas',        label: 'Faltas',        icon: 'calendar' },
+        { id: 'agenda',        label: 'Agenda',        icon: 'calendar' },
         { id: 'pagamentos',    label: 'Pagamentos',   icon: 'cash',      badge: 3 },
         { id: 'workflows',     label: 'Aprovações',   icon: 'layers',    badge: 6 },
         { id: 'documentos',    label: 'Documentos',   icon: 'doc' },
@@ -75,6 +76,7 @@ const NAV_BY_ROLE: Record<Role, NavSection[]> = {
       section: 'Talento',
       items: [
         { id: 'talentos',      label: 'Talentos',     icon: 'users' },
+        { id: 'agenda',        label: 'Agenda',       icon: 'calendar' },
         { id: 'avaliacoes',    label: 'Avaliações',   icon: 'star' },
         { id: 'retencao',      label: 'Retenção',     icon: 'shield' },
       ],
@@ -98,10 +100,11 @@ const NAV_BY_ROLE: Record<Role, NavSection[]> = {
     {
       section: 'Mentoria',
       items: [
-        { id: 'mentor',    label: 'Portal do Mentor',     icon: 'dashboard' },
-        { id: 'tarefas',   label: 'Tarefas',              icon: 'check'     },
-        { id: 'faltas',    label: 'Faltas',               icon: 'calendar'  },
-        { id: 'avaliacoes',label: 'Avaliações',           icon: 'star'      },
+        { id: 'mentor',    label: 'Portal do Mentor',  icon: 'dashboard' },
+        { id: 'agenda',    label: 'Agenda',            icon: 'calendar'  },
+        { id: 'tarefas',   label: 'Tarefas',           icon: 'check'     },
+        { id: 'faltas',    label: 'Faltas',            icon: 'calendar'  },
+        { id: 'avaliacoes',label: 'Avaliações',        icon: 'star'      },
       ],
     },
   ],
@@ -110,6 +113,7 @@ const NAV_BY_ROLE: Record<Role, NavSection[]> = {
       section: 'O Meu Programa',
       items: [
         { id: 'bolseiro', label: 'Portal do Bolseiro', icon: 'dashboard' },
+        { id: 'agenda',   label: 'Agenda',             icon: 'calendar'  },
       ],
     },
   ],

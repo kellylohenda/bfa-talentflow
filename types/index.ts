@@ -17,6 +17,27 @@ export type ApplicationStage = 'triagem' | 'entrevista1' | 'entrevista2' | 'aval
 export type ApplicationTipo = 'bolseiro' | 'estagiario' | 'voluntariado'
 export type RotationStatus = 'concluida' | 'activa' | 'agendada'
 
+// ── Agenda / Workshops ────────────────────────────────────────────────────────
+export type EventoTipo = 'workshop' | 'formacao' | 'evento' | 'mentoria' | 'convocatoria' | 'avaliacao'
+export type EventoAudience = 'todos' | 'bolseiro' | 'estagiario' | 'voluntario' | 'mentor' | 'rh'
+
+export interface Evento {
+  id: string
+  titulo: string
+  tipo: EventoTipo
+  descricao: string
+  data: string        // YYYY-MM-DD
+  horaInicio: string  // HH:MM
+  horaFim: string
+  local: string
+  facilitador: string
+  vagasTotal: number | null
+  inscritos: string[] // talentId[] or volunteerV-xxx
+  audiencia: EventoAudience[]
+  obrigatorio: boolean
+  programas: string[] // e.g. ['fbfa','bif'] or [] for all
+}
+
 // ── Presença / Horas ──────────────────────────────────────────────────────────
 export type PresencaStatus = 'presente' | 'ausente' | 'justificado' | 'pendente'
 export type SessaoTipo     = 'mentoria' | 'workshop' | 'avaliacao' | 'formacao' | 'evento'
