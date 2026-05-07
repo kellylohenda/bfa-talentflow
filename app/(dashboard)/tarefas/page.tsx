@@ -27,14 +27,22 @@ const TODAY = '2026-05-05'
 const MENTOR_NAME = 'Edmilson Cardoso'
 const mentorMenteeIds = new Set(talents.filter(t => t.mentor === MENTOR_NAME).map(t => t.id))
 const activeTalents = talents.filter(t => t.status === 'active' || t.status === 'onboarding')
+const CURRENT_TALENT_ID: Partial<Record<string, string>> = {
+  estagiario: 'T-1042',
+  bolseiro:   'T-1043',
+}
 
 const CATEGORIES = ['Relatório', 'Formação', 'Documento', 'PDI', 'Apresentação', 'Avaliação', 'Certificação']
 
 export default function PageTarefas() {
   const role = useRole()
-  const isMentor = role === 'mentor'
+  const isMentor      = role === 'mentor'
+  const isParticipant = role === 'bolseiro' || role === 'estagiario'
+  const myTalentId    = CURRENT_TALENT_ID[role]
   const [taskList, setTaskList] = useState<Task[]>([...initialTasks])
-  const visibleTasks = isMentor ? taskList.filter(t => mentorMenteeIds.has(t.talentId)) : taskList
+  const visibleTasks = isMentor      ? taskList.filter(t => mentorMenteeIds.has(t.talentId))
+                     : isParticipant ? taskList.filter(t => t.talentId === myTalentId)
+                     : taskList
   const mentorTalents = activeTalents.filter(t => mentorMenteeIds.has(t.id))
   const [activeTab, setActiveTab] = useState<'lista' | 'talento' | 'criar'>('lista')
   const [filterStatus, setFilterStatus] = useState('all')
@@ -100,13 +108,20 @@ export default function PageTarefas() {
         <div>
           <div className="page-title">Tarefas</div>
           <div className="page-subtitle">
-            {isMentor ? `As minhas tarefas atribuídas · ${mentorMenteeIds.size} mentorandos` : 'Gestão de tarefas dos talentos'}
+            {isMentor      ? `As minhas tarefas atribuídas · ${mentorMenteeIds.size} mentorandos`
+           : isParticipant ? 'As minhas tarefas'
+           : 'Gestão de tarefas dos talentos'}
           </div>
         </div>
       </div>
       {isMentor && (
         <div style={{ marginBottom: 16, padding: '10px 14px', borderRadius: 8, background: '#FFF7ED', border: '1px solid #FED7AA', fontSize: 13, color: '#9A3412' }}>
           A ver apenas tarefas dos seus mentorandos. Para criar tarefas, use o separador "Criar".
+        </div>
+      )}
+      {isParticipant && (
+        <div style={{ marginBottom: 16, padding: '10px 14px', borderRadius: 8, background: '#EFF6FF', border: '1px solid #BFDBFE', fontSize: 13, color: '#1D4ED8' }}>
+          A ver apenas as suas tarefas pessoais.
         </div>
       )}
 

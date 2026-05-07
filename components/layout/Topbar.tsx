@@ -23,7 +23,9 @@ const PATH_LABELS: Record<string, string> = {
   retencao:     'Retenção',
   compliance:   'Compliance',
   mentor:       'Portal do Mentor',
-  bolseiro:     'Portal do Bolseiro',
+  bolseiro:     'Portal do Bolseiro / Estagiário',
+  voluntario:   'Portal do Voluntário',
+  agenda:       'Agenda & Workshops',
   documentos:   'Documentos',
   voluntarios:  'Voluntários',
   actividades:  'Actividades',
@@ -111,7 +113,7 @@ function buildNotifications(role: Role): NotifItem[] {
     ]
   }
 
-  if (role === 'bolseiro') {
+  if (role === 'bolseiro' || role === 'estagiario') {
     return bolseiroNotifs.map(n => ({
       id: `bn-${n.id}`,
       icon: n.type === 'payment' ? 'cash' : n.type === 'doc' ? 'doc' : n.type === 'mentor' ? 'briefcase' : 'bell',
@@ -119,6 +121,13 @@ function buildNotifications(role: Role): NotifItem[] {
       title: n.title,
       sub: n.text,
     }))
+  }
+
+  if (role === 'voluntario') {
+    return [
+      { id: 'v-1', icon: 'calendar', tone: 'info' as const, title: 'Actividade agendada', sub: 'Escola Primária Sambizanga · 24 Mai' },
+      { id: 'v-2', icon: 'clock', tone: 'neutral' as const, title: 'Horas validadas', sub: '4h · Tutoria Escolar · Fev 2026' },
+    ]
   }
 
   return []

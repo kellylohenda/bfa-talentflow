@@ -1,4 +1,4 @@
-export type Role = 'rh' | 'direcao' | 'mentor' | 'bolseiro'
+export type Role = 'rh' | 'direcao' | 'mentor' | 'bolseiro' | 'estagiario' | 'voluntario'
 export type Theme = 'light' | 'dark'
 export type Density = 'compact' | 'balanced' | 'comfortable'
 

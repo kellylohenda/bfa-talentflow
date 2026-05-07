@@ -10,6 +10,10 @@ import type { Absence } from '@/types'
 
 const MENTOR_NAME = 'Edmilson Cardoso'
 const mentorMenteeIds = new Set(talents.filter(t => t.mentor === MENTOR_NAME).map(t => t.id))
+const CURRENT_TALENT_ID: Partial<Record<string, string>> = {
+  estagiario: 'T-1042',
+  bolseiro:   'T-1043',
+}
 
 type AbsStatus = 'pending' | 'approved' | 'rejected'
 
@@ -21,13 +25,17 @@ const STATUS_META: Record<AbsStatus, { label: string; tone: 'warn' | 'success' |
 
 export default function PageFaltas() {
   const role = useRole()
-  const isMentor = role === 'mentor'
+  const isMentor      = role === 'mentor'
+  const isParticipant = role === 'bolseiro' || role === 'estagiario'
+  const myTalentId    = CURRENT_TALENT_ID[role]
   const [absenceList, setAbsenceList] = useState<Absence[]>([...initialAbsences])
   const [activeTab, setActiveTab] = useState<'pendentes' | 'historico' | 'impacto'>('pendentes')
   const [selectedAbsence, setSelectedAbsence] = useState<Absence | null>(null)
   const [rhNote, setRhNote] = useState('')
 
-  const visibleAbsences = isMentor ? absenceList.filter(a => mentorMenteeIds.has(a.talentId)) : absenceList
+  const visibleAbsences = isMentor      ? absenceList.filter(a => mentorMenteeIds.has(a.talentId))
+                        : isParticipant ? absenceList.filter(a => a.talentId === myTalentId)
+                        : absenceList
   const pendentes = visibleAbsences.filter(a => a.status === 'pending')
   const historico = visibleAbsences.filter(a => a.status !== 'pending')
   const aprovadas = visibleAbsences.filter(a => a.status === 'approved')
@@ -64,13 +72,20 @@ export default function PageFaltas() {
         <div>
           <div className="page-title">Faltas</div>
           <div className="page-subtitle">
-            {isMentor ? `Ausências dos seus mentorandos · ${mentorMenteeIds.size} mentorandos` : 'Gestão de ausências e pedidos de falta'}
+            {isMentor      ? `Ausências dos seus mentorandos · ${mentorMenteeIds.size} mentorandos`
+           : isParticipant ? 'As minhas faltas e ausências'
+           : 'Gestão de ausências e pedidos de falta'}
           </div>
         </div>
       </div>
       {isMentor && (
         <div style={{ marginBottom: 16, padding: '10px 14px', borderRadius: 8, background: '#FFF7ED', border: '1px solid #FED7AA', fontSize: 13, color: '#9A3412' }}>
           A ver apenas faltas dos seus mentorandos. Pode aprovar ou rejeitar pedidos pendentes.
+        </div>
+      )}
+      {isParticipant && (
+        <div style={{ marginBottom: 16, padding: '10px 14px', borderRadius: 8, background: '#EFF6FF', border: '1px solid #BFDBFE', fontSize: 13, color: '#1D4ED8' }}>
+          As suas ausências registadas. Para submeter uma nova falta, contacte o seu mentor ou RH.
         </div>
       )}
 
@@ -83,7 +98,7 @@ export default function PageFaltas() {
 
       <div className="tabs">
         <button className={`tab${activeTab === 'pendentes' ? ' tab--active' : ''}`} onClick={() => setActiveTab('pendentes')}>
-          Pendentes <span className="tab-count">{pendentes.length}</span>
+          {isParticipant ? 'Pendentes' : 'Pendentes'} <span className="tab-count">{pendentes.length}</span>
         </button>
         <button className={`tab${activeTab === 'historico' ? ' tab--active' : ''}`} onClick={() => setActiveTab('historico')}>
           Histórico <span className="tab-count">{historico.length}</span>

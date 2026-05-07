@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import { bolseiroPayments, bolseiroNotifs, tasks, rotations, presencas, sessoesBolseiro } from '@/lib/data'
 import { fmtKz } from '@/lib/utils'
+import { useRole } from '@/lib/useRole'
 import KPI from '@/components/ui/KPI'
 import Pill from '@/components/ui/Pill'
 import Modal from '@/components/ui/Modal'
@@ -9,29 +10,23 @@ import Icon from '@/components/ui/Icon'
 import Bar from '@/components/ui/Bar'
 import type { TaskStatus, PaymentStatus, ParticipantKind, PresencaStatus } from '@/types'
 
-// ── Persona ───────────────────────────────────────────────────────────────────
-// Lwini Capemba = programa Futuro BFA = Estagiária
-// Mudar kind para 'bolseiro' para ver a experiência de bolseiro
-const ME = {
-  name:       'Lwini Capemba',
-  id:         'T-1042',
-  kind:       'estagiario' as ParticipantKind,
-  program:    'Futuro BFA',
-  programId:  'fbfa',
-  university: 'Universidade Agostinho Neto',
-  course:     'Economia',
-  year:       'Trainee Y2',
-  mentor:     'Edmilson Cardoso',
-  dept:       'Banca de Empresas',
-  gpa:        17.2,
-  perf:       92,
-  startDate:  '2024-09-01',
-  endDate:    '2026-08-31',
+// ── Personas ──────────────────────────────────────────────────────────────────
+const PERSONA_ESTAGIARIO = {
+  name: 'Lwini Capemba', id: 'T-1042', kind: 'estagiario' as ParticipantKind,
+  program: 'Futuro BFA', programId: 'fbfa',
+  university: 'Universidade Agostinho Neto', course: 'Economia', year: 'Trainee Y2',
+  mentor: 'Edmilson Cardoso', dept: 'Banca de Empresas',
+  gpa: 17.2, perf: 92, startDate: '2024-09-01', endDate: '2026-08-31',
+}
+const PERSONA_BOLSEIRO = {
+  name: 'Joaquim Tchindemba', id: 'T-1043', kind: 'bolseiro' as ParticipantKind,
+  program: 'Bolsa Internacional', programId: 'bif',
+  university: 'Nova SBE', course: 'Mestrado Finanças', year: '2º ano',
+  mentor: 'Sofia Mendes', dept: '—',
+  gpa: 16.8, perf: 88, startDate: '2024-09-15', endDate: '2027-07-31',
 }
 
-const IS_ESTAGIARIO = ME.kind === 'estagiario'
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
+// ── Static helpers ────────────────────────────────────────────────────────────
 function payLabel(s: PaymentStatus) {
   return s === 'paid' ? 'Pago' : s === 'pending' ? 'Pendente' : s === 'failed' ? 'Falhou' : 'Em espera'
 }
@@ -44,37 +39,6 @@ function taskLabel(s: TaskStatus) {
 function taskTone(s: TaskStatus): 'success' | 'warn' | 'danger' | 'neutral' {
   return s === 'done' ? 'success' : s === 'in_progress' ? 'warn' : s === 'overdue' ? 'danger' : 'neutral'
 }
-
-const myTasks        = tasks.filter(t => t.talentId === ME.id)
-const myRotations    = rotations.filter(r => r.talentId === ME.id)
-const activeRotation = myRotations.find(r => r.status === 'activa')
-const myPresencas    = presencas.filter(p => p.talentId === ME.id)
-const mySessoes      = sessoesBolseiro.filter(s => s.talentId === ME.id)
-
-// ── Presença stats ────────────────────────────────────────────────────────────
-const SEMANA_ACTUAL = ['2026-05-04', '2026-05-05', '2026-05-06', '2026-05-07', '2026-05-08']
-const MES_ACTUAL    = myPresencas.filter(p => p.date >= '2026-05-01')
-const HISTORICO     = myPresencas.filter(p => p.date >= '2026-04-01')
-const presHist      = HISTORICO.filter(p => p.status === 'presente')
-const totalHorasMes = presHist.reduce((s, p) => s + (p.horas ?? 0), 0)
-const diasTrabalhados = presHist.length
-const taxaPresenca  = HISTORICO.filter(p => p.status !== 'pendente').length > 0
-  ? Math.round(presHist.length / HISTORICO.filter(p => p.status !== 'pendente').length * 100)
-  : 0
-const horasEstaSemana = SEMANA_ACTUAL.reduce((s, d) => {
-  const p = myPresencas.find(p => p.date === d)
-  return s + (p?.horas ?? 0)
-}, 0)
-const avgChegada = (() => {
-  const times = presHist.filter(p => p.entrada).map(p => {
-    const [h, m] = p.entrada!.split(':').map(Number)
-    return h * 60 + m
-  })
-  if (!times.length) return '—'
-  const avg = Math.round(times.reduce((a, b) => a + b, 0) / times.length)
-  return `${String(Math.floor(avg / 60)).padStart(2, '0')}:${String(avg % 60).padStart(2, '0')}`
-})()
-
 function presStatusStyle(s: PresencaStatus): { bg: string; color: string; label: string } {
   return s === 'presente'   ? { bg: '#D1FAE5', color: '#065F46', label: 'Presente' }
        : s === 'ausente'    ? { bg: '#FEE2E2', color: '#991B1B', label: 'Ausente' }
@@ -82,20 +46,52 @@ function presStatusStyle(s: PresencaStatus): { bg: string; color: string; label:
        :                     { bg: '#F3F4F6', color: '#6B7280', label: 'Pendente' }
 }
 
-const DOC_TYPES_ESTAGIARIO = ['Relatório de Estágio', 'Avaliação do Supervisor', 'Plano de Desenvolvimento', 'Identificação', 'Contrato']
-const DOC_TYPES_BOLSEIRO   = ['Boletim', 'Comprovativo Matrícula', 'Relatório Semestral', 'Identificação', 'Contrato']
-const DOC_TYPES = IS_ESTAGIARIO ? DOC_TYPES_ESTAGIARIO : DOC_TYPES_BOLSEIRO
-
-// ── Competencies (estagiário self-assessment) ─────────────────────────────────
-const COMPETENCIAS = [
-  { key: 'tecnico',     label: 'Desempenho Técnico',         self: 4 },
-  { key: 'comunicacao', label: 'Comunicação Profissional',   self: 4 },
-  { key: 'iniciativa',  label: 'Iniciativa e Proactividade', self: 5 },
-  { key: 'equipa',      label: 'Trabalho em Equipa',         self: 5 },
-  { key: 'pontualidade',label: 'Pontualidade e Assiduidade', self: 5 },
-]
+const SEMANA_ACTUAL = ['2026-05-04', '2026-05-05', '2026-05-06', '2026-05-07', '2026-05-08']
 
 export default function BolseiroPage() {
+  const role = useRole()
+  const ME = role === 'bolseiro' ? PERSONA_BOLSEIRO : PERSONA_ESTAGIARIO
+  const IS_ESTAGIARIO = ME.kind === 'estagiario'
+
+  const myTasks        = tasks.filter(t => t.talentId === ME.id)
+  const myRotations    = rotations.filter(r => r.talentId === ME.id)
+  const activeRotation = myRotations.find(r => r.status === 'activa')
+  const myPresencas    = presencas.filter(p => p.talentId === ME.id)
+  const mySessoes      = sessoesBolseiro.filter(s => s.talentId === ME.id)
+
+  const HISTORICO       = myPresencas.filter(p => p.date >= '2026-04-01')
+  const presHist        = HISTORICO.filter(p => p.status === 'presente')
+  const totalHorasMes   = presHist.reduce((s, p) => s + (p.horas ?? 0), 0)
+  const diasTrabalhados = presHist.length
+  const taxaPresenca    = HISTORICO.filter(p => p.status !== 'pendente').length > 0
+    ? Math.round(presHist.length / HISTORICO.filter(p => p.status !== 'pendente').length * 100)
+    : 0
+  const horasEstaSemana = SEMANA_ACTUAL.reduce((s, d) => {
+    const p = myPresencas.find(p => p.date === d)
+    return s + (p?.horas ?? 0)
+  }, 0)
+  const avgChegada = (() => {
+    const times = presHist.filter(p => p.entrada).map(p => {
+      const [h, m] = p.entrada!.split(':').map(Number)
+      return h * 60 + m
+    })
+    if (!times.length) return '—'
+    const avg = Math.round(times.reduce((a, b) => a + b, 0) / times.length)
+    return `${String(Math.floor(avg / 60)).padStart(2, '0')}:${String(avg % 60).padStart(2, '0')}`
+  })()
+
+  const DOC_TYPES = IS_ESTAGIARIO
+    ? ['Relatório de Estágio', 'Avaliação do Supervisor', 'Plano de Desenvolvimento', 'Identificação', 'Contrato']
+    : ['Boletim', 'Comprovativo Matrícula', 'Relatório Semestral', 'Identificação', 'Contrato']
+
+  const COMPETENCIAS = [
+    { key: 'tecnico',     label: 'Desempenho Técnico',         self: 4 },
+    { key: 'comunicacao', label: 'Comunicação Profissional',   self: 4 },
+    { key: 'iniciativa',  label: 'Iniciativa e Proactividade', self: 5 },
+    { key: 'equipa',      label: 'Trabalho em Equipa',         self: 5 },
+    { key: 'pontualidade',label: 'Pontualidade e Assiduidade', self: 5 },
+  ]
+
   type EstagiarioTab = 'inicio' | 'presencas' | 'rotacoes' | 'tarefas' | 'perfil'
   type BolseiroTab   = 'inicio' | 'presencas' | 'pagamentos' | 'tarefas' | 'perfil'
   type Tab = EstagiarioTab | BolseiroTab

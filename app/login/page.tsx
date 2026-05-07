@@ -3,15 +3,18 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import type { Role } from '@/types'
 
-const ROLES: { id: Role; label: string; desc: string; color: string; initials: string }[] = [
-  { id: 'rh',       label: 'Gestora de RH',    desc: 'Candidaturas, talentos, pagamentos, compliance e workflows', color: '#FF7607', initials: 'MQ' },
-  { id: 'direcao',  label: 'Direcção de RH',   desc: 'Dashboard executivo, KPIs estratégicos, 9-Box e ROI',       color: '#2563EB', initials: 'MB' },
-  { id: 'mentor',   label: 'Portal do Mentor',  desc: 'Gerir mentorandos, sessões, tarefas e avaliações',          color: '#7C3AED', initials: 'EC' },
-  { id: 'bolseiro', label: 'Portal do Bolseiro', desc: 'O meu programa — subsídios, documentos e mentoria',        color: '#059669', initials: 'LC' },
+const ROLES: { id: Role; label: string; desc: string; color: string; initials: string; group?: string }[] = [
+  { id: 'rh',         label: 'Gestora de RH',       desc: 'Candidaturas, talentos, pagamentos, compliance e workflows', color: '#FF7607', initials: 'MQ', group: 'Equipa BFA' },
+  { id: 'direcao',    label: 'Direcção de RH',       desc: 'Dashboard executivo, KPIs estratégicos, 9-Box e ROI',       color: '#2563EB', initials: 'MB', group: 'Equipa BFA' },
+  { id: 'mentor',     label: 'Portal do Mentor',     desc: 'Gerir mentorandos, sessões, tarefas e avaliações',          color: '#7C3AED', initials: 'EC', group: 'Equipa BFA' },
+  { id: 'estagiario', label: 'Portal do Estagiário', desc: 'Presenças, rotações, tarefas e desenvolvimento — Futuro BFA', color: '#FF7607', initials: 'LC', group: 'Participantes' },
+  { id: 'bolseiro',   label: 'Portal do Bolseiro',   desc: 'Subsídios, sessões académicas, tarefas e mentoria',         color: '#0E7C4A', initials: 'JT', group: 'Participantes' },
+  { id: 'voluntario', label: 'Portal do Voluntário', desc: 'As minhas actividades, horas validadas e agenda',           color: '#0891B2', initials: 'AK', group: 'Participantes' },
 ]
 
 const DEST: Record<Role, string> = {
-  rh: '/overview', direcao: '/overview', mentor: '/mentor', bolseiro: '/bolseiro',
+  rh: '/overview', direcao: '/overview', mentor: '/mentor',
+  estagiario: '/bolseiro', bolseiro: '/bolseiro', voluntario: '/voluntario',
 }
 
 export default function LoginPage() {
@@ -107,11 +110,17 @@ export default function LoginPage() {
 
         {/* Role cards */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 24 }}>
-          {ROLES.map((r) => {
+          {ROLES.map((r, i) => {
             const isSelected = selected === r.id
+            const showGroup = i === 0 || r.group !== ROLES[i - 1].group
             return (
+              <div key={r.id}>
+                {showGroup && (
+                  <div style={{ fontSize: 10, fontWeight: 700, color: '#3A3A38', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 6, marginTop: i > 0 ? 12 : 0 }}>
+                    {r.group}
+                  </div>
+                )}
               <button
-                key={r.id}
                 onClick={() => setSelected(r.id)}
                 style={{
                   padding: '14px 16px',
@@ -157,6 +166,7 @@ export default function LoginPage() {
                   )}
                 </div>
               </button>
+              </div>
             )
           })}
         </div>

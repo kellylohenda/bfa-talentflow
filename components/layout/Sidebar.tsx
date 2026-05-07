@@ -108,36 +108,68 @@ const NAV_BY_ROLE: Record<Role, NavSection[]> = {
       ],
     },
   ],
+  estagiario: [
+    {
+      section: 'O Meu Estágio',
+      items: [
+        { id: 'bolseiro',   label: 'Portal',            icon: 'dashboard' },
+        { id: 'agenda',     label: 'Agenda',            icon: 'calendar'  },
+        { id: 'tarefas',    label: 'As Minhas Tarefas', icon: 'check'     },
+        { id: 'faltas',     label: 'Faltas',            icon: 'calendar'  },
+        { id: 'documentos', label: 'Documentos',        icon: 'doc'       },
+      ],
+    },
+  ],
   bolseiro: [
     {
       section: 'O Meu Programa',
       items: [
-        { id: 'bolseiro', label: 'Portal do Bolseiro', icon: 'dashboard' },
-        { id: 'agenda',   label: 'Agenda',             icon: 'calendar'  },
+        { id: 'bolseiro',   label: 'Portal',            icon: 'dashboard' },
+        { id: 'agenda',     label: 'Agenda',            icon: 'calendar'  },
+        { id: 'tarefas',    label: 'As Minhas Tarefas', icon: 'check'     },
+        { id: 'faltas',     label: 'Faltas',            icon: 'calendar'  },
+        { id: 'documentos', label: 'Documentos',        icon: 'doc'       },
+      ],
+    },
+  ],
+  voluntario: [
+    {
+      section: 'Voluntariado',
+      items: [
+        { id: 'voluntario',   label: 'Portal',          icon: 'dashboard' },
+        { id: 'agenda',       label: 'Agenda',          icon: 'calendar'  },
+        { id: 'actividades',  label: 'Actividades',     icon: 'calendar'  },
+        { id: 'horas',        label: 'As Minhas Horas', icon: 'clock'     },
       ],
     },
   ],
 }
 
 const USER_BY_ROLE: Record<Role, { name: string; sub: string }> = {
-  rh:       { name: 'Mariana Quissama',  sub: 'Gestora de Programa · RH' },
-  direcao:  { name: 'Dr. Manuel Bemba',  sub: 'Direcção de RH' },
-  mentor:   { name: 'Edmilson Cardoso',  sub: 'Director · Banca de Empresas' },
-  bolseiro: { name: 'Lwini Capemba',     sub: 'Trainee Y1 · Futuro BFA' },
+  rh:         { name: 'Mariana Quissama',   sub: 'Gestora de Programa · RH' },
+  direcao:    { name: 'Dr. Manuel Bemba',   sub: 'Direcção de RH' },
+  mentor:     { name: 'Edmilson Cardoso',   sub: 'Director · Banca de Empresas' },
+  estagiario: { name: 'Lwini Capemba',      sub: 'Estagiária Y1 · Futuro BFA' },
+  bolseiro:   { name: 'Joaquim Tchindemba', sub: 'Bolseiro · BIF · Nova SBE' },
+  voluntario: { name: 'Ana Paula Kiala',    sub: 'Voluntária · Educação' },
 }
 
 const ROLE_PILLS: { key: Role; label: string }[] = [
-  { key: 'rh',       label: 'RH' },
-  { key: 'direcao',  label: 'Dir.' },
-  { key: 'mentor',   label: 'Mentor' },
-  { key: 'bolseiro', label: 'Bolseiro' },
+  { key: 'rh',         label: 'RH' },
+  { key: 'direcao',    label: 'Dir.' },
+  { key: 'mentor',     label: 'Mentor' },
+  { key: 'estagiario', label: 'Estag.' },
+  { key: 'bolseiro',   label: 'Bolseiro' },
+  { key: 'voluntario', label: 'Volunt.' },
 ]
 
 const DEFAULT_PAGE: Record<Role, string> = {
-  rh:       '/overview',
-  direcao:  '/overview',
-  mentor:   '/mentor',
-  bolseiro: '/bolseiro',
+  rh:         '/overview',
+  direcao:    '/overview',
+  mentor:     '/mentor',
+  estagiario: '/bolseiro',
+  bolseiro:   '/bolseiro',
+  voluntario: '/voluntario',
 }
 
 interface SidebarProps {
