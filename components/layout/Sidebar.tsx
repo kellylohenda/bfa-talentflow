@@ -98,9 +98,7 @@ const NAV_BY_ROLE: Record<Role, NavSection[]> = {
     {
       section: 'Mentoria',
       items: [
-        { id: 'mentor',        label: 'Dashboard',    icon: 'dashboard' },
-        { id: 'mentoria',      label: 'Mentorandos',  icon: 'users' },
-        { id: 'tarefas',       label: 'Tarefas',      icon: 'check' },
+        { id: 'mentor', label: 'Portal do Mentor', icon: 'dashboard' },
       ],
     },
   ],
@@ -108,11 +106,7 @@ const NAV_BY_ROLE: Record<Role, NavSection[]> = {
     {
       section: 'O Meu Programa',
       items: [
-        { id: 'bolseiro',      label: 'Início',       icon: 'dashboard' },
-        { id: 'pagamentos',    label: 'Pagamentos',   icon: 'cash' },
-        { id: 'documentos',    label: 'Documentos',   icon: 'doc' },
-        { id: 'tarefas',       label: 'Tarefas',      icon: 'check' },
-        { id: 'faltas',        label: 'Faltas',        icon: 'calendar' },
+        { id: 'bolseiro', label: 'Portal do Bolseiro', icon: 'dashboard' },
       ],
     },
   ],
@@ -157,6 +151,11 @@ export default function Sidebar({ role, collapsed }: SidebarProps) {
     document.cookie = `role=${r}; path=/; max-age=31536000`
     router.push(DEFAULT_PAGE[r])
     router.refresh()
+  }
+
+  const handleLogout = () => {
+    document.cookie = 'role=; path=/; max-age=0'
+    router.push('/login')
   }
 
   const inits = initials(user.name)
@@ -231,6 +230,14 @@ export default function Sidebar({ role, collapsed }: SidebarProps) {
           <b>{user.name}</b>
           <span>{user.sub}</span>
         </div>
+        <button
+          className="btn btn-ghost"
+          onClick={handleLogout}
+          title="Terminar sessão"
+          style={{ marginLeft: 'auto', padding: '6px', opacity: 0.55, flexShrink: 0 }}
+        >
+          <Icon name="logout" size={15} />
+        </button>
       </div>
     </aside>
   )

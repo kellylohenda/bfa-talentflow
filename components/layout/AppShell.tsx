@@ -57,6 +57,7 @@ export default function AppShell({ role, children }: AppShellProps) {
       <Sidebar role={role} collapsed={collapsed} />
       <div className="main">
         <Topbar
+          role={role}
           onToggleDesktop={toggleDesktop}
           onToggleMobile={toggleMobile}
           theme={theme}
