@@ -51,6 +51,15 @@ const NAV_BY_ROLE: Record<Role, NavSection[]> = {
         { id: 'compliance',    label: 'Compliance',   icon: 'shield' },
       ],
     },
+    {
+      section: 'Voluntariado',
+      items: [
+        { id: 'voluntarios',               label: 'Voluntários',  icon: 'users'    },
+        { id: 'actividades',               label: 'Actividades',  icon: 'calendar' },
+        { id: 'horas',                     label: 'Horas',        icon: 'clock'    },
+        { id: 'relatorios-voluntariado',   label: 'Relatórios',   icon: 'chart'    },
+      ],
+    },
   ],
   direcao: [
     {
@@ -75,6 +84,13 @@ const NAV_BY_ROLE: Record<Role, NavSection[]> = {
       items: [
         { id: 'workflows',     label: 'Aprovações',   icon: 'layers' },
         { id: 'compliance',    label: 'Compliance',   icon: 'shield' },
+      ],
+    },
+    {
+      section: 'Voluntariado',
+      items: [
+        { id: 'voluntarios',             label: 'Voluntários', icon: 'users'  },
+        { id: 'relatorios-voluntariado', label: 'Relatórios',  icon: 'chart'  },
       ],
     },
   ],

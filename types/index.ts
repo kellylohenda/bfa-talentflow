@@ -9,6 +9,56 @@ export type AbsenceStatus = 'pending' | 'approved' | 'rejected'
 export type WorkflowStatus = 'pending' | 'approved' | 'rejected'
 export type ApplicationStage = 'triagem' | 'entrevista1' | 'entrevista2' | 'avaliacao' | 'aprovacao' | 'oferta' | 'rejeitado'
 
+// ── Voluntariado ─────────────────────────────────────────────────────────────
+export type VolunteerStatus = 'activo' | 'inactivo' | 'desistente'
+export type ActivityStatus  = 'agendada' | 'em_curso' | 'concluida' | 'cancelada'
+export type ActivityType    = 'saude' | 'educacao' | 'ambiente' | 'social' | 'cultura'
+
+export interface Volunteer {
+  id: string
+  nome: string
+  email: string
+  tel: string
+  profissao: string
+  instituicao: string
+  provincia: string
+  local: string
+  dataInscricao: string
+  status: VolunteerStatus
+  areaActuacao: ActivityType
+  totalHoras: number
+}
+
+export interface VolunteerActivity {
+  id: string
+  nome: string
+  descricao: string
+  tipo: ActivityType
+  data: string
+  horaInicio: string
+  horaFim: string
+  local: string
+  provincia: string
+  coordenador: string
+  vagasTotal: number
+  inscritos: number
+  status: ActivityStatus
+  horasPrevistas: number
+}
+
+export interface HoursEntry {
+  id: string
+  voluntarioId: string
+  voluntarioNome: string
+  actividadeId: string
+  actividadeNome: string
+  data: string
+  horas: number
+  validado: boolean
+  validadoPor: string | null
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
 export interface Program {
   id: string
   name: string
