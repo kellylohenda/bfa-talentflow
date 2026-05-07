@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { talents, programs } from '@/lib/data'
 import { initials, avatarColor } from '@/lib/utils'
 import Avatar from '@/components/ui/Avatar'
@@ -59,6 +60,8 @@ export default function PageEstagiarios() {
   const [rotForm, setRotForm] = useState({ talent: '', from: '', to: '', start: '', end: '' })
   const [showEvalModal, setShowEvalModal] = useState(false)
   const [evalTarget, setEvalTarget] = useState<string | null>(null)
+  const [evalScores, setEvalScores] = useState<Record<string, number>>({})
+  const [evalSubmitted, setEvalSubmitted] = useState<Set<string>>(new Set())
 
   const total = interns.length
   const onboarding = interns.filter(t => t.status === 'onboarding').length
@@ -69,8 +72,19 @@ export default function PageEstagiarios() {
     talent: t,
     score: t.perf,
     cycle: 'Q1 2026',
-    status: t.perf > 80 ? 'submitted' : 'pending',
+    status: evalSubmitted.has(t.id) || t.perf > 80 ? 'submitted' : 'pending',
   }))
+
+  const EVAL_COMPS = ['Competências técnicas', 'Comunicação', 'Iniciativa', 'Trabalho em equipa', 'Pontualidade']
+
+  const submitEval = () => {
+    if (!evalTarget) return
+    const intern = interns.find(t => t.name === evalTarget)
+    if (intern) setEvalSubmitted(prev => { const next = new Set(prev); next.add(intern.id); return next })
+    setShowEvalModal(false)
+    setEvalScores({})
+    setEvalTarget(null)
+  }
 
   const toggleCheck = (key: string) => {
     setChecklist(prev => ({ ...prev, [key]: !prev[key] }))
@@ -154,7 +168,7 @@ export default function PageEstagiarios() {
                     </Pill>
                   </td>
                   <td>
-                    <button className="btn btn-sm">Ver ficha</button>
+                    <Link href={`/talentos/${t.id}`} className="btn btn-sm">Ver ficha</Link>
                   </td>
                 </tr>
               ))}
@@ -323,21 +337,56 @@ export default function PageEstagiarios() {
       )}
 
       {showEvalModal && evalTarget && (
-        <Modal title={`Avaliação — ${evalTarget}`} onClose={() => setShowEvalModal(false)}>
-          <div style={{ opacity: 0.6, marginBottom: 16 }}>Avaliação de desempenho Q1 2026</div>
-          {['Competências técnicas', 'Comunicação', 'Iniciativa', 'Trabalho em equipa', 'Pontualidade'].map(comp => (
-            <div key={comp} className="form-group">
-              <label className="form-label">{comp}</label>
-              <div style={{ display: 'flex', gap: 6 }}>
-                {[1,2,3,4,5].map(n => (
-                  <button key={n} className="btn btn-sm" style={{ minWidth: 36 }}>{n}</button>
-                ))}
+        <Modal title={`Avaliação — ${evalTarget}`} onClose={() => { setShowEvalModal(false); setEvalScores({}) }}>
+          <div style={{ opacity: 0.6, marginBottom: 16, fontSize: 13 }}>Avaliação de desempenho Q1 2026 · Classifique de 1 (Insuficiente) a 5 (Excelente)</div>
+          {EVAL_COMPS.map(comp => {
+            const score = evalScores[comp] ?? 0
+            return (
+              <div key={comp} className="form-group">
+                <label className="form-label" style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span>{comp}</span>
+                  {score > 0 && (
+                    <span style={{ fontWeight: 700, color: score >= 4 ? 'var(--success)' : score >= 3 ? 'var(--warn)' : 'var(--danger)' }}>
+                      {score}/5
+                    </span>
+                  )}
+                </label>
+                <div style={{ display: 'flex', gap: 6 }}>
+                  {[1,2,3,4,5].map(n => (
+                    <button
+                      key={n}
+                      className="btn btn-sm"
+                      style={{
+                        minWidth: 40,
+                        background: score === n ? (n >= 4 ? 'var(--success)' : n >= 3 ? 'var(--warn)' : 'var(--danger)') : undefined,
+                        color: score === n ? '#fff' : undefined,
+                        borderColor: score === n ? 'transparent' : undefined,
+                        fontWeight: score === n ? 700 : undefined,
+                      }}
+                      onClick={() => setEvalScores(prev => ({ ...prev, [comp]: n }))}
+                    >
+                      {n}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
-          <div style={{ marginTop: 16 }}>
-            <button className="btn btn-primary" onClick={() => setShowEvalModal(false)}>Submeter avaliação</button>
+            )
+          })}
+          <div style={{ marginTop: 16, display: 'flex', gap: 8 }}>
+            <button
+              className="btn btn-primary"
+              onClick={submitEval}
+              disabled={Object.keys(evalScores).length < EVAL_COMPS.length}
+            >
+              Submeter avaliação
+            </button>
+            <button className="btn" onClick={() => { setShowEvalModal(false); setEvalScores({}) }}>Cancelar</button>
           </div>
+          {Object.keys(evalScores).length < EVAL_COMPS.length && (
+            <p style={{ fontSize: 11, opacity: 0.5, marginTop: 8 }}>
+              Preencha todas as {EVAL_COMPS.length} competências para submeter.
+            </p>
+          )}
         </Modal>
       )}
     </div>

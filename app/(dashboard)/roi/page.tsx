@@ -42,7 +42,7 @@ export default function ROIPage() {
           <select className="select" value={year} onChange={e => setYear(e.target.value)}>
             {YEARS.map(y => <option key={y}>{y}</option>)}
           </select>
-          <button className="btn btn-primary">Exportar</button>
+          <button className="btn btn-primary" onClick={() => window.print()}>Exportar</button>
         </div>
       </div>
 

@@ -50,11 +50,21 @@ function StatusPill({ status }: { status: CandidaturaRecord['status'] }) {
   )
 }
 
+const PROGRAMS_OPTS = [
+  { id: 'fbfa', name: 'Futuro BFA' },
+  { id: 'bif',  name: 'Bolsa Internacional' },
+  { id: 'bnac', name: 'Bolsa Nacional' },
+  { id: 'lid',  name: 'Liderança+' },
+  { id: 'mest', name: 'Mestrado Patrocinado' },
+]
+
 export default function CandidaturasPage() {
   const [selected, setSelected] = useState<Application | null>(null)
   const [realCandidaturas, setRealCandidaturas] = useState<CandidaturaRecord[]>([])
   const [loadingReal, setLoadingReal] = useState(true)
   const [actionLoading, setActionLoading] = useState<string | null>(null)
+  const [novaModal, setNovaModal] = useState(false)
+  const [novaForm, setNovaForm] = useState({ name: '', email: '', program: 'fbfa', course: '', uni: '', country: 'Angola', source: 'Manual' })
 
   useEffect(() => {
     fetch('/api/candidaturas')
@@ -92,7 +102,7 @@ export default function CandidaturasPage() {
           <h1 className="page-title">Candidaturas</h1>
           <p className="page-subtitle">Funil de recrutamento — Q2 2026</p>
         </div>
-        <button className="btn btn-primary">
+        <button className="btn btn-primary" onClick={() => setNovaModal(true)}>
           <Icon name="plus" size={15} />
           Nova candidatura
         </button>
@@ -395,6 +405,61 @@ export default function CandidaturasPage() {
           </table>
         )}
       </div>
+
+      {novaModal && (
+        <Modal title="Nova Candidatura" onClose={() => setNovaModal(false)} width={560}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div>
+                <label style={{ fontSize: 12, opacity: 0.6, display: 'block', marginBottom: 6 }}>Nome completo *</label>
+                <input className="input" style={{ width: '100%' }} value={novaForm.name} onChange={e => setNovaForm(f => ({ ...f, name: e.target.value }))} />
+              </div>
+              <div>
+                <label style={{ fontSize: 12, opacity: 0.6, display: 'block', marginBottom: 6 }}>Email *</label>
+                <input className="input" type="email" style={{ width: '100%' }} value={novaForm.email} onChange={e => setNovaForm(f => ({ ...f, email: e.target.value }))} />
+              </div>
+            </div>
+            <div>
+              <label style={{ fontSize: 12, opacity: 0.6, display: 'block', marginBottom: 6 }}>Programa</label>
+              <select className="select" style={{ width: '100%' }} value={novaForm.program} onChange={e => setNovaForm(f => ({ ...f, program: e.target.value }))}>
+                {PROGRAMS_OPTS.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+              </select>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div>
+                <label style={{ fontSize: 12, opacity: 0.6, display: 'block', marginBottom: 6 }}>Curso</label>
+                <input className="input" style={{ width: '100%' }} value={novaForm.course} onChange={e => setNovaForm(f => ({ ...f, course: e.target.value }))} />
+              </div>
+              <div>
+                <label style={{ fontSize: 12, opacity: 0.6, display: 'block', marginBottom: 6 }}>Universidade</label>
+                <input className="input" style={{ width: '100%' }} value={novaForm.uni} onChange={e => setNovaForm(f => ({ ...f, uni: e.target.value }))} />
+              </div>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div>
+                <label style={{ fontSize: 12, opacity: 0.6, display: 'block', marginBottom: 6 }}>País</label>
+                <input className="input" style={{ width: '100%' }} value={novaForm.country} onChange={e => setNovaForm(f => ({ ...f, country: e.target.value }))} />
+              </div>
+              <div>
+                <label style={{ fontSize: 12, opacity: 0.6, display: 'block', marginBottom: 6 }}>Fonte</label>
+                <select className="select" style={{ width: '100%' }} value={novaForm.source} onChange={e => setNovaForm(f => ({ ...f, source: e.target.value }))}>
+                  {['Manual', 'Portal', 'LinkedIn', 'Referência', 'Feira Universitária'].map(s => <option key={s}>{s}</option>)}
+                </select>
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 4 }}>
+              <button className="btn" onClick={() => setNovaModal(false)}>Cancelar</button>
+              <button
+                className="btn btn-primary"
+                disabled={!novaForm.name.trim() || !novaForm.email.trim()}
+                onClick={() => setNovaModal(false)}
+              >
+                Adicionar candidatura
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
 
       {/* Detail Modal */}
       {selected && (

@@ -87,7 +87,7 @@ export default function AvaliacoesPage() {
           <h1 className="page-title">Avaliações 360°</h1>
           <p className="page-subtitle">Ciclo {CYCLE} · Prazo {DUE}</p>
         </div>
-        <button className="btn btn-primary">
+        <button className="btn btn-primary" onClick={() => window.print()}>
           <Icon name="download" size={15} />
           Exportar relatório
         </button>

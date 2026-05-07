@@ -60,7 +60,7 @@ export default function CompliancePage() {
           <h1 className="page-title">Compliance</h1>
           <p className="page-subtitle">Conformidade regulatória e alertas de incumprimento</p>
         </div>
-        <button className="btn btn-primary">Relatório Compliance</button>
+        <button className="btn btn-primary" onClick={() => window.print()}>Relatório Compliance</button>
       </div>
 
       <div className="grid cols-4" style={{ marginBottom: 24 }}>

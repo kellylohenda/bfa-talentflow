@@ -8,6 +8,7 @@ import Pill from '@/components/ui/Pill'
 import Bar from '@/components/ui/Bar'
 import KPI from '@/components/ui/KPI'
 import Icon from '@/components/ui/Icon'
+import Modal from '@/components/ui/Modal'
 import Link from 'next/link'
 
 type ToneType = 'success' | 'warn' | 'danger' | 'info' | 'neutral' | 'primary'
@@ -36,6 +37,8 @@ export default function TalentosPage() {
   const [programFilter, setProgramFilter] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
   const [countryFilter, setCountryFilter] = useState('')
+  const [addModal, setAddModal] = useState(false)
+  const [addForm, setAddForm] = useState({ name: '', email: '', program: 'fbfa', university: '', course: '', country: 'Angola', mentor: '' })
 
   const totalCount = talents.length
   const activeCount = talents.filter(t => t.status === 'active').length
@@ -64,7 +67,7 @@ export default function TalentosPage() {
           <h1 className="page-title">Talentos</h1>
           <p className="page-subtitle">Roster de talentos BFA</p>
         </div>
-        <button className="btn btn-primary">
+        <button className="btn btn-primary" onClick={() => setAddModal(true)}>
           <Icon name="plus" size={15} />
           Adicionar talento
         </button>
@@ -249,6 +252,59 @@ export default function TalentosPage() {
           </tbody>
         </table>
       </div>
+
+      {addModal && (
+        <Modal title="Adicionar Talento" onClose={() => setAddModal(false)} width={560}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div>
+                <label style={{ fontSize: 12, opacity: 0.6, display: 'block', marginBottom: 6 }}>Nome completo *</label>
+                <input className="input" style={{ width: '100%' }} value={addForm.name} onChange={e => setAddForm(f => ({ ...f, name: e.target.value }))} />
+              </div>
+              <div>
+                <label style={{ fontSize: 12, opacity: 0.6, display: 'block', marginBottom: 6 }}>Email *</label>
+                <input className="input" type="email" style={{ width: '100%' }} value={addForm.email} onChange={e => setAddForm(f => ({ ...f, email: e.target.value }))} />
+              </div>
+            </div>
+            <div>
+              <label style={{ fontSize: 12, opacity: 0.6, display: 'block', marginBottom: 6 }}>Programa</label>
+              <select className="select" style={{ width: '100%' }} value={addForm.program} onChange={e => setAddForm(f => ({ ...f, program: e.target.value }))}>
+                {programs.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+              </select>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div>
+                <label style={{ fontSize: 12, opacity: 0.6, display: 'block', marginBottom: 6 }}>Universidade</label>
+                <input className="input" style={{ width: '100%' }} value={addForm.university} onChange={e => setAddForm(f => ({ ...f, university: e.target.value }))} />
+              </div>
+              <div>
+                <label style={{ fontSize: 12, opacity: 0.6, display: 'block', marginBottom: 6 }}>Curso</label>
+                <input className="input" style={{ width: '100%' }} value={addForm.course} onChange={e => setAddForm(f => ({ ...f, course: e.target.value }))} />
+              </div>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div>
+                <label style={{ fontSize: 12, opacity: 0.6, display: 'block', marginBottom: 6 }}>País</label>
+                <input className="input" style={{ width: '100%' }} value={addForm.country} onChange={e => setAddForm(f => ({ ...f, country: e.target.value }))} />
+              </div>
+              <div>
+                <label style={{ fontSize: 12, opacity: 0.6, display: 'block', marginBottom: 6 }}>Mentor</label>
+                <input className="input" style={{ width: '100%' }} placeholder="Nome do mentor" value={addForm.mentor} onChange={e => setAddForm(f => ({ ...f, mentor: e.target.value }))} />
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 4 }}>
+              <button className="btn" onClick={() => setAddModal(false)}>Cancelar</button>
+              <button
+                className="btn btn-primary"
+                disabled={!addForm.name.trim() || !addForm.email.trim()}
+                onClick={() => setAddModal(false)}
+              >
+                Adicionar
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
   )
 }
