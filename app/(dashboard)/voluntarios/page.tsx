@@ -40,6 +40,8 @@ export default function VoluntariosPage() {
   const [filterStatus, setStatus]   = useState<VolunteerStatus | 'todos'>('todos')
   const [filterArea, setArea]       = useState<ActivityType | 'todos'>('todos')
   const [selected, setSelected]     = useState<Volunteer | null>(null)
+  const [newModal, setNewModal]     = useState(false)
+  const [newForm, setNewForm]       = useState({ nome: '', email: '', tel: '', profissao: '', instituicao: '', provincia: 'Luanda', local: '', areaActuacao: 'educacao' as ActivityType })
 
   const total      = volunteers.length
   const activos    = volunteers.filter(v => v.status === 'activo').length
@@ -65,7 +67,7 @@ export default function VoluntariosPage() {
           <h1 className="page-title">Voluntários</h1>
           <p className="page-subtitle">Base de dados — Fundação BFA · {new Date().getFullYear()}</p>
         </div>
-        <button className="btn btn-primary">
+        <button className="btn btn-primary" onClick={() => setNewModal(true)}>
           <Icon name="plus" size={15} />
           Registar voluntário
         </button>
@@ -219,6 +221,67 @@ export default function VoluntariosPage() {
               </table>
             </>
           )}
+        </Modal>
+      )}
+
+      {newModal && (
+        <Modal title="Registar Voluntário" onClose={() => setNewModal(false)} width={560}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div>
+                <label style={{ fontSize: 12, opacity: 0.6, display: 'block', marginBottom: 6 }}>Nome completo *</label>
+                <input className="input" style={{ width: '100%' }} value={newForm.nome} onChange={e => setNewForm(f => ({ ...f, nome: e.target.value }))} />
+              </div>
+              <div>
+                <label style={{ fontSize: 12, opacity: 0.6, display: 'block', marginBottom: 6 }}>Email *</label>
+                <input className="input" type="email" style={{ width: '100%' }} value={newForm.email} onChange={e => setNewForm(f => ({ ...f, email: e.target.value }))} />
+              </div>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div>
+                <label style={{ fontSize: 12, opacity: 0.6, display: 'block', marginBottom: 6 }}>Telemóvel</label>
+                <input className="input" style={{ width: '100%' }} value={newForm.tel} onChange={e => setNewForm(f => ({ ...f, tel: e.target.value }))} />
+              </div>
+              <div>
+                <label style={{ fontSize: 12, opacity: 0.6, display: 'block', marginBottom: 6 }}>Profissão</label>
+                <input className="input" style={{ width: '100%' }} value={newForm.profissao} onChange={e => setNewForm(f => ({ ...f, profissao: e.target.value }))} />
+              </div>
+            </div>
+            <div>
+              <label style={{ fontSize: 12, opacity: 0.6, display: 'block', marginBottom: 6 }}>Instituição</label>
+              <input className="input" style={{ width: '100%' }} value={newForm.instituicao} onChange={e => setNewForm(f => ({ ...f, instituicao: e.target.value }))} />
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div>
+                <label style={{ fontSize: 12, opacity: 0.6, display: 'block', marginBottom: 6 }}>Área de actuação</label>
+                <select className="select" style={{ width: '100%' }} value={newForm.areaActuacao} onChange={e => setNewForm(f => ({ ...f, areaActuacao: e.target.value as ActivityType }))}>
+                  <option value="saude">Saúde</option>
+                  <option value="educacao">Educação</option>
+                  <option value="ambiente">Ambiente</option>
+                  <option value="social">Social</option>
+                  <option value="cultura">Cultura</option>
+                </select>
+              </div>
+              <div>
+                <label style={{ fontSize: 12, opacity: 0.6, display: 'block', marginBottom: 6 }}>Província</label>
+                <input className="input" style={{ width: '100%' }} value={newForm.provincia} onChange={e => setNewForm(f => ({ ...f, provincia: e.target.value }))} />
+              </div>
+            </div>
+            <div>
+              <label style={{ fontSize: 12, opacity: 0.6, display: 'block', marginBottom: 6 }}>Local de actuação</label>
+              <input className="input" style={{ width: '100%' }} placeholder="Ex: Hospital Geral de Luanda" value={newForm.local} onChange={e => setNewForm(f => ({ ...f, local: e.target.value }))} />
+            </div>
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 4 }}>
+              <button className="btn" onClick={() => setNewModal(false)}>Cancelar</button>
+              <button
+                className="btn btn-primary"
+                disabled={!newForm.nome.trim() || !newForm.email.trim()}
+                onClick={() => setNewModal(false)}
+              >
+                Registar
+              </button>
+            </div>
+          </div>
         </Modal>
       )}
     </div>

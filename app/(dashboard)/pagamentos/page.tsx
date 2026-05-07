@@ -8,6 +8,7 @@ import Avatar from '@/components/ui/Avatar'
 import Pill from '@/components/ui/Pill'
 import KPI from '@/components/ui/KPI'
 import Icon from '@/components/ui/Icon'
+import Modal from '@/components/ui/Modal'
 
 type ToneType = 'success' | 'warn' | 'danger' | 'info' | 'neutral' | 'primary'
 
@@ -36,6 +37,8 @@ export default function PagamentosPage() {
   const [typeFilter, setTypeFilter] = useState('')
   const [search, setSearch] = useState('')
   const [localStatuses, setLocalStatuses] = useState<Record<string, PaymentStatus>>({})
+  const [newModal, setNewModal] = useState(false)
+  const [newForm, setNewForm] = useState({ talentName: '', type: 'Subsídio', period: '', amount: '', method: 'Transferência' })
 
   const getStatus = (p: Payment): PaymentStatus =>
     localStatuses[p.id] ?? p.status
@@ -76,7 +79,7 @@ export default function PagamentosPage() {
           <h1 className="page-title">Pagamentos</h1>
           <p className="page-subtitle">Gestão de subsídios e propinas</p>
         </div>
-        <button className="btn btn-primary">
+        <button className="btn btn-primary" onClick={() => setNewModal(true)}>
           <Icon name="plus" size={15} />
           Novo pagamento
         </button>
@@ -261,6 +264,50 @@ export default function PagamentosPage() {
           </tbody>
         </table>
       </div>
+      {newModal && (
+        <Modal title="Novo Pagamento" onClose={() => setNewModal(false)}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div>
+              <label style={{ fontSize: 12, opacity: 0.6, display: 'block', marginBottom: 6 }}>Talento</label>
+              <input className="input" style={{ width: '100%' }} placeholder="Nome do talento" value={newForm.talentName} onChange={e => setNewForm(f => ({ ...f, talentName: e.target.value }))} />
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div>
+                <label style={{ fontSize: 12, opacity: 0.6, display: 'block', marginBottom: 6 }}>Tipo</label>
+                <select className="select" style={{ width: '100%' }} value={newForm.type} onChange={e => setNewForm(f => ({ ...f, type: e.target.value }))}>
+                  {['Subsídio', 'Propina', 'Seguro', 'Alojamento', 'Transporte'].map(t => <option key={t}>{t}</option>)}
+                </select>
+              </div>
+              <div>
+                <label style={{ fontSize: 12, opacity: 0.6, display: 'block', marginBottom: 6 }}>Período</label>
+                <input className="input" style={{ width: '100%' }} placeholder="Ex: Mai 2026" value={newForm.period} onChange={e => setNewForm(f => ({ ...f, period: e.target.value }))} />
+              </div>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div>
+                <label style={{ fontSize: 12, opacity: 0.6, display: 'block', marginBottom: 6 }}>Valor (AOA)</label>
+                <input className="input" style={{ width: '100%' }} type="number" placeholder="0" value={newForm.amount} onChange={e => setNewForm(f => ({ ...f, amount: e.target.value }))} />
+              </div>
+              <div>
+                <label style={{ fontSize: 12, opacity: 0.6, display: 'block', marginBottom: 6 }}>Método</label>
+                <select className="select" style={{ width: '100%' }} value={newForm.method} onChange={e => setNewForm(f => ({ ...f, method: e.target.value }))}>
+                  {['Transferência', 'SWIFT', 'Cheque', 'Numerário'].map(m => <option key={m}>{m}</option>)}
+                </select>
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 8 }}>
+              <button className="btn" onClick={() => setNewModal(false)}>Cancelar</button>
+              <button
+                className="btn btn-primary"
+                disabled={!newForm.talentName.trim() || !newForm.period.trim() || !newForm.amount}
+                onClick={() => setNewModal(false)}
+              >
+                Criar pagamento
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
   )
 }

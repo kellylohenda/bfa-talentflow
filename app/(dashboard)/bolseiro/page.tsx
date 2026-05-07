@@ -4,6 +4,8 @@ import { bolseiroPayments, bolseiroNotifs, tasks } from '@/lib/data'
 import { fmtKz } from '@/lib/utils'
 import KPI from '@/components/ui/KPI'
 import Pill from '@/components/ui/Pill'
+import Modal from '@/components/ui/Modal'
+import Icon from '@/components/ui/Icon'
 import type { TaskStatus, PaymentStatus } from '@/types'
 
 const ME = {
@@ -35,14 +37,34 @@ function taskTone(s: TaskStatus): 'success' | 'warn' | 'danger' | 'neutral' {
 
 const myTasks = tasks.filter(t => t.talentId === ME.id)
 
+const DOC_TYPES = ['Boletim', 'Relatório', 'Comprovativo', 'Identificação', 'Contrato']
+
 export default function BolseiroPage() {
   const [tab, setTab] = useState<'inicio' | 'pagamentos' | 'tarefas' | 'perfil'>('inicio')
   const [notifs, setNotifs] = useState(bolseiroNotifs)
+  const [taskList, setTaskList] = useState(myTasks)
+  const [docModal, setDocModal] = useState(false)
+  const [docForm, setDocForm] = useState({ type: 'Boletim', period: '', notes: '', file: '' })
+  const [docSubmitted, setDocSubmitted] = useState(false)
 
   const unread = notifs.filter(n => !n.read).length
   const lastPayment = bolseiroPayments.find(p => p.status === 'paid')
-  const pendingTasks = myTasks.filter(t => t.status === 'pending' || t.status === 'in_progress')
-  const overdue = myTasks.filter(t => t.status === 'overdue')
+  const pendingTasks = taskList.filter(t => t.status === 'pending' || t.status === 'in_progress')
+  const overdue = taskList.filter(t => t.status === 'overdue')
+
+  const markTaskDone = (id: string) => {
+    setTaskList(prev => prev.map(t => t.id === id ? { ...t, status: 'done' as const, completedAt: '2026-05-07' } : t))
+  }
+
+  const handleDocSubmit = () => {
+    if (!docForm.period.trim()) return
+    setDocSubmitted(true)
+    setTimeout(() => {
+      setDocModal(false)
+      setDocSubmitted(false)
+      setDocForm({ type: 'Boletim', period: '', notes: '', file: '' })
+    }, 1200)
+  }
 
   const markRead = (id: number) => {
     setNotifs(prev => prev.map(n => n.id === id ? { ...n, read: true } : n))
@@ -59,7 +81,10 @@ export default function BolseiroPage() {
           {unread > 0 && (
             <Pill tone="warn">{unread} notificações</Pill>
           )}
-          <button className="btn btn-primary">Submeter Documento</button>
+          <button className="btn btn-primary" onClick={() => setDocModal(true)}>
+            <Icon name="upload" size={14} />
+            Submeter Documento
+          </button>
         </div>
       </div>
 
@@ -107,7 +132,7 @@ export default function BolseiroPage() {
             </div>
             <div className="card">
               <div className="card-head"><span className="card-title">Tarefas Urgentes</span></div>
-              {[...overdue, ...pendingTasks].slice(0, 3).map(t => (
+              {[...overdue, ...pendingTasks].slice(0, 3).map((t) => (
                 <div key={t.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid var(--border)' }}>
                   <div>
                     <div style={{ fontSize: 13, fontWeight: 500 }}>{t.title}</div>
@@ -159,10 +184,10 @@ export default function BolseiroPage() {
         <div className="card">
           <table className="tbl">
             <thead>
-              <tr><th>Tarefa</th><th>Atribuída por</th><th>Categoria</th><th>Prioridade</th><th>Prazo</th><th>Estado</th></tr>
+              <tr><th>Tarefa</th><th>Atribuída por</th><th>Categoria</th><th>Prioridade</th><th>Prazo</th><th>Estado</th><th>Acção</th></tr>
             </thead>
             <tbody>
-              {myTasks.map(t => (
+              {taskList.map(t => (
                 <tr key={t.id}>
                   <td>
                     <div style={{ fontWeight: 500, fontSize: 13 }}>{t.title}</div>
@@ -180,6 +205,13 @@ export default function BolseiroPage() {
                   </td>
                   <td style={{ fontSize: 12 }}>{t.dueDate}</td>
                   <td><Pill tone={taskTone(t.status)}>{taskLabel(t.status)}</Pill></td>
+                  <td>
+                    {t.status !== 'done' ? (
+                      <button className="btn btn-sm btn-primary" onClick={() => markTaskDone(t.id)}>Concluir</button>
+                    ) : (
+                      <span style={{ fontSize: 12, opacity: 0.4 }}>—</span>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -227,6 +259,81 @@ export default function BolseiroPage() {
             </div>
           </div>
         </div>
+      )}
+      {docModal && (
+        <Modal title="Submeter Documento" onClose={() => setDocModal(false)}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div>
+              <label style={{ fontSize: 12, opacity: 0.6, display: 'block', marginBottom: 6 }}>Tipo de documento</label>
+              <select
+                className="select"
+                style={{ width: '100%' }}
+                value={docForm.type}
+                onChange={e => setDocForm(f => ({ ...f, type: e.target.value }))}
+              >
+                {DOC_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+              </select>
+            </div>
+            <div>
+              <label style={{ fontSize: 12, opacity: 0.6, display: 'block', marginBottom: 6 }}>Período *</label>
+              <input
+                className="input"
+                placeholder="Ex: Q1 2026 / S1 2026"
+                style={{ width: '100%' }}
+                value={docForm.period}
+                onChange={e => setDocForm(f => ({ ...f, period: e.target.value }))}
+              />
+            </div>
+            <div>
+              <label style={{ fontSize: 12, opacity: 0.6, display: 'block', marginBottom: 6 }}>Ficheiro</label>
+              <div
+                style={{
+                  border: '2px dashed var(--border)',
+                  borderRadius: 8,
+                  padding: '20px',
+                  textAlign: 'center',
+                  fontSize: 13,
+                  opacity: 0.6,
+                  cursor: 'pointer',
+                }}
+                onClick={() => setDocForm(f => ({ ...f, file: 'documento.pdf' }))}
+              >
+                {docForm.file ? (
+                  <span style={{ color: 'var(--primary)', fontWeight: 500 }}>
+                    <Icon name="doc" size={14} style={{ verticalAlign: 'middle', marginRight: 6 }} />
+                    {docForm.file}
+                  </span>
+                ) : (
+                  <>
+                    <Icon name="upload" size={20} style={{ marginBottom: 6, display: 'block', margin: '0 auto 6px' }} />
+                    Clique para seleccionar ficheiro (PDF, máx. 10 MB)
+                  </>
+                )}
+              </div>
+            </div>
+            <div>
+              <label style={{ fontSize: 12, opacity: 0.6, display: 'block', marginBottom: 6 }}>Notas (opcional)</label>
+              <textarea
+                className="input"
+                rows={2}
+                placeholder="Informações adicionais..."
+                style={{ width: '100%', resize: 'vertical' }}
+                value={docForm.notes}
+                onChange={e => setDocForm(f => ({ ...f, notes: e.target.value }))}
+              />
+            </div>
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+              <button className="btn" onClick={() => setDocModal(false)}>Cancelar</button>
+              <button
+                className="btn btn-primary"
+                onClick={handleDocSubmit}
+                disabled={!docForm.period.trim() || docSubmitted}
+              >
+                {docSubmitted ? 'A submeter…' : 'Submeter'}
+              </button>
+            </div>
+          </div>
+        </Modal>
       )}
     </div>
   )

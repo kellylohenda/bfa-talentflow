@@ -3,6 +3,7 @@ import { useState } from 'react'
 import Avatar from '@/components/ui/Avatar'
 import KPI from '@/components/ui/KPI'
 import Pill from '@/components/ui/Pill'
+import Modal from '@/components/ui/Modal'
 
 type DocStatus = 'submetido' | 'pendente' | 'rejeitado' | 'aprovado'
 type DocType = 'Boletim' | 'Relatório' | 'Contrato' | 'Identificação' | 'Comprovativo'
@@ -38,6 +39,8 @@ export default function DocumentosPage() {
   const [docs, setDocs] = useState<DocItem[]>(DOCS)
   const [filter, setFilter] = useState<DocStatus | 'all'>('all')
   const [search, setSearch] = useState('')
+  const [solicitarModal, setSolicitarModal] = useState(false)
+  const [solForm, setSolForm] = useState({ talentName: '', type: 'Boletim' as DocType, period: '', deadline: '' })
 
   const pending = docs.filter(d => d.status === 'pendente').length
   const submitted = docs.filter(d => d.status === 'submetido').length
@@ -60,7 +63,7 @@ export default function DocumentosPage() {
           <h1 className="page-title">Documentos</h1>
           <p className="page-subtitle">Gestão de documentos e submissões académicas</p>
         </div>
-        <button className="btn btn-primary">Solicitar Documento</button>
+        <button className="btn btn-primary" onClick={() => setSolicitarModal(true)}>Solicitar Documento</button>
       </div>
 
       <div className="grid cols-4" style={{ marginBottom: 24 }}>
@@ -125,6 +128,57 @@ export default function DocumentosPage() {
           </tbody>
         </table>
       </div>
+
+      {solicitarModal && (
+        <Modal title="Solicitar Documento" onClose={() => setSolicitarModal(false)}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div>
+              <label style={{ fontSize: 12, opacity: 0.6, display: 'block', marginBottom: 6 }}>Bolseiro *</label>
+              <input className="input" style={{ width: '100%' }} placeholder="Nome do bolseiro" value={solForm.talentName} onChange={e => setSolForm(f => ({ ...f, talentName: e.target.value }))} />
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div>
+                <label style={{ fontSize: 12, opacity: 0.6, display: 'block', marginBottom: 6 }}>Tipo</label>
+                <select className="select" style={{ width: '100%' }} value={solForm.type} onChange={e => setSolForm(f => ({ ...f, type: e.target.value as DocType }))}>
+                  {(['Boletim','Relatório','Contrato','Identificação','Comprovativo'] as DocType[]).map(t => <option key={t} value={t}>{t}</option>)}
+                </select>
+              </div>
+              <div>
+                <label style={{ fontSize: 12, opacity: 0.6, display: 'block', marginBottom: 6 }}>Período</label>
+                <input className="input" style={{ width: '100%' }} placeholder="Ex: Q2 2026" value={solForm.period} onChange={e => setSolForm(f => ({ ...f, period: e.target.value }))} />
+              </div>
+            </div>
+            <div>
+              <label style={{ fontSize: 12, opacity: 0.6, display: 'block', marginBottom: 6 }}>Prazo de submissão</label>
+              <input className="input" type="date" style={{ width: '100%' }} value={solForm.deadline} onChange={e => setSolForm(f => ({ ...f, deadline: e.target.value }))} />
+            </div>
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 4 }}>
+              <button className="btn" onClick={() => setSolicitarModal(false)}>Cancelar</button>
+              <button
+                className="btn btn-primary"
+                disabled={!solForm.talentName.trim()}
+                onClick={() => {
+                  setDocs(prev => [{
+                    id: `D-${String(prev.length + 1).padStart(3, '0')}`,
+                    talentId: '',
+                    talentName: solForm.talentName,
+                    type: solForm.type,
+                    name: `${solForm.type} ${solForm.period}`.trim(),
+                    period: solForm.period,
+                    status: 'pendente',
+                    submittedAt: null,
+                    size: null,
+                  }, ...prev])
+                  setSolicitarModal(false)
+                  setSolForm({ talentName: '', type: 'Boletim', period: '', deadline: '' })
+                }}
+              >
+                Solicitar
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
   )
 }

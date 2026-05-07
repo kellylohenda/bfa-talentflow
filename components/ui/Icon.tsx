@@ -163,6 +163,19 @@ const PATHS: Record<string, React.ReactNode> = {
       <path d="M5 20c0-3.5 3-6 7-6s7 2.5 7 6" />
     </>
   ),
+  sun: (
+    <>
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
+    </>
+  ),
+  moon: <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />,
+  upload: (
+    <>
+      <path d="M12 20V8M6 14l6-6 6 6" />
+      <path d="M4 21h16" />
+    </>
+  ),
 }
 
 export default function Icon({ name, size = 16, stroke = 1.6, style }: IconProps) {

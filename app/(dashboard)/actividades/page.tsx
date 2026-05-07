@@ -44,6 +44,8 @@ export default function ActividadesPage() {
   const [filterTipo, setTipo]   = useState<ActivityType | 'todos'>('todos')
   const [filterStatus, setStatus] = useState<ActivityStatus | 'todos'>('todos')
   const [view, setView]           = useState<'lista' | 'cronograma'>('cronograma')
+  const [newModal, setNewModal]   = useState(false)
+  const [newForm, setNewForm]     = useState({ nome: '', tipo: 'saude' as ActivityType, data: '', local: '', provincia: 'Luanda', horaInicio: '09:00', horaFim: '17:00', vagasTotal: 20, horasPrevistas: 8, coordenador: '' })
 
   const concluidas = volunteerActivities.filter(a => a.status === 'concluida').length
   const agendadas  = volunteerActivities.filter(a => a.status === 'agendada').length
@@ -89,7 +91,7 @@ export default function ActividadesPage() {
           >
             Lista
           </button>
-          <button className="btn btn-primary">
+          <button className="btn btn-primary" onClick={() => setNewModal(true)}>
             <Icon name="plus" size={15} />
             Nova actividade
           </button>
@@ -249,6 +251,73 @@ export default function ActividadesPage() {
       )}
 
       {/* Detail Modal */}
+      {newModal && (
+        <Modal title="Nova Actividade" onClose={() => setNewModal(false)} width={560}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <div>
+              <label style={{ fontSize: 12, opacity: 0.6, display: 'block', marginBottom: 6 }}>Nome da actividade *</label>
+              <input className="input" style={{ width: '100%' }} placeholder="Ex: Rastreio de Saúde Luanda" value={newForm.nome} onChange={e => setNewForm(f => ({ ...f, nome: e.target.value }))} />
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div>
+                <label style={{ fontSize: 12, opacity: 0.6, display: 'block', marginBottom: 6 }}>Tipo</label>
+                <select className="select" style={{ width: '100%' }} value={newForm.tipo} onChange={e => setNewForm(f => ({ ...f, tipo: e.target.value as ActivityType }))}>
+                  {(['saude','educacao','ambiente','social','cultura'] as ActivityType[]).map(t => <option key={t} value={t}>{TYPE_LABEL[t]}</option>)}
+                </select>
+              </div>
+              <div>
+                <label style={{ fontSize: 12, opacity: 0.6, display: 'block', marginBottom: 6 }}>Data *</label>
+                <input className="input" type="date" style={{ width: '100%' }} value={newForm.data} onChange={e => setNewForm(f => ({ ...f, data: e.target.value }))} />
+              </div>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div>
+                <label style={{ fontSize: 12, opacity: 0.6, display: 'block', marginBottom: 6 }}>Hora início</label>
+                <input className="input" type="time" style={{ width: '100%' }} value={newForm.horaInicio} onChange={e => setNewForm(f => ({ ...f, horaInicio: e.target.value }))} />
+              </div>
+              <div>
+                <label style={{ fontSize: 12, opacity: 0.6, display: 'block', marginBottom: 6 }}>Hora fim</label>
+                <input className="input" type="time" style={{ width: '100%' }} value={newForm.horaFim} onChange={e => setNewForm(f => ({ ...f, horaFim: e.target.value }))} />
+              </div>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div>
+                <label style={{ fontSize: 12, opacity: 0.6, display: 'block', marginBottom: 6 }}>Local</label>
+                <input className="input" style={{ width: '100%' }} placeholder="Ex: Hospital Geral" value={newForm.local} onChange={e => setNewForm(f => ({ ...f, local: e.target.value }))} />
+              </div>
+              <div>
+                <label style={{ fontSize: 12, opacity: 0.6, display: 'block', marginBottom: 6 }}>Província</label>
+                <input className="input" style={{ width: '100%' }} value={newForm.provincia} onChange={e => setNewForm(f => ({ ...f, provincia: e.target.value }))} />
+              </div>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div>
+                <label style={{ fontSize: 12, opacity: 0.6, display: 'block', marginBottom: 6 }}>Vagas</label>
+                <input className="input" type="number" style={{ width: '100%' }} value={newForm.vagasTotal} onChange={e => setNewForm(f => ({ ...f, vagasTotal: Number(e.target.value) }))} />
+              </div>
+              <div>
+                <label style={{ fontSize: 12, opacity: 0.6, display: 'block', marginBottom: 6 }}>Horas por vol.</label>
+                <input className="input" type="number" style={{ width: '100%' }} value={newForm.horasPrevistas} onChange={e => setNewForm(f => ({ ...f, horasPrevistas: Number(e.target.value) }))} />
+              </div>
+            </div>
+            <div>
+              <label style={{ fontSize: 12, opacity: 0.6, display: 'block', marginBottom: 6 }}>Coordenador</label>
+              <input className="input" style={{ width: '100%' }} placeholder="Nome do coordenador" value={newForm.coordenador} onChange={e => setNewForm(f => ({ ...f, coordenador: e.target.value }))} />
+            </div>
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 4 }}>
+              <button className="btn" onClick={() => setNewModal(false)}>Cancelar</button>
+              <button
+                className="btn btn-primary"
+                disabled={!newForm.nome.trim() || !newForm.data}
+                onClick={() => setNewModal(false)}
+              >
+                Criar actividade
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
+
       {selected && (
         <Modal title={`Actividade — ${selected.nome}`} onClose={() => setSelected(null)} width={640}>
           <div className="info-grid">

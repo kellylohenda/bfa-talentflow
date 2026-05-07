@@ -12,16 +12,30 @@ interface AppShellProps {
 export default function AppShell({ role, children }: AppShellProps) {
   const [collapsed, setCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [theme, setTheme] = useState<'light' | 'dark'>('light')
 
   useEffect(() => {
-    const saved = localStorage.getItem('sb-collapsed')
-    if (saved === 'true') setCollapsed(true)
+    const savedSb = localStorage.getItem('sb-collapsed')
+    if (savedSb === 'true') setCollapsed(true)
+
+    const savedTheme = (localStorage.getItem('theme') as 'light' | 'dark') ?? 'light'
+    setTheme(savedTheme)
+    document.documentElement.setAttribute('data-theme', savedTheme)
   }, [])
 
   const toggleDesktop = () => {
     setCollapsed(c => {
       const next = !c
       localStorage.setItem('sb-collapsed', String(next))
+      return next
+    })
+  }
+
+  const toggleTheme = () => {
+    setTheme(t => {
+      const next = t === 'light' ? 'dark' : 'light'
+      localStorage.setItem('theme', next)
+      document.documentElement.setAttribute('data-theme', next)
       return next
     })
   }
@@ -42,7 +56,12 @@ export default function AppShell({ role, children }: AppShellProps) {
       )}
       <Sidebar role={role} collapsed={collapsed} />
       <div className="main">
-        <Topbar onToggleDesktop={toggleDesktop} onToggleMobile={toggleMobile} />
+        <Topbar
+          onToggleDesktop={toggleDesktop}
+          onToggleMobile={toggleMobile}
+          theme={theme}
+          onToggleTheme={toggleTheme}
+        />
         <div className="page">
           {children}
         </div>

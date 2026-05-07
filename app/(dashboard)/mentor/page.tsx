@@ -15,7 +15,7 @@ interface MentorSession {
   id: string; date: string; time: string; mentee: string; topic: string; dur: number; status: 'upcoming' | 'done'
 }
 
-const SESSIONS: MentorSession[] = [
+const INITIAL_SESSIONS: MentorSession[] = [
   { id: 'S-001', date: '2026-05-08', time: '15:00', mentee: 'Lwini Capemba',   topic: 'Análise de crédito e plano Q2',       dur: 60, status: 'upcoming' },
   { id: 'S-002', date: '2026-05-06', time: '10:00', mentee: 'Kiala Domingos',  topic: 'Revisão do relatório de estágio',     dur: 45, status: 'upcoming' },
   { id: 'S-003', date: '2026-04-30', time: '14:00', mentee: 'Lwini Capemba',   topic: 'Balanço mensal e próximos objectivos',dur: 60, status: 'done' },
@@ -34,11 +34,35 @@ function taskLabel(s: TaskStatus) {
 
 export default function MentorPage() {
   const [tab, setTab] = useState<'dashboard' | 'sessoes' | 'tarefas' | 'mentorandos'>('dashboard')
+  const [sessions, setSessions] = useState<MentorSession[]>(INITIAL_SESSIONS)
   const [newSession, setNewSession] = useState(false)
+  const [sessionForm, setSessionForm] = useState({
+    mentee: MY_MENTEES[0]?.name ?? '',
+    date: '2026-05-12',
+    time: '15:00',
+    topic: '',
+    dur: 60,
+  })
 
-  const upcoming = SESSIONS.filter(s => s.status === 'upcoming')
-  const done = SESSIONS.filter(s => s.status === 'done')
+  const upcoming = sessions.filter(s => s.status === 'upcoming')
+  const done = sessions.filter(s => s.status === 'done')
   const pendingTasks = myTasks.filter(t => t.status !== 'done')
+
+  const handleAddSession = () => {
+    if (!sessionForm.topic.trim()) return
+    const newS: MentorSession = {
+      id: `S-${String(sessions.length + 1).padStart(3, '0')}`,
+      date: sessionForm.date,
+      time: sessionForm.time,
+      mentee: sessionForm.mentee,
+      topic: sessionForm.topic,
+      dur: sessionForm.dur,
+      status: 'upcoming',
+    }
+    setSessions(prev => [newS, ...prev])
+    setSessionForm({ mentee: MY_MENTEES[0]?.name ?? '', date: '2026-05-12', time: '15:00', topic: '', dur: 60 })
+    setNewSession(false)
+  }
 
   return (
     <div className="section">
@@ -110,7 +134,7 @@ export default function MentorPage() {
               <tr><th>Data</th><th>Hora</th><th>Mentorando</th><th>Tema</th><th>Duração</th><th>Estado</th></tr>
             </thead>
             <tbody>
-              {SESSIONS.map(s => (
+              {sessions.map(s => (
                 <tr key={s.id}>
                   <td>{s.date}</td>
                   <td>{s.time}</td>
@@ -205,30 +229,73 @@ export default function MentorPage() {
           footer={
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
               <button className="btn" onClick={() => setNewSession(false)}>Cancelar</button>
-              <button className="btn btn-primary" onClick={() => setNewSession(false)}>Agendar Sessão</button>
+              <button
+                className="btn btn-primary"
+                onClick={handleAddSession}
+                disabled={!sessionForm.topic.trim()}
+              >
+                Agendar Sessão
+              </button>
             </div>
           }
         >
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             <div>
               <label style={{ fontSize: 12, opacity: 0.6, display: 'block', marginBottom: 6 }}>Mentorando</label>
-              <select className="select" style={{ width: '100%' }}>
-                {MY_MENTEES.map(m => <option key={m.id}>{m.name}</option>)}
+              <select
+                className="select"
+                style={{ width: '100%' }}
+                value={sessionForm.mentee}
+                onChange={e => setSessionForm(f => ({ ...f, mentee: e.target.value }))}
+              >
+                {MY_MENTEES.map(m => <option key={m.id} value={m.name}>{m.name}</option>)}
               </select>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
               <div>
                 <label style={{ fontSize: 12, opacity: 0.6, display: 'block', marginBottom: 6 }}>Data</label>
-                <input type="date" className="input" defaultValue="2026-05-12" style={{ width: '100%' }} />
+                <input
+                  type="date"
+                  className="input"
+                  value={sessionForm.date}
+                  onChange={e => setSessionForm(f => ({ ...f, date: e.target.value }))}
+                  style={{ width: '100%' }}
+                />
               </div>
               <div>
                 <label style={{ fontSize: 12, opacity: 0.6, display: 'block', marginBottom: 6 }}>Hora</label>
-                <input type="time" className="input" defaultValue="15:00" style={{ width: '100%' }} />
+                <input
+                  type="time"
+                  className="input"
+                  value={sessionForm.time}
+                  onChange={e => setSessionForm(f => ({ ...f, time: e.target.value }))}
+                  style={{ width: '100%' }}
+                />
               </div>
             </div>
             <div>
-              <label style={{ fontSize: 12, opacity: 0.6, display: 'block', marginBottom: 6 }}>Tema</label>
-              <input className="input" placeholder="Ex: Revisão objectivos Q2" style={{ width: '100%' }} />
+              <label style={{ fontSize: 12, opacity: 0.6, display: 'block', marginBottom: 6 }}>Tema *</label>
+              <input
+                className="input"
+                placeholder="Ex: Revisão objectivos Q2"
+                style={{ width: '100%' }}
+                value={sessionForm.topic}
+                onChange={e => setSessionForm(f => ({ ...f, topic: e.target.value }))}
+              />
+            </div>
+            <div>
+              <label style={{ fontSize: 12, opacity: 0.6, display: 'block', marginBottom: 6 }}>Duração (min)</label>
+              <select
+                className="select"
+                style={{ width: '100%' }}
+                value={sessionForm.dur}
+                onChange={e => setSessionForm(f => ({ ...f, dur: Number(e.target.value) }))}
+              >
+                <option value={30}>30 min</option>
+                <option value={45}>45 min</option>
+                <option value={60}>60 min</option>
+                <option value={90}>90 min</option>
+              </select>
             </div>
           </div>
         </Modal>

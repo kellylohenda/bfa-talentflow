@@ -27,9 +27,11 @@ const PATH_LABELS: Record<string, string> = {
 interface TopbarProps {
   onToggleDesktop: () => void
   onToggleMobile: () => void
+  theme: 'light' | 'dark'
+  onToggleTheme: () => void
 }
 
-export default function Topbar({ onToggleDesktop, onToggleMobile }: TopbarProps) {
+export default function Topbar({ onToggleDesktop, onToggleMobile, theme, onToggleTheme }: TopbarProps) {
   const pathname = usePathname()
   const segment = pathname.split('/').filter(Boolean)[0] ?? ''
   const label = PATH_LABELS[segment] ?? segment
@@ -92,8 +94,13 @@ export default function Topbar({ onToggleDesktop, onToggleMobile }: TopbarProps)
         />
       </button>
 
-      <button className="btn btn-ghost" aria-label="Definições">
-        <Icon name="cog" size={18} />
+      <button
+        className="btn btn-ghost"
+        aria-label={theme === 'dark' ? 'Modo claro' : 'Modo escuro'}
+        title={theme === 'dark' ? 'Mudar para modo claro' : 'Mudar para modo escuro'}
+        onClick={onToggleTheme}
+      >
+        <Icon name={theme === 'dark' ? 'sun' : 'moon'} size={18} />
       </button>
     </header>
   )

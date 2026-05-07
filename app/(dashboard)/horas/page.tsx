@@ -6,6 +6,7 @@ import type { HoursEntry } from '@/types'
 import KPI from '@/components/ui/KPI'
 import Pill from '@/components/ui/Pill'
 import Icon from '@/components/ui/Icon'
+import Modal from '@/components/ui/Modal'
 
 export default function HorasPage() {
   const [filterVol, setFilterVol]     = useState('todos')
@@ -13,6 +14,8 @@ export default function HorasPage() {
   const [filterValid, setFilterValid] = useState<'todos' | 'validado' | 'pendente'>('todos')
   const [actionId, setActionId]       = useState<string | null>(null)
   const [entries, setEntries]         = useState<HoursEntry[]>(hoursEntries)
+  const [newModal, setNewModal]       = useState(false)
+  const [newForm, setNewForm]         = useState({ voluntarioId: '', actividadeId: '', horas: 4, data: '' })
 
   const totalHoras    = entries.filter(h => h.validado).reduce((s, h) => s + h.horas, 0)
   const pendentes     = entries.filter(h => !h.validado).length
@@ -27,6 +30,26 @@ export default function HorasPage() {
     const matchValid = filterValid === 'todos' || (filterValid === 'validado' ? h.validado : !h.validado)
     return matchVol && matchAct && matchValid
   })
+
+  function handleNewEntry() {
+    if (!newForm.voluntarioId || !newForm.actividadeId || !newForm.data) return
+    const vol = volunteers.find(v => v.id === newForm.voluntarioId)
+    const act = volunteerActivities.find(a => a.id === newForm.actividadeId)
+    const entry: HoursEntry = {
+      id: `H-${String(entries.length + 1).padStart(3, '0')}`,
+      voluntarioId: newForm.voluntarioId,
+      voluntarioNome: vol?.nome ?? '',
+      actividadeId: newForm.actividadeId,
+      actividadeNome: act?.nome ?? '',
+      data: newForm.data,
+      horas: newForm.horas,
+      validado: false,
+      validadoPor: null,
+    }
+    setEntries(prev => [entry, ...prev])
+    setNewForm({ voluntarioId: '', actividadeId: '', horas: 4, data: '' })
+    setNewModal(false)
+  }
 
   function validate(id: string) {
     setActionId(id)
@@ -43,7 +66,7 @@ export default function HorasPage() {
           <h1 className="page-title">Registo de Horas</h1>
           <p className="page-subtitle">Base de horas por voluntário e actividade — Fundação BFA</p>
         </div>
-        <button className="btn btn-primary">
+        <button className="btn btn-primary" onClick={() => setNewModal(true)}>
           <Icon name="plus" size={15} />
           Registar horas
         </button>
@@ -189,6 +212,47 @@ export default function HorasPage() {
           </tbody>
         </table>
       </div>
+
+      {newModal && (
+        <Modal title="Registar Horas" onClose={() => setNewModal(false)}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div>
+              <label style={{ fontSize: 12, opacity: 0.6, display: 'block', marginBottom: 6 }}>Voluntário *</label>
+              <select className="select" style={{ width: '100%' }} value={newForm.voluntarioId} onChange={e => setNewForm(f => ({ ...f, voluntarioId: e.target.value }))}>
+                <option value="">Seleccionar voluntário...</option>
+                {volunteers.map(v => <option key={v.id} value={v.id}>{v.nome}</option>)}
+              </select>
+            </div>
+            <div>
+              <label style={{ fontSize: 12, opacity: 0.6, display: 'block', marginBottom: 6 }}>Actividade *</label>
+              <select className="select" style={{ width: '100%' }} value={newForm.actividadeId} onChange={e => setNewForm(f => ({ ...f, actividadeId: e.target.value }))}>
+                <option value="">Seleccionar actividade...</option>
+                {volunteerActivities.map(a => <option key={a.id} value={a.id}>{a.nome}</option>)}
+              </select>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div>
+                <label style={{ fontSize: 12, opacity: 0.6, display: 'block', marginBottom: 6 }}>Data *</label>
+                <input className="input" type="date" style={{ width: '100%' }} value={newForm.data} onChange={e => setNewForm(f => ({ ...f, data: e.target.value }))} />
+              </div>
+              <div>
+                <label style={{ fontSize: 12, opacity: 0.6, display: 'block', marginBottom: 6 }}>Horas</label>
+                <input className="input" type="number" min={1} max={12} style={{ width: '100%' }} value={newForm.horas} onChange={e => setNewForm(f => ({ ...f, horas: Number(e.target.value) }))} />
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 4 }}>
+              <button className="btn" onClick={() => setNewModal(false)}>Cancelar</button>
+              <button
+                className="btn btn-primary"
+                disabled={!newForm.voluntarioId || !newForm.actividadeId || !newForm.data}
+                onClick={handleNewEntry}
+              >
+                Registar
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
   )
 }
