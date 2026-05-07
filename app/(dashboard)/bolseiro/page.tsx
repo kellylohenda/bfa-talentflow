@@ -1,6 +1,6 @@
 'use client'
 import { useState } from 'react'
-import { bolseiroPayments, bolseiroNotifs, tasks, rotations, presencas, sessoesBolseiro } from '@/lib/data'
+import { bolseiroPayments, pagamentosJoaquim, bolseiroNotifs, tasks, rotations, presencas, sessoesBolseiro } from '@/lib/data'
 import { fmtKz } from '@/lib/utils'
 import { useRole } from '@/lib/useRole'
 import KPI from '@/components/ui/KPI'
@@ -16,14 +16,14 @@ const PERSONA_ESTAGIARIO = {
   program: 'Futuro BFA', programId: 'fbfa',
   university: 'Universidade Agostinho Neto', course: 'Economia', year: 'Trainee Y2',
   mentor: 'Edmilson Cardoso', dept: 'Banca de Empresas',
-  gpa: 17.2, perf: 92, startDate: '2024-09-01', endDate: '2026-08-31',
+  gpa: 17.2, perf: 92, stipend: 380000, startDate: '2024-09-01', endDate: '2026-08-31',
 }
 const PERSONA_BOLSEIRO = {
   name: 'Joaquim Tchindemba', id: 'T-1043', kind: 'bolseiro' as ParticipantKind,
   program: 'Bolsa Internacional', programId: 'bif',
   university: 'Nova SBE', course: 'Mestrado Finanças', year: '2º ano',
   mentor: 'Sofia Mendes', dept: '—',
-  gpa: 16.8, perf: 88, startDate: '2024-09-15', endDate: '2027-07-31',
+  gpa: 16.8, perf: 88, stipend: 1850000, startDate: '2024-09-15', endDate: '2027-07-31',
 }
 
 // ── Static helpers ────────────────────────────────────────────────────────────
@@ -92,7 +92,7 @@ export default function BolseiroPage() {
     { key: 'pontualidade',label: 'Pontualidade e Assiduidade', self: 5 },
   ]
 
-  type EstagiarioTab = 'inicio' | 'presencas' | 'rotacoes' | 'tarefas' | 'perfil'
+  type EstagiarioTab = 'inicio' | 'presencas' | 'pagamentos' | 'rotacoes' | 'tarefas' | 'perfil'
   type BolseiroTab   = 'inicio' | 'presencas' | 'pagamentos' | 'tarefas' | 'perfil'
   type Tab = EstagiarioTab | BolseiroTab
 
@@ -104,7 +104,7 @@ export default function BolseiroPage() {
   const [docSubmitted, setDocSubmitted] = useState(false)
 
   const unread       = notifs.filter(n => !n.read).length
-  const lastPayment  = bolseiroPayments.find(p => p.status === 'paid')
+  const lastPayment  = (IS_ESTAGIARIO ? bolseiroPayments : pagamentosJoaquim).find(p => p.status === 'paid')
   const pendingTasks = taskList.filter(t => t.status === 'pending' || t.status === 'in_progress')
   const overdue      = taskList.filter(t => t.status === 'overdue')
 
@@ -133,8 +133,10 @@ export default function BolseiroPage() {
   const checkedInToday  = todayRecord?.entrada != null
   const checkedOutToday = todayRecord?.saida   != null
 
+  const myPayments = IS_ESTAGIARIO ? bolseiroPayments : pagamentosJoaquim
+
   const TABS: [Tab, string][] = IS_ESTAGIARIO
-    ? [['inicio', 'Início'], ['presencas', 'Presenças & Horas'], ['rotacoes', 'Rotações'], ['tarefas', 'As Minhas Tarefas'], ['perfil', 'O Meu Perfil']]
+    ? [['inicio', 'Início'], ['presencas', 'Presenças & Horas'], ['pagamentos', 'Pagamentos'], ['rotacoes', 'Rotações'], ['tarefas', 'As Minhas Tarefas'], ['perfil', 'O Meu Perfil']]
     : [['inicio', 'Início'], ['presencas', 'Presenças & Sessões'], ['pagamentos', 'Pagamentos'], ['tarefas', 'As Minhas Tarefas'], ['perfil', 'O Meu Perfil']]
 
   return (
@@ -173,14 +175,14 @@ export default function BolseiroPage() {
       <div className="grid cols-4" style={{ marginBottom: 24 }}>
         {IS_ESTAGIARIO ? (
           <>
+            <KPI label="Último Subsídio" value={lastPayment ? fmtKz(lastPayment.amount) : '—'} sub={lastPayment?.date ?? ''} delta="Recebido" deltaTone="up" icon="cash" />
             <KPI label="Desempenho" value={`${ME.perf}%`} sub="Ciclo actual" delta="+4pts" deltaTone="up" icon="star" />
             <KPI label="Rotação actual" value={activeRotation?.dept ?? '—'} sub={activeRotation ? `Desde ${activeRotation.startDate}` : 'Sem rotação activa'} icon="briefcase" />
-            <KPI label="Rotações concluídas" value={myRotations.filter(r => r.status === 'concluida').length} sub={`de ${myRotations.length} total`} icon="check" />
             <KPI label="Tarefas Pendentes" value={pendingTasks.length} sub={overdue.length > 0 ? `${overdue.length} em atraso` : 'Em dia'} delta={overdue.length > 0 ? 'Urgente' : 'OK'} deltaTone={overdue.length > 0 ? 'down' : 'up'} icon="clock" />
           </>
         ) : (
           <>
-            <KPI label="Último Subsídio" value={lastPayment ? fmtKz(lastPayment.amount) : '—'} sub={lastPayment?.date ?? ''} delta="Recebido" deltaTone="up" icon="cash" />
+            <KPI label="Último Pagamento" value={lastPayment ? fmtKz(lastPayment.amount) : '—'} sub={lastPayment?.date ?? ''} delta="Recebido" deltaTone="up" icon="cash" />
             <KPI label="Desempenho" value={`${ME.perf}%`} sub="Ciclo actual" delta="+4pts" deltaTone="up" icon="star" />
             <KPI label="Média Académica" value={String(ME.gpa)} sub="/ 20 valores" delta="Excelente" deltaTone="up" icon="check" />
             <KPI label="Tarefas Pendentes" value={pendingTasks.length} sub={overdue.length > 0 ? `${overdue.length} em atraso` : 'Em dia'} delta={overdue.length > 0 ? 'Urgente' : 'OK'} deltaTone={overdue.length > 0 ? 'down' : 'up'} icon="clock" />
@@ -587,34 +589,37 @@ export default function BolseiroPage() {
         </div>
       )}
 
-      {/* ── PAGAMENTOS (Bolseiro only) ───────────────────────────────────────── */}
-      {tab === 'pagamentos' && !IS_ESTAGIARIO && (
-        <div className="card">
-          <div className="card-head"><span className="card-title">Histórico de Pagamentos</span></div>
-          <table className="tbl">
-            <thead>
-              <tr><th>ID</th><th>Período</th><th>Tipo</th><th>Montante</th><th>Estado</th><th>Data</th></tr>
-            </thead>
-            <tbody>
-              {bolseiroPayments.map(p => (
-                <tr key={p.id}>
-                  <td style={{ fontSize: 12, opacity: 0.55 }}>{p.id}</td>
-                  <td>{p.period}</td>
-                  <td>{p.type}</td>
-                  <td style={{ fontWeight: 600 }}>{fmtKz(p.amount)}</td>
-                  <td><Pill tone={payTone(p.status)}>{payLabel(p.status)}</Pill></td>
-                  <td style={{ fontSize: 12, opacity: 0.65 }}>{p.date}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <div style={{ padding: '16px 0 0', display: 'flex', justifyContent: 'flex-end' }}>
-            <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: 11, opacity: 0.5, marginBottom: 4 }}>Total recebido</div>
-              <div style={{ fontSize: 20, fontWeight: 700 }}>
-                {fmtKz(bolseiroPayments.filter(p => p.status === 'paid').reduce((s, p) => s + p.amount, 0))}
-              </div>
+      {/* ── PAGAMENTOS ──────────────────────────────────────────────────────── */}
+      {tab === 'pagamentos' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div className="grid cols-4">
+            <KPI label="Total recebido" value={fmtKz(myPayments.filter(p => p.status === 'paid').reduce((s, p) => s + p.amount, 0))} sub="Histórico" icon="cash" />
+            <KPI label="Último pagamento" value={myPayments.find(p => p.status === 'paid') ? fmtKz(myPayments.find(p => p.status === 'paid')!.amount) : '—'} sub={myPayments.find(p => p.status === 'paid')?.date ?? ''} deltaTone="up" delta="Recebido" icon="check" />
+            <KPI label="Pendentes" value={myPayments.filter(p => p.status === 'pending').length} sub={myPayments.filter(p => p.status === 'pending').length > 0 ? 'A aguardar processamento' : 'Nenhum pendente'} icon="clock" />
+            <KPI label="Tipo principal" value={IS_ESTAGIARIO ? 'Subsídio de estágio' : 'Propina + Subsistência'} sub={IS_ESTAGIARIO ? `${fmtKz(ME.stipend)}/mês` : 'Semestral + Mensal'} icon="briefcase" />
+          </div>
+          <div className="card">
+            <div className="card-head">
+              <span className="card-title">Histórico de Pagamentos</span>
+              <span style={{ fontSize: 12, opacity: 0.5 }}>{myPayments.length} registos</span>
             </div>
+            <table className="tbl">
+              <thead>
+                <tr><th>Referência</th><th>Período</th><th>Tipo</th><th>Montante</th><th>Estado</th><th>Data</th></tr>
+              </thead>
+              <tbody>
+                {myPayments.map(p => (
+                  <tr key={p.id}>
+                    <td style={{ fontSize: 12, opacity: 0.55, fontFamily: 'monospace' }}>{p.id}</td>
+                    <td style={{ fontSize: 13 }}>{p.period}</td>
+                    <td style={{ fontSize: 13 }}>{p.type}</td>
+                    <td style={{ fontWeight: 700, fontSize: 14 }}>{fmtKz(p.amount)}</td>
+                    <td><Pill tone={payTone(p.status)} dot={false}>{payLabel(p.status)}</Pill></td>
+                    <td style={{ fontSize: 12, opacity: 0.65 }}>{p.date}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       )}

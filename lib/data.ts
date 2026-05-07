@@ -175,12 +175,28 @@ export const bolseiroNotifs: Notification[] = [
   { id: 4, type: 'event',   title: 'Workshop "Banca em Angola"',   text: 'Inscrição aberta · 12 Maio · Sede BFA.',                    when: 'Há 1 semana', read: true },
 ]
 
+// Pagamentos da estagiária Lwini Capemba (T-1042 · Futuro BFA · 380k/mês)
 export const bolseiroPayments: BolseiroPayment[] = [
-  { id: 'P-9821', period: 'Abril 2026',     type: 'Subsídio mensal',    amount: 380000, status: 'paid', date: '2026-04-28' },
-  { id: 'P-9701', period: 'Março 2026',     type: 'Subsídio mensal',    amount: 380000, status: 'paid', date: '2026-03-28' },
-  { id: 'P-9602', period: '2026-T1',        type: 'Material didáctico', amount: 85000,  status: 'paid', date: '2026-02-12' },
-  { id: 'P-9588', period: 'Fevereiro 2026', type: 'Subsídio mensal',    amount: 380000, status: 'paid', date: '2026-02-28' },
-  { id: 'P-9412', period: 'Janeiro 2026',   type: 'Subsídio mensal',    amount: 380000, status: 'paid', date: '2026-01-30' },
+  { id: 'PE-001', period: 'Maio 2026',      type: 'Subsídio de estágio',  amount: 380000, status: 'pending', date: '2026-05-28' },
+  { id: 'PE-002', period: 'Abril 2026',     type: 'Subsídio de estágio',  amount: 380000, status: 'paid',    date: '2026-04-28' },
+  { id: 'PE-003', period: '2026-T1',        type: 'Material de trabalho', amount: 85000,  status: 'paid',    date: '2026-02-12' },
+  { id: 'PE-004', period: 'Março 2026',     type: 'Subsídio de estágio',  amount: 380000, status: 'paid',    date: '2026-03-28' },
+  { id: 'PE-005', period: 'Fevereiro 2026', type: 'Subsídio de estágio',  amount: 380000, status: 'paid',    date: '2026-02-28' },
+  { id: 'PE-006', period: 'Janeiro 2026',   type: 'Subsídio de estágio',  amount: 380000, status: 'paid',    date: '2026-01-30' },
+  { id: 'PE-007', period: '2025-T2',        type: 'Material de trabalho', amount: 85000,  status: 'paid',    date: '2025-09-10' },
+  { id: 'PE-008', period: 'Dezembro 2025',  type: 'Subsídio de estágio',  amount: 380000, status: 'paid',    date: '2025-12-29' },
+]
+
+// Pagamentos do bolseiro Joaquim Tchindemba (T-1043 · BIF · Nova SBE Lisboa)
+export const pagamentosJoaquim: BolseiroPayment[] = [
+  { id: 'PB-001', period: '2025/26 · 2º Sem', type: 'Propina Nova SBE',      amount: 4200000, status: 'paid',    date: '2026-01-15' },
+  { id: 'PB-002', period: 'Mai 2026',          type: 'Subsídio subsistência', amount: 650000,  status: 'pending', date: '2026-05-30' },
+  { id: 'PB-003', period: 'Abr 2026',          type: 'Subsídio subsistência', amount: 650000,  status: 'paid',    date: '2026-04-30' },
+  { id: 'PB-004', period: 'Mar 2026',          type: 'Subsídio subsistência', amount: 650000,  status: 'paid',    date: '2026-03-31' },
+  { id: 'PB-005', period: 'Fev 2026',          type: 'Subsídio subsistência', amount: 650000,  status: 'paid',    date: '2026-02-28' },
+  { id: 'PB-006', period: 'Jan 2026',          type: 'Subsídio subsistência', amount: 650000,  status: 'paid',    date: '2026-01-31' },
+  { id: 'PB-007', period: '2025/26 · 1º Sem', type: 'Propina Nova SBE',      amount: 4200000, status: 'paid',    date: '2025-09-10' },
+  { id: 'PB-008', period: '2025-T1',           type: 'Subsídio instalação',   amount: 320000,  status: 'paid',    date: '2025-09-05' },
 ]
 
 export const tasks: Task[] = [
