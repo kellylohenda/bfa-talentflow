@@ -27,6 +27,7 @@ export interface Volunteer {
   status: VolunteerStatus
   areaActuacao: ActivityType
   totalHoras: number
+  mentor?: string
 }
 
 export interface VolunteerActivity {
