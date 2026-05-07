@@ -63,7 +63,7 @@ export default function ProgramaPage() {
         .pub-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: #1A1A1A; font-weight: 700; font-size: 17px; letter-spacing: -0.01em; }
         .pub-logo { width: 32px; height: 32px; background: #1A1A1A; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; border-radius: 5px; }
         .pub-brand small { font-weight: 400; color: #8A8A87; font-size: 12px; }
-        .pub-nav { display: flex; gap: 4px; margin-left: auto; }
+        .pub-nav { display: flex; gap: 4px; margin-left: auto; margin-right: 8px; }
         .pub-nav a { padding: 8px 14px; font-size: 14px; color: #525252; text-decoration: none; border-radius: 6px; }
         .pub-nav a:hover { background: #F2F2F0; color: #1A1A1A; }
         .pub-cta { display: inline-flex; align-items: center; padding: 10px 18px; background: #1A1A1A; color: #fff; border-radius: 6px; text-decoration: none; font-size: 14px; font-weight: 500; border: none; transition: background 120ms; cursor: pointer; }
@@ -177,7 +177,10 @@ export default function ProgramaPage() {
             <a href="#testemunho">Testemunhos</a>
             <a href="#faq">FAQ</a>
           </nav>
-          <Link href="/candidatura" className="pub-cta pub-cta-primary">Candidatar-me →</Link>
+          <div style={{ display: 'flex', gap: 8, marginLeft: 'auto', alignItems: 'center' }}>
+            <Link href="/login" className="pub-cta" style={{ background: '#fff', color: '#525252', border: '1px solid #E7E5E1', fontSize: 13 }}>Acesso RH →</Link>
+            <Link href="/candidatura" className="pub-cta pub-cta-primary">Candidatar-me →</Link>
+          </div>
         </div>
       </div>
 
@@ -346,6 +349,7 @@ export default function ProgramaPage() {
               <li><a href="#">Calendário 2026</a></li>
               <li><a href="#">Brochura (PDF)</a></li>
               <li><a href="#">Política de privacidade</a></li>
+              <li><a href="/login">Acesso colaboradores</a></li>
             </ul>
           </div>
           <div>
