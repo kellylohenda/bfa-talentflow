@@ -1,13 +1,13 @@
 'use client'
 import { useState } from 'react'
-import { bolseiroPayments, bolseiroNotifs, tasks, rotations } from '@/lib/data'
+import { bolseiroPayments, bolseiroNotifs, tasks, rotations, presencas, sessoesBolseiro } from '@/lib/data'
 import { fmtKz } from '@/lib/utils'
 import KPI from '@/components/ui/KPI'
 import Pill from '@/components/ui/Pill'
 import Modal from '@/components/ui/Modal'
 import Icon from '@/components/ui/Icon'
 import Bar from '@/components/ui/Bar'
-import type { TaskStatus, PaymentStatus, ParticipantKind } from '@/types'
+import type { TaskStatus, PaymentStatus, ParticipantKind, PresencaStatus } from '@/types'
 
 // ── Persona ───────────────────────────────────────────────────────────────────
 // Lwini Capemba = programa Futuro BFA = Estagiária
@@ -45,9 +45,42 @@ function taskTone(s: TaskStatus): 'success' | 'warn' | 'danger' | 'neutral' {
   return s === 'done' ? 'success' : s === 'in_progress' ? 'warn' : s === 'overdue' ? 'danger' : 'neutral'
 }
 
-const myTasks       = tasks.filter(t => t.talentId === ME.id)
-const myRotations   = rotations.filter(r => r.talentId === ME.id)
+const myTasks        = tasks.filter(t => t.talentId === ME.id)
+const myRotations    = rotations.filter(r => r.talentId === ME.id)
 const activeRotation = myRotations.find(r => r.status === 'activa')
+const myPresencas    = presencas.filter(p => p.talentId === ME.id)
+const mySessoes      = sessoesBolseiro.filter(s => s.talentId === ME.id)
+
+// ── Presença stats ────────────────────────────────────────────────────────────
+const SEMANA_ACTUAL = ['2026-05-04', '2026-05-05', '2026-05-06', '2026-05-07', '2026-05-08']
+const MES_ACTUAL    = myPresencas.filter(p => p.date >= '2026-05-01')
+const HISTORICO     = myPresencas.filter(p => p.date >= '2026-04-01')
+const presHist      = HISTORICO.filter(p => p.status === 'presente')
+const totalHorasMes = presHist.reduce((s, p) => s + (p.horas ?? 0), 0)
+const diasTrabalhados = presHist.length
+const taxaPresenca  = HISTORICO.filter(p => p.status !== 'pendente').length > 0
+  ? Math.round(presHist.length / HISTORICO.filter(p => p.status !== 'pendente').length * 100)
+  : 0
+const horasEstaSemana = SEMANA_ACTUAL.reduce((s, d) => {
+  const p = myPresencas.find(p => p.date === d)
+  return s + (p?.horas ?? 0)
+}, 0)
+const avgChegada = (() => {
+  const times = presHist.filter(p => p.entrada).map(p => {
+    const [h, m] = p.entrada!.split(':').map(Number)
+    return h * 60 + m
+  })
+  if (!times.length) return '—'
+  const avg = Math.round(times.reduce((a, b) => a + b, 0) / times.length)
+  return `${String(Math.floor(avg / 60)).padStart(2, '0')}:${String(avg % 60).padStart(2, '0')}`
+})()
+
+function presStatusStyle(s: PresencaStatus): { bg: string; color: string; label: string } {
+  return s === 'presente'   ? { bg: '#D1FAE5', color: '#065F46', label: 'Presente' }
+       : s === 'ausente'    ? { bg: '#FEE2E2', color: '#991B1B', label: 'Ausente' }
+       : s === 'justificado'? { bg: '#FEF3C7', color: '#92400E', label: 'Justificado' }
+       :                     { bg: '#F3F4F6', color: '#6B7280', label: 'Pendente' }
+}
 
 const DOC_TYPES_ESTAGIARIO = ['Relatório de Estágio', 'Avaliação do Supervisor', 'Plano de Desenvolvimento', 'Identificação', 'Contrato']
 const DOC_TYPES_BOLSEIRO   = ['Boletim', 'Comprovativo Matrícula', 'Relatório Semestral', 'Identificação', 'Contrato']
@@ -63,8 +96,8 @@ const COMPETENCIAS = [
 ]
 
 export default function BolseiroPage() {
-  type EstagiarioTab = 'inicio' | 'rotacoes' | 'tarefas' | 'perfil'
-  type BolseiroTab   = 'inicio' | 'pagamentos' | 'tarefas' | 'perfil'
+  type EstagiarioTab = 'inicio' | 'presencas' | 'rotacoes' | 'tarefas' | 'perfil'
+  type BolseiroTab   = 'inicio' | 'presencas' | 'pagamentos' | 'tarefas' | 'perfil'
   type Tab = EstagiarioTab | BolseiroTab
 
   const [tab, setTab]             = useState<Tab>('inicio')
@@ -97,9 +130,16 @@ export default function BolseiroPage() {
     setNotifs(prev => prev.map(n => n.id === id ? { ...n, read: true } : n))
   }
 
+  const [checkingIn, setCheckingIn]   = useState(false)
+  const [checkingOut, setCheckingOut] = useState(false)
+
+  const todayRecord = myPresencas.find(p => p.date === '2026-05-07')
+  const checkedInToday  = todayRecord?.entrada != null
+  const checkedOutToday = todayRecord?.saida   != null
+
   const TABS: [Tab, string][] = IS_ESTAGIARIO
-    ? [['inicio', 'Início'], ['rotacoes', 'Rotações'], ['tarefas', 'As Minhas Tarefas'], ['perfil', 'O Meu Perfil']]
-    : [['inicio', 'Início'], ['pagamentos', 'Pagamentos'], ['tarefas', 'As Minhas Tarefas'], ['perfil', 'O Meu Perfil']]
+    ? [['inicio', 'Início'], ['presencas', 'Presenças & Horas'], ['rotacoes', 'Rotações'], ['tarefas', 'As Minhas Tarefas'], ['perfil', 'O Meu Perfil']]
+    : [['inicio', 'Início'], ['presencas', 'Presenças & Sessões'], ['pagamentos', 'Pagamentos'], ['tarefas', 'As Minhas Tarefas'], ['perfil', 'O Meu Perfil']]
 
   return (
     <div className="section">
@@ -232,6 +272,171 @@ export default function BolseiroPage() {
                 <p style={{ opacity: 0.45, fontSize: 13 }}>Sem tarefas urgentes.</p>
               )}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── PRESENÇAS & HORAS ────────────────────────────────────────────────── */}
+      {tab === 'presencas' && IS_ESTAGIARIO && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {/* KPIs */}
+          <div className="grid cols-4">
+            <KPI label="Dias trabalhados" value={diasTrabalhados} sub="Desde Abril" icon="check" />
+            <KPI label="Horas totais" value={`${totalHorasMes.toFixed(0)}h`} sub="Desde Abril" icon="clock" />
+            <KPI label="Taxa de presença" value={`${taxaPresenca}%`} sub="Excluindo justificados" delta={taxaPresenca >= 90 ? 'Excelente' : 'Atenção'} deltaTone={taxaPresenca >= 90 ? 'up' : 'flat'} icon="star" />
+            <KPI label="Esta semana" value={`${horasEstaSemana.toFixed(1)}h`} sub={`Chegada média: ${avgChegada}`} icon="briefcase" />
+          </div>
+
+          {/* Check-in / Check-out + Semana actual */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+            <div className="card">
+              <div className="card-head">
+                <span className="card-title">Ponto de Hoje</span>
+                <span style={{ fontSize: 12, opacity: 0.5 }}>7 de Maio de 2026</span>
+              </div>
+              <div style={{ marginBottom: 14 }}>
+                <div style={{ fontSize: 13, opacity: 0.6, marginBottom: 4 }}>Departamento</div>
+                <div style={{ fontSize: 15, fontWeight: 700 }}>{activeRotation?.dept ?? ME.dept}</div>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 16 }}>
+                <div style={{ padding: '10px 12px', borderRadius: 8, background: checkedInToday ? '#D1FAE5' : 'var(--surface-2)', textAlign: 'center' }}>
+                  <div style={{ fontSize: 11, opacity: 0.6, marginBottom: 4 }}>Entrada</div>
+                  <div style={{ fontSize: 18, fontWeight: 700, color: checkedInToday ? '#065F46' : 'var(--text)' }}>
+                    {todayRecord?.entrada ?? '—'}
+                  </div>
+                </div>
+                <div style={{ padding: '10px 12px', borderRadius: 8, background: checkedOutToday ? '#D1FAE5' : 'var(--surface-2)', textAlign: 'center' }}>
+                  <div style={{ fontSize: 11, opacity: 0.6, marginBottom: 4 }}>Saída</div>
+                  <div style={{ fontSize: 18, fontWeight: 700, color: checkedOutToday ? '#065F46' : 'var(--text)' }}>
+                    {todayRecord?.saida ?? '—'}
+                  </div>
+                </div>
+              </div>
+              {!checkedInToday && (
+                <button className="btn btn-primary" style={{ width: '100%' }} onClick={() => setCheckingIn(true)} disabled={checkingIn}>
+                  {checkingIn ? 'Registado ✓' : <><Icon name="check" size={14} /> Registar Entrada</>}
+                </button>
+              )}
+              {checkedInToday && !checkedOutToday && (
+                <button className="btn" style={{ width: '100%', background: '#065F46', color: '#fff', borderColor: '#065F46' }}
+                  onClick={() => setCheckingOut(true)} disabled={checkingOut}>
+                  {checkingOut ? 'Registado ✓' : <><Icon name="clock" size={14} /> Registar Saída</>}
+                </button>
+              )}
+              {checkedInToday && checkedOutToday && (
+                <div style={{ textAlign: 'center', padding: '8px', borderRadius: 8, background: '#D1FAE5', fontSize: 13, fontWeight: 600, color: '#065F46' }}>
+                  ✓ Ponto completo hoje
+                </div>
+              )}
+            </div>
+
+            <div className="card">
+              <div className="card-head">
+                <span className="card-title">Semana Actual</span>
+                <span style={{ fontSize: 12, opacity: 0.5 }}>5–9 Maio</span>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 6, marginBottom: 12 }}>
+                {[['Seg', '2026-05-04'], ['Ter', '2026-05-05'], ['Qua', '2026-05-06'], ['Qui', '2026-05-07'], ['Sex', '2026-05-08']].map(([day, date]) => {
+                  const rec = myPresencas.find(p => p.date === date)
+                  const s = presStatusStyle(rec?.status ?? 'pendente')
+                  const isEmpty = !rec
+                  return (
+                    <div key={day} style={{ textAlign: 'center' }}>
+                      <div style={{ fontSize: 11, opacity: 0.5, marginBottom: 4 }}>{day}</div>
+                      <div style={{ width: 36, height: 36, borderRadius: '50%', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center', background: isEmpty ? 'var(--surface-2)' : s.bg, color: isEmpty ? 'var(--text)' : s.color, fontSize: 11, fontWeight: 700, border: date === '2026-05-07' ? '2px solid var(--primary)' : 'none', opacity: isEmpty ? 0.35 : 1 }}>
+                        {isEmpty ? '—' : rec!.status === 'presente' ? '✓' : rec!.status === 'ausente' ? '✗' : rec!.status === 'justificado' ? 'J' : '●'}
+                      </div>
+                      <div style={{ fontSize: 10, marginTop: 4, opacity: 0.6 }}>{rec?.horas ? `${rec.horas}h` : ''}</div>
+                    </div>
+                  )
+                })}
+              </div>
+              <div style={{ display: 'flex', gap: 12, fontSize: 11, opacity: 0.65, flexWrap: 'wrap' }}>
+                {[['#D1FAE5', '#065F46', 'Presente'], ['#FEE2E2', '#991B1B', 'Ausente'], ['#FEF3C7', '#92400E', 'Justificado']].map(([bg, color, label]) => (
+                  <span key={label} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <span style={{ width: 10, height: 10, borderRadius: '50%', background: bg, border: `1px solid ${color}`, display: 'inline-block' }} />
+                    {label}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Histórico completo */}
+          <div className="card">
+            <div className="card-head">
+              <span className="card-title">Histórico de Presenças</span>
+              <span style={{ fontSize: 12, opacity: 0.5 }}>{HISTORICO.length} dias registados</span>
+            </div>
+            <table className="tbl">
+              <thead>
+                <tr><th>Data</th><th>Departamento</th><th>Entrada</th><th>Saída</th><th>Horas</th><th>Estado</th><th>Supervisor</th><th>Nota</th></tr>
+              </thead>
+              <tbody>
+                {[...HISTORICO].reverse().map(p => {
+                  const s = presStatusStyle(p.status)
+                  return (
+                    <tr key={p.id}>
+                      <td style={{ fontSize: 13, fontWeight: 500 }}>{p.date}</td>
+                      <td style={{ fontSize: 13 }}>{p.dept}</td>
+                      <td style={{ fontSize: 13, fontFamily: 'monospace' }}>{p.entrada ?? '—'}</td>
+                      <td style={{ fontSize: 13, fontFamily: 'monospace' }}>{p.saida ?? '—'}</td>
+                      <td style={{ fontSize: 13, fontWeight: 600 }}>{p.horas != null ? `${p.horas}h` : '—'}</td>
+                      <td>
+                        <span style={{ padding: '2px 8px', borderRadius: 10, fontSize: 11, fontWeight: 700, background: s.bg, color: s.color }}>
+                          {s.label}
+                        </span>
+                      </td>
+                      <td>
+                        {p.supervisorOk
+                          ? <span style={{ color: 'var(--success)', fontSize: 12 }}>✓ Confirmado</span>
+                          : <span style={{ opacity: 0.4, fontSize: 12 }}>Pendente</span>}
+                      </td>
+                      <td style={{ fontSize: 12, opacity: 0.6, maxWidth: 180 }}>{p.nota || '—'}</td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* ── PRESENÇAS & SESSÕES (Bolseiro) ──────────────────────────────────── */}
+      {tab === 'presencas' && !IS_ESTAGIARIO && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div className="grid cols-4">
+            <KPI label="Sessões agendadas" value={mySessoes.length} icon="calendar" />
+            <KPI label="Frequentadas" value={mySessoes.filter(s => s.presente).length} icon="check" />
+            <KPI label="Taxa de presença" value={mySessoes.length ? `${Math.round(mySessoes.filter(s => s.presente).length / mySessoes.length * 100)}%` : '—'} delta="Do programa" deltaTone="up" icon="star" />
+            <KPI label="Horas de programa" value={`${mySessoes.filter(s => s.presente).reduce((a, s) => a + s.duracaoH, 0)}h`} sub="Acumuladas" icon="clock" />
+          </div>
+          <div className="card">
+            <div className="card-head"><span className="card-title">Histórico de Sessões</span></div>
+            <table className="tbl">
+              <thead>
+                <tr><th>Data</th><th>Tipo</th><th>Sessão</th><th>Duração</th><th>Presença</th><th>Nota</th></tr>
+              </thead>
+              <tbody>
+                {[...mySessoes].reverse().map(s => (
+                  <tr key={s.id}>
+                    <td style={{ fontSize: 13 }}>{s.date}</td>
+                    <td><Pill tone={s.tipo === 'mentoria' ? 'info' : s.tipo === 'avaliacao' ? 'warn' : s.tipo === 'workshop' ? 'primary' : 'neutral'} dot={false}>{s.tipo}</Pill></td>
+                    <td style={{ fontSize: 13 }}>{s.titulo}</td>
+                    <td style={{ fontSize: 13 }}>{s.duracaoH}h</td>
+                    <td>
+                      {s.presente
+                        ? <span style={{ color: 'var(--success)', fontWeight: 600, fontSize: 13 }}>✓ Presente</span>
+                        : <span style={{ color: 'var(--danger)', fontWeight: 600, fontSize: 13 }}>✗ Ausente</span>}
+                    </td>
+                    <td style={{ fontSize: 12, opacity: 0.6 }}>{s.nota || '—'}</td>
+                  </tr>
+                ))}
+                {mySessoes.length === 0 && (
+                  <tr><td colSpan={6} style={{ textAlign: 'center', padding: '24px 0', opacity: 0.4, fontSize: 13 }}>Sem sessões registadas.</td></tr>
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
       )}

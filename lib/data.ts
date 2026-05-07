@@ -1,4 +1,4 @@
-import type { Program, Talent, Application, Payment, Mentor, GeoPoint, NineBoxItem, ActivityItem, Notification, BolseiroPayment, Task, Absence, Workflow, Stage, Volunteer, VolunteerActivity, HoursEntry, Rotation } from '@/types'
+import type { Program, Talent, Application, Payment, Mentor, GeoPoint, NineBoxItem, ActivityItem, Notification, BolseiroPayment, Task, Absence, Workflow, Stage, Volunteer, VolunteerActivity, HoursEntry, Rotation, Presenca, SessaoBolseiro } from '@/types'
 
 export const programs: Program[] = [
   { id: 'fbfa', name: 'Futuro BFA', kind: 'Trainee', color: '#FF7607' },
@@ -292,5 +292,59 @@ export const hoursEntries: HoursEntry[] = [
   { id: 'H-026', voluntarioId: 'V-012', voluntarioNome: 'Xavier Ngola',      actividadeId: 'AC-008', actividadeNome: 'Exposição Arte Contemporânea',      data: '2026-05-17', horas: 10, validado: false, validadoPor: null             },
   { id: 'H-027', voluntarioId: 'V-004', voluntarioNome: 'Isac Tchilemba',    actividadeId: 'AC-009', actividadeNome: 'Tutoria Escolar — Maio (Benguela)', data: '2026-05-24', horas: 4,  validado: false, validadoPor: null             },
   { id: 'H-028', voluntarioId: 'V-008', voluntarioNome: 'Ricardo Catata',    actividadeId: 'AC-009', actividadeNome: 'Tutoria Escolar — Maio (Benguela)', data: '2026-05-24', horas: 4,  validado: false, validadoPor: null             },
+]
+
+// ── Presenças Estagiários ─────────────────────────────────────────────────────
+// Registos diários de presença para os estagiários (Futuro BFA)
+export const presencas: Presenca[] = [
+  // ── Lwini Capemba (T-1042) — Banca de Empresas ──────────────────────────
+  { id: 'PR-001', talentId: 'T-1042', talentName: 'Lwini Capemba',   date: '2026-04-21', dept: 'Banca de Empresas', entrada: '09:00', saida: '17:30', horas: 8.5, status: 'presente',  supervisorOk: true,  nota: '' },
+  { id: 'PR-002', talentId: 'T-1042', talentName: 'Lwini Capemba',   date: '2026-04-22', dept: 'Banca de Empresas', entrada: '08:45', saida: '17:15', horas: 8.5, status: 'presente',  supervisorOk: true,  nota: '' },
+  { id: 'PR-003', talentId: 'T-1042', talentName: 'Lwini Capemba',   date: '2026-04-23', dept: 'Banca de Empresas', entrada: '09:00', saida: '18:00', horas: 9.0, status: 'presente',  supervisorOk: true,  nota: 'Ficou extra para fechar relatório semanal.' },
+  { id: 'PR-004', talentId: 'T-1042', talentName: 'Lwini Capemba',   date: '2026-04-24', dept: 'Banca de Empresas', entrada: null,    saida: null,    horas: null, status: 'ausente',   supervisorOk: false, nota: 'Consulta médica — sem justificação submetida.' },
+  { id: 'PR-005', talentId: 'T-1042', talentName: 'Lwini Capemba',   date: '2026-04-25', dept: 'Banca de Empresas', entrada: '09:15', saida: '17:15', horas: 8.0, status: 'presente',  supervisorOk: true,  nota: '' },
+  { id: 'PR-006', talentId: 'T-1042', talentName: 'Lwini Capemba',   date: '2026-04-28', dept: 'Banca de Empresas', entrada: '09:00', saida: '17:30', horas: 8.5, status: 'presente',  supervisorOk: true,  nota: '' },
+  { id: 'PR-007', talentId: 'T-1042', talentName: 'Lwini Capemba',   date: '2026-04-29', dept: 'Banca de Empresas', entrada: '09:00', saida: '17:30', horas: 8.5, status: 'presente',  supervisorOk: true,  nota: '' },
+  { id: 'PR-008', talentId: 'T-1042', talentName: 'Lwini Capemba',   date: '2026-04-30', dept: 'Banca de Empresas', entrada: '09:00', saida: '17:30', horas: 8.5, status: 'presente',  supervisorOk: true,  nota: '' },
+  { id: 'PR-009', talentId: 'T-1042', talentName: 'Lwini Capemba',   date: '2026-05-02', dept: 'Banca de Empresas', entrada: '09:00', saida: '17:00', horas: 8.0, status: 'presente',  supervisorOk: true,  nota: '' },
+  { id: 'PR-010', talentId: 'T-1042', talentName: 'Lwini Capemba',   date: '2026-05-05', dept: 'Banca de Empresas', entrada: '08:50', saida: '17:30', horas: 8.7, status: 'presente',  supervisorOk: true,  nota: '' },
+  { id: 'PR-011', talentId: 'T-1042', talentName: 'Lwini Capemba',   date: '2026-05-06', dept: 'Banca de Empresas', entrada: '09:00', saida: '17:30', horas: 8.5, status: 'presente',  supervisorOk: true,  nota: '' },
+  { id: 'PR-012', talentId: 'T-1042', talentName: 'Lwini Capemba',   date: '2026-05-07', dept: 'Banca de Empresas', entrada: '09:00', saida: null,    horas: null, status: 'pendente',  supervisorOk: false, nota: 'Check-out pendente.' },
+  // ── Yuran Bumba (T-1045) — TI Sistemas ──────────────────────────────────
+  { id: 'PR-013', talentId: 'T-1045', talentName: 'Yuran Bumba',     date: '2026-04-28', dept: 'TI Sistemas',       entrada: '09:00', saida: '17:30', horas: 8.5, status: 'presente',  supervisorOk: true,  nota: '' },
+  { id: 'PR-014', talentId: 'T-1045', talentName: 'Yuran Bumba',     date: '2026-04-29', dept: 'TI Sistemas',       entrada: '09:15', saida: '17:45', horas: 8.5, status: 'presente',  supervisorOk: true,  nota: '' },
+  { id: 'PR-015', talentId: 'T-1045', talentName: 'Yuran Bumba',     date: '2026-04-30', dept: 'TI Sistemas',       entrada: null,    saida: null,    horas: null, status: 'ausente',   supervisorOk: false, nota: 'Sem justificação.' },
+  { id: 'PR-016', talentId: 'T-1045', talentName: 'Yuran Bumba',     date: '2026-05-02', dept: 'TI Sistemas',       entrada: '09:00', saida: '17:00', horas: 8.0, status: 'presente',  supervisorOk: true,  nota: '' },
+  { id: 'PR-017', talentId: 'T-1045', talentName: 'Yuran Bumba',     date: '2026-05-05', dept: 'TI Sistemas',       entrada: '09:00', saida: '17:30', horas: 8.5, status: 'presente',  supervisorOk: true,  nota: '' },
+  { id: 'PR-018', talentId: 'T-1045', talentName: 'Yuran Bumba',     date: '2026-05-06', dept: 'TI Sistemas',       entrada: '09:00', saida: '17:30', horas: 8.5, status: 'presente',  supervisorOk: true,  nota: '' },
+  { id: 'PR-019', talentId: 'T-1045', talentName: 'Yuran Bumba',     date: '2026-05-07', dept: 'TI Sistemas',       entrada: '09:00', saida: null,    horas: null, status: 'pendente',  supervisorOk: false, nota: '' },
+  // ── Kiala Domingos (T-1048) — Banca Privada ──────────────────────────────
+  { id: 'PR-020', talentId: 'T-1048', talentName: 'Kiala Domingos',  date: '2026-04-28', dept: 'Banca de Empresas', entrada: '09:00', saida: '17:30', horas: 8.5, status: 'presente',  supervisorOk: true,  nota: '' },
+  { id: 'PR-021', talentId: 'T-1048', talentName: 'Kiala Domingos',  date: '2026-04-29', dept: 'Banca de Empresas', entrada: '09:00', saida: '17:30', horas: 8.5, status: 'presente',  supervisorOk: true,  nota: '' },
+  { id: 'PR-022', talentId: 'T-1048', talentName: 'Kiala Domingos',  date: '2026-04-30', dept: 'Banca de Empresas', entrada: '09:00', saida: '17:30', horas: 8.5, status: 'presente',  supervisorOk: true,  nota: '' },
+  { id: 'PR-023', talentId: 'T-1048', talentName: 'Kiala Domingos',  date: '2026-05-02', dept: 'Banca de Empresas', entrada: null,    saida: null,    horas: null, status: 'justificado', supervisorOk: false, nota: 'Consulta médica com comprovativo.' },
+  { id: 'PR-024', talentId: 'T-1048', talentName: 'Kiala Domingos',  date: '2026-05-05', dept: 'Banca de Empresas', entrada: '09:00', saida: '17:30', horas: 8.5, status: 'presente',  supervisorOk: true,  nota: '' },
+  { id: 'PR-025', talentId: 'T-1048', talentName: 'Kiala Domingos',  date: '2026-05-06', dept: 'Banca de Empresas', entrada: '09:00', saida: '17:30', horas: 8.5, status: 'presente',  supervisorOk: true,  nota: '' },
+  { id: 'PR-026', talentId: 'T-1048', talentName: 'Kiala Domingos',  date: '2026-05-07', dept: 'Banca de Empresas', entrada: '09:00', saida: null,    horas: null, status: 'pendente',  supervisorOk: false, nota: '' },
+  // ── Fernando Ngoma (T-1050) — Operações ─────────────────────────────────
+  { id: 'PR-027', talentId: 'T-1050', talentName: 'Fernando Ngoma',  date: '2026-05-05', dept: 'Operações',         entrada: '09:00', saida: '17:30', horas: 8.5, status: 'presente',  supervisorOk: true,  nota: '' },
+  { id: 'PR-028', talentId: 'T-1050', talentName: 'Fernando Ngoma',  date: '2026-05-06', dept: 'Operações',         entrada: '09:30', saida: '17:30', horas: 8.0, status: 'presente',  supervisorOk: true,  nota: 'Chegou 30 min atrasado.' },
+  { id: 'PR-029', talentId: 'T-1050', talentName: 'Fernando Ngoma',  date: '2026-05-07', dept: 'Operações',         entrada: '09:00', saida: null,    horas: null, status: 'pendente',  supervisorOk: false, nota: '' },
+]
+
+// ── Sessões Bolseiros ─────────────────────────────────────────────────────────
+// Registo de presenças em sessões do programa (workshops, mentorias, avaliações)
+export const sessoesBolseiro: SessaoBolseiro[] = [
+  { id: 'SB-001', talentId: 'T-1043', talentName: 'Joaquim Tchindemba',    date: '2026-03-10', tipo: 'mentoria',  titulo: 'Sessão de mentoria — Plano académico Q2',      duracaoH: 1,   presente: true,  nota: 'Definidos objectivos para o semestre.' },
+  { id: 'SB-002', talentId: 'T-1043', talentName: 'Joaquim Tchindemba',    date: '2026-03-25', tipo: 'workshop',  titulo: 'Workshop: Gestão Financeira Pessoal',           duracaoH: 3,   presente: true,  nota: '' },
+  { id: 'SB-003', talentId: 'T-1043', talentName: 'Joaquim Tchindemba',    date: '2026-04-07', tipo: 'avaliacao', titulo: 'Avaliação intercalar 360° — Q1 2026',           duracaoH: 1.5, presente: true,  nota: '' },
+  { id: 'SB-004', talentId: 'T-1043', talentName: 'Joaquim Tchindemba',    date: '2026-04-14', tipo: 'mentoria',  titulo: 'Sessão de mentoria — Resultados intercalares',  duracaoH: 1,   presente: false, nota: 'Faltou sem aviso prévio.' },
+  { id: 'SB-005', talentId: 'T-1043', talentName: 'Joaquim Tchindemba',    date: '2026-04-28', tipo: 'formacao',  titulo: 'Formação: Banca e Compliance',                  duracaoH: 4,   presente: true,  nota: '' },
+  { id: 'SB-006', talentId: 'T-1043', talentName: 'Joaquim Tchindemba',    date: '2026-05-05', tipo: 'mentoria',  titulo: 'Sessão de mentoria — Preparação para exames',   duracaoH: 1,   presente: true,  nota: 'Muito motivado.' },
+  { id: 'SB-007', talentId: 'T-1044', talentName: 'Esperança Quimbamba',   date: '2026-03-12', tipo: 'mentoria',  titulo: 'Sessão de mentoria — Plano académico Q2',      duracaoH: 1,   presente: true,  nota: '' },
+  { id: 'SB-008', talentId: 'T-1044', talentName: 'Esperança Quimbamba',   date: '2026-03-25', tipo: 'workshop',  titulo: 'Workshop: Gestão Financeira Pessoal',           duracaoH: 3,   presente: false, nota: 'Faltou. Justificação enviada por email.' },
+  { id: 'SB-009', talentId: 'T-1044', talentName: 'Esperança Quimbamba',   date: '2026-04-07', tipo: 'avaliacao', titulo: 'Avaliação intercalar 360° — Q1 2026',           duracaoH: 1.5, presente: true,  nota: '' },
+  { id: 'SB-010', talentId: 'T-1044', talentName: 'Esperança Quimbamba',   date: '2026-04-28', tipo: 'formacao',  titulo: 'Formação: Banca e Compliance',                  duracaoH: 4,   presente: true,  nota: '' },
+  { id: 'SB-011', talentId: 'T-1044', talentName: 'Esperança Quimbamba',   date: '2026-05-05', tipo: 'mentoria',  titulo: 'Sessão de mentoria — Revisão relatório semestral', duracaoH: 1, presente: true,  nota: '' },
 ]
 // ─────────────────────────────────────────────────────────────────────────────

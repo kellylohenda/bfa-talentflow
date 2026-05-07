@@ -17,6 +17,36 @@ export type ApplicationStage = 'triagem' | 'entrevista1' | 'entrevista2' | 'aval
 export type ApplicationTipo = 'bolseiro' | 'estagiario' | 'voluntariado'
 export type RotationStatus = 'concluida' | 'activa' | 'agendada'
 
+// ── Presença / Horas ──────────────────────────────────────────────────────────
+export type PresencaStatus = 'presente' | 'ausente' | 'justificado' | 'pendente'
+export type SessaoTipo     = 'mentoria' | 'workshop' | 'avaliacao' | 'formacao' | 'evento'
+
+export interface Presenca {
+  id: string
+  talentId: string
+  talentName: string
+  date: string          // YYYY-MM-DD
+  dept: string
+  entrada: string | null   // HH:MM
+  saida: string | null     // HH:MM
+  horas: number | null
+  status: PresencaStatus
+  supervisorOk: boolean
+  nota: string
+}
+
+export interface SessaoBolseiro {
+  id: string
+  talentId: string
+  talentName: string
+  date: string
+  tipo: SessaoTipo
+  titulo: string
+  duracaoH: number
+  presente: boolean
+  nota: string
+}
+
 // ── Voluntariado ─────────────────────────────────────────────────────────────
 export type VolunteerStatus = 'activo' | 'inactivo' | 'desistente'
 export type ActivityStatus  = 'agendada' | 'em_curso' | 'concluida' | 'cancelada'

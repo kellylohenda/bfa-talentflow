@@ -1,6 +1,6 @@
 'use client'
 import { useState } from 'react'
-import { talents, tasks as initialTasks, absences, volunteers, hoursEntries, volunteerActivities } from '@/lib/data'
+import { talents, tasks as initialTasks, absences, volunteers, hoursEntries, volunteerActivities, presencas, sessoesBolseiro } from '@/lib/data'
 import KPI from '@/components/ui/KPI'
 import Pill from '@/components/ui/Pill'
 import Avatar from '@/components/ui/Avatar'
@@ -656,7 +656,40 @@ export default function MentorPage() {
                 </div>
 
                 {/* Activity summary */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
+                  {/* Presenças / Horas */}
+                  <div style={{ background: 'var(--surface-2)', borderRadius: 8, padding: '12px 14px' }}>
+                    <div style={{ fontSize: 11, opacity: 0.55, marginBottom: 8, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Presenças</div>
+                    {(() => {
+                      const mPres  = presencas.filter(p => p.talentId === m.id && p.date >= '2026-04-01')
+                      const mSess  = sessoesBolseiro.filter(s => s.talentId === m.id)
+                      const isEst  = m.program === 'fbfa'
+                      if (isEst) {
+                        const dias  = mPres.filter(p => p.status === 'presente').length
+                        const horas = mPres.filter(p => p.status === 'presente').reduce((s, p) => s + (p.horas ?? 0), 0)
+                        const valid = mPres.filter(p => p.status !== 'pendente')
+                        const taxa  = valid.length ? Math.round(dias / valid.length * 100) : null
+                        const today = mPres.find(p => p.date === '2026-05-07')
+                        return (
+                          <>
+                            <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 2 }}>{dias} dias · {horas.toFixed(0)}h</div>
+                            {taxa != null && <div style={{ fontSize: 12, color: taxa >= 90 ? 'var(--success)' : taxa >= 75 ? 'var(--warn)' : 'var(--danger)', fontWeight: 600, marginBottom: 4 }}>{taxa}% presença</div>}
+                            {today && <div style={{ fontSize: 11, opacity: 0.6 }}>Hoje: {today.entrada ?? 'Sem entrada'}{today.saida ? ` → ${today.saida}` : ''}</div>}
+                            {!today && <div style={{ fontSize: 11, opacity: 0.4 }}>Sem registo hoje</div>}
+                          </>
+                        )
+                      } else {
+                        const freq = mSess.filter(s => s.presente).length
+                        const horas = mSess.filter(s => s.presente).reduce((a, s) => a + s.duracaoH, 0)
+                        return (
+                          <>
+                            <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 2 }}>{freq}/{mSess.length} sessões</div>
+                            <div style={{ fontSize: 12, opacity: 0.65 }}>{horas}h de programa</div>
+                          </>
+                        )
+                      }
+                    })()}
+                  </div>
                   {/* Sessions */}
                   <div style={{ background: 'var(--surface-2)', borderRadius: 8, padding: '12px 14px' }}>
                     <div style={{ fontSize: 11, opacity: 0.55, marginBottom: 8, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Sessões</div>

@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { talents, programs } from '@/lib/data'
+import { talents, programs, presencas } from '@/lib/data'
 import { initials, avatarColor } from '@/lib/utils'
 import Avatar from '@/components/ui/Avatar'
 import KPI from '@/components/ui/KPI'
@@ -52,8 +52,20 @@ const buildInitialChecklist = (): ChecklistState => {
   return state
 }
 
+// ── Presença stats por estagiário ─────────────────────────────────────────────
+const HIST_START = '2026-04-01'
+function presStats(talentId: string) {
+  const recs   = presencas.filter(p => p.talentId === talentId && p.date >= HIST_START)
+  const pres   = recs.filter(p => p.status === 'presente')
+  const valid  = recs.filter(p => p.status !== 'pendente')
+  const horas  = pres.reduce((s, p) => s + (p.horas ?? 0), 0)
+  const taxa   = valid.length ? Math.round(pres.length / valid.length * 100) : null
+  const today  = recs.find(p => p.date === '2026-05-07')
+  return { dias: pres.length, horas, taxa, today }
+}
+
 export default function PageEstagiarios() {
-  const [activeTab, setActiveTab] = useState<'visao' | 'onboarding' | 'rotacoes' | 'avaliacoes'>('visao')
+  const [activeTab, setActiveTab] = useState<'visao' | 'presencas' | 'onboarding' | 'rotacoes' | 'avaliacoes'>('visao')
   const [checklist, setChecklist] = useState<ChecklistState>(buildInitialChecklist)
   const [showRotModal, setShowRotModal] = useState(false)
   const [rotations, setRotations] = useState(ROTATIONS)
@@ -134,16 +146,115 @@ export default function PageEstagiarios() {
       </div>
 
       <div className="tabs">
-        {(['visao', 'onboarding', 'rotacoes', 'avaliacoes'] as const).map(tab => (
+        {(['visao', 'presencas', 'onboarding', 'rotacoes', 'avaliacoes'] as const).map(tab => (
           <button
             key={tab}
             className={`tab${activeTab === tab ? ' tab--active' : ''}`}
             onClick={() => setActiveTab(tab)}
           >
-            {tab === 'visao' ? 'Visão Geral' : tab === 'onboarding' ? 'Onboarding' : tab === 'rotacoes' ? 'Rotações' : 'Avaliações'}
+            {tab === 'visao' ? 'Visão Geral' : tab === 'presencas' ? 'Presenças & Horas' : tab === 'onboarding' ? 'Onboarding' : tab === 'rotacoes' ? 'Rotações' : 'Avaliações'}
           </button>
         ))}
       </div>
+
+      {activeTab === 'presencas' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {/* Summary KPIs */}
+          <div className="grid cols-4">
+            <KPI label="Registos este mês" value={presencas.filter(p => p.date >= '2026-05-01').length} icon="calendar" />
+            <KPI label="Presentes hoje" value={presencas.filter(p => p.date === '2026-05-07' && p.status !== 'ausente').length} sub="7 de Maio" icon="check" />
+            <KPI label="Ausências (Abril+Maio)" value={presencas.filter(p => p.status === 'ausente').length} delta="Sem justificação" deltaTone="down" icon="x" />
+            <KPI label="Pendentes hoje" value={presencas.filter(p => p.date === '2026-05-07' && p.status === 'pendente').length} sub="Check-out em falta" icon="clock" />
+          </div>
+
+          {/* Per-intern table */}
+          <div className="card">
+            <div className="card-head">
+              <span className="card-title">Presenças por Estagiário</span>
+              <span style={{ fontSize: 12, opacity: 0.5 }}>Desde 1 de Abril</span>
+            </div>
+            <table className="tbl">
+              <thead>
+                <tr>
+                  <th>Estagiário</th>
+                  <th>Dept. actual</th>
+                  <th>Dias presentes</th>
+                  <th>Total horas</th>
+                  <th>Taxa presença</th>
+                  <th>Média h/dia</th>
+                  <th>Estado hoje</th>
+                </tr>
+              </thead>
+              <tbody>
+                {interns.map(t => {
+                  const s = presStats(t.id)
+                  const avgH = s.dias > 0 ? (s.horas / s.dias).toFixed(1) : '—'
+                  const todayStatus = s.today?.status ?? null
+                  return (
+                    <tr key={t.id}>
+                      <td>
+                        <div style={{ fontWeight: 600, fontSize: 13 }}>{t.name}</div>
+                        <div style={{ fontSize: 11, opacity: 0.5 }}>{t.id}</div>
+                      </td>
+                      <td style={{ fontSize: 13 }}>{t.dept}</td>
+                      <td style={{ fontSize: 13, fontWeight: 600 }}>{s.dias}</td>
+                      <td style={{ fontSize: 13, fontWeight: 600 }}>{s.horas.toFixed(0)}h</td>
+                      <td>
+                        {s.taxa != null ? (
+                          <span style={{ fontSize: 13, fontWeight: 700, color: s.taxa >= 90 ? 'var(--success)' : s.taxa >= 75 ? 'var(--warn)' : 'var(--danger)' }}>
+                            {s.taxa}%
+                          </span>
+                        ) : <span style={{ opacity: 0.35 }}>—</span>}
+                      </td>
+                      <td style={{ fontSize: 13 }}>{avgH !== '—' ? `${avgH}h` : '—'}</td>
+                      <td>
+                        {todayStatus === 'presente' && <span style={{ padding: '2px 8px', borderRadius: 10, fontSize: 11, fontWeight: 700, background: '#D1FAE5', color: '#065F46' }}>Presente</span>}
+                        {todayStatus === 'pendente' && <span style={{ padding: '2px 8px', borderRadius: 10, fontSize: 11, fontWeight: 700, background: '#F3F4F6', color: '#6B7280' }}>Em curso</span>}
+                        {todayStatus === 'ausente'  && <span style={{ padding: '2px 8px', borderRadius: 10, fontSize: 11, fontWeight: 700, background: '#FEE2E2', color: '#991B1B' }}>Ausente</span>}
+                        {!todayStatus              && <span style={{ opacity: 0.35, fontSize: 12 }}>Sem registo</span>}
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Detailed records */}
+          <div className="card">
+            <div className="card-head">
+              <span className="card-title">Registos detalhados</span>
+              <span style={{ fontSize: 12, opacity: 0.5 }}>{presencas.length} entradas</span>
+            </div>
+            <table className="tbl">
+              <thead>
+                <tr><th>Data</th><th>Estagiário</th><th>Departamento</th><th>Entrada</th><th>Saída</th><th>Horas</th><th>Estado</th><th>Supervisor</th></tr>
+              </thead>
+              <tbody>
+                {[...presencas].sort((a, b) => b.date.localeCompare(a.date)).map(p => (
+                  <tr key={p.id}>
+                    <td style={{ fontSize: 13 }}>{p.date}</td>
+                    <td style={{ fontSize: 13, fontWeight: 500 }}>{p.talentName}</td>
+                    <td style={{ fontSize: 13 }}>{p.dept}</td>
+                    <td style={{ fontSize: 13, fontFamily: 'monospace' }}>{p.entrada ?? '—'}</td>
+                    <td style={{ fontSize: 13, fontFamily: 'monospace' }}>{p.saida ?? '—'}</td>
+                    <td style={{ fontSize: 13, fontWeight: 600 }}>{p.horas != null ? `${p.horas}h` : '—'}</td>
+                    <td>
+                      <span style={{ padding: '2px 8px', borderRadius: 10, fontSize: 11, fontWeight: 700,
+                        background: p.status === 'presente' ? '#D1FAE5' : p.status === 'ausente' ? '#FEE2E2' : p.status === 'justificado' ? '#FEF3C7' : '#F3F4F6',
+                        color:      p.status === 'presente' ? '#065F46' : p.status === 'ausente' ? '#991B1B' : p.status === 'justificado' ? '#92400E' : '#6B7280',
+                      }}>
+                        {p.status === 'presente' ? 'Presente' : p.status === 'ausente' ? 'Ausente' : p.status === 'justificado' ? 'Justificado' : 'Pendente'}
+                      </span>
+                    </td>
+                    <td>{p.supervisorOk ? <span style={{ color: 'var(--success)', fontSize: 12 }}>✓</span> : <span style={{ opacity: 0.3, fontSize: 12 }}>—</span>}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
 
       {activeTab === 'visao' && (
         <div className="card">
