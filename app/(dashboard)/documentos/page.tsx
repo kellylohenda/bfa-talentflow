@@ -1,6 +1,10 @@
 'use client'
 import { useState } from 'react'
+import { useRole } from '@/lib/useRole'
 import Avatar from '@/components/ui/Avatar'
+
+const CURRENT_TALENT_ID: Partial<Record<string, string>> = { estagiario: 'T-1042', bolseiro: 'T-1043' }
+const MENTOR_MENTEE_IDS = new Set(['T-1042', 'T-1048', 'T-1058'])
 import KPI from '@/components/ui/KPI'
 import Pill from '@/components/ui/Pill'
 import Modal from '@/components/ui/Modal'
@@ -36,18 +40,33 @@ function statusLabel(s: DocStatus) {
 }
 
 export default function DocumentosPage() {
+  const role = useRole()
+  const isParticipant = role === 'bolseiro' || role === 'estagiario'
+  const isMentor = role === 'mentor'
+  const myTalentId = CURRENT_TALENT_ID[role]
+
+  const baseDocs = isParticipant ? DOCS.filter(d => d.talentId === myTalentId)
+                 : isMentor      ? DOCS.filter(d => MENTOR_MENTEE_IDS.has(d.talentId))
+                 : DOCS
+
   const [docs, setDocs] = useState<DocItem[]>(DOCS)
   const [filter, setFilter] = useState<DocStatus | 'all'>('all')
   const [search, setSearch] = useState('')
   const [solicitarModal, setSolicitarModal] = useState(false)
   const [solForm, setSolForm] = useState({ talentName: '', type: 'Boletim' as DocType, period: '', deadline: '' })
+  const [submitModal, setSubmitModal] = useState(false)
+  const [submitForm, setSubmitForm] = useState({ type: 'Relatório' as DocType, period: '', file: '' })
 
-  const pending = docs.filter(d => d.status === 'pendente').length
-  const submitted = docs.filter(d => d.status === 'submetido').length
-  const approved = docs.filter(d => d.status === 'aprovado').length
-  const rejected = docs.filter(d => d.status === 'rejeitado').length
+  const visibleBase = isParticipant ? docs.filter(d => d.talentId === myTalentId)
+                    : isMentor      ? docs.filter(d => MENTOR_MENTEE_IDS.has(d.talentId))
+                    : docs
 
-  const visible = docs.filter(d => {
+  const pending = visibleBase.filter(d => d.status === 'pendente').length
+  const submitted = visibleBase.filter(d => d.status === 'submetido').length
+  const approved = visibleBase.filter(d => d.status === 'aprovado').length
+  const rejected = visibleBase.filter(d => d.status === 'rejeitado').length
+
+  const visible = visibleBase.filter(d => {
     if (filter !== 'all' && d.status !== filter) return false
     if (search && !d.talentName.toLowerCase().includes(search.toLowerCase()) && !d.name.toLowerCase().includes(search.toLowerCase())) return false
     return true
@@ -61,10 +80,23 @@ export default function DocumentosPage() {
       <div className="page-head">
         <div>
           <h1 className="page-title">Documentos</h1>
-          <p className="page-subtitle">Gestão de documentos e submissões académicas</p>
+          <p className="page-subtitle">
+            {isParticipant ? 'Os meus documentos e submissões'
+             : isMentor    ? `Documentos dos meus mentorandos`
+             : 'Gestão de documentos e submissões académicas'}
+          </p>
         </div>
-        <button className="btn btn-primary" onClick={() => setSolicitarModal(true)}>Solicitar Documento</button>
+        {isParticipant
+          ? <button className="btn btn-primary" onClick={() => setSubmitModal(true)}>+ Submeter Documento</button>
+          : !isParticipant && !isMentor
+            ? <button className="btn btn-primary" onClick={() => setSolicitarModal(true)}>Solicitar Documento</button>
+            : null}
       </div>
+      {isMentor && (
+        <div style={{ marginBottom: 16, padding: '10px 14px', borderRadius: 8, background: '#FFF7ED', border: '1px solid #FED7AA', fontSize: 13, color: '#9A3412' }}>
+          A ver apenas documentos dos seus mentorandos. Pode aprovar ou rejeitar submissões.
+        </div>
+      )}
 
       <div className="grid cols-4" style={{ marginBottom: 24 }}>
         <KPI label="Pendentes" value={pending} sub="Por submeter" delta={pending > 2 ? 'Atenção' : 'OK'} deltaTone={pending > 2 ? 'flat' : 'up'} icon="clock" />
@@ -174,6 +206,54 @@ export default function DocumentosPage() {
                 }}
               >
                 Solicitar
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
+
+      {submitModal && (
+        <Modal title="Submeter Documento" onClose={() => setSubmitModal(false)}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div>
+                <label style={{ fontSize: 12, opacity: 0.6, display: 'block', marginBottom: 6 }}>Tipo *</label>
+                <select className="select" style={{ width: '100%' }} value={submitForm.type} onChange={e => setSubmitForm(f => ({ ...f, type: e.target.value as DocType }))}>
+                  {(['Boletim','Relatório','Contrato','Identificação','Comprovativo'] as DocType[]).map(t => <option key={t} value={t}>{t}</option>)}
+                </select>
+              </div>
+              <div>
+                <label style={{ fontSize: 12, opacity: 0.6, display: 'block', marginBottom: 6 }}>Período *</label>
+                <input className="input" style={{ width: '100%' }} placeholder="Ex: Q2 2026" value={submitForm.period} onChange={e => setSubmitForm(f => ({ ...f, period: e.target.value }))} />
+              </div>
+            </div>
+            <div>
+              <label style={{ fontSize: 12, opacity: 0.6, display: 'block', marginBottom: 6 }}>Ficheiro</label>
+              <input className="input" style={{ width: '100%' }} placeholder="Nome do ficheiro (ex: boletim_q2.pdf)" value={submitForm.file} onChange={e => setSubmitForm(f => ({ ...f, file: e.target.value }))} />
+            </div>
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 4 }}>
+              <button className="btn" onClick={() => setSubmitModal(false)}>Cancelar</button>
+              <button
+                className="btn btn-primary"
+                disabled={!submitForm.period.trim()}
+                onClick={() => {
+                  const today = new Date().toISOString().split('T')[0]
+                  setDocs(prev => [{
+                    id: `D-${String(prev.length + 1).padStart(3, '0')}`,
+                    talentId: myTalentId ?? '',
+                    talentName: myTalentId === 'T-1042' ? 'Lwini Capemba' : 'Joaquim Tchindemba',
+                    type: submitForm.type,
+                    name: `${submitForm.type} ${submitForm.period}`.trim(),
+                    period: submitForm.period,
+                    status: 'submetido',
+                    submittedAt: today,
+                    size: submitForm.file ? '—' : null,
+                  }, ...prev])
+                  setSubmitModal(false)
+                  setSubmitForm({ type: 'Relatório', period: '', file: '' })
+                }}
+              >
+                Submeter
               </button>
             </div>
           </div>

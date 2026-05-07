@@ -1,6 +1,6 @@
 'use client'
 
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { useState, useRef, useEffect } from 'react'
 import Icon from '@/components/ui/Icon'
 import { talents, payments, applications, workflows, tasks, bolseiroNotifs } from '@/lib/data'
@@ -30,6 +30,8 @@ const PATH_LABELS: Record<string, string> = {
   voluntarios:  'Voluntários',
   actividades:  'Actividades',
   horas:        'Horas',
+  chat:         'Mensagens',
+  notificacoes: 'Notificações',
 }
 
 type NotifTone = 'danger' | 'warn' | 'info' | 'neutral'
@@ -148,8 +150,58 @@ interface TopbarProps {
   onToggleTheme: () => void
 }
 
+interface SearchResult {
+  id: string
+  label: string
+  sub: string
+  icon: string
+  href: string
+  category: string
+}
+
+function runSearch(query: string, role: Role): SearchResult[] {
+  const q = query.toLowerCase().trim()
+  if (!q) return []
+  const results: SearchResult[] = []
+
+  if (role === 'rh' || role === 'direcao' || role === 'mentor') {
+    talents.slice(0, 30).forEach(t => {
+      if (t.name.toLowerCase().includes(q) || t.course.toLowerCase().includes(q)) {
+        results.push({ id: `t-${t.id}`, label: t.name, sub: `${t.course} · ${t.university}`, icon: 'user', href: `/talentos/${t.id}`, category: 'Talentos' })
+      }
+    })
+  }
+
+  if (role === 'rh') {
+    applications.slice(0, 20).forEach(a => {
+      if (a.name.toLowerCase().includes(q) || a.course.toLowerCase().includes(q)) {
+        results.push({ id: `a-${a.id}`, label: a.name, sub: `Candidatura · ${a.uni}`, icon: 'funnel', href: '/candidaturas', category: 'Candidaturas' })
+      }
+    })
+    payments.slice(0, 20).forEach(p => {
+      if (p.talentName.toLowerCase().includes(q) || p.type.toLowerCase().includes(q)) {
+        results.push({ id: `p-${p.id}`, label: `${p.type} — ${p.talentName}`, sub: `${p.period} · ${p.status}`, icon: 'cash', href: '/pagamentos', category: 'Pagamentos' })
+      }
+    })
+  }
+
+  tasks.slice(0, 30).forEach(t => {
+    if (t.title.toLowerCase().includes(q) || t.talentName.toLowerCase().includes(q)) {
+      results.push({ id: `tk-${t.id}`, label: t.title, sub: `Tarefa · ${t.talentName}`, icon: 'check', href: '/tarefas', category: 'Tarefas' })
+    }
+  })
+
+  const pages = Object.entries(PATH_LABELS).filter(([, v]) => v.toLowerCase().includes(q))
+  pages.forEach(([k, v]) => {
+    results.push({ id: `pg-${k}`, label: v, sub: `Página · /${k}`, icon: 'dashboard', href: `/${k}`, category: 'Páginas' })
+  })
+
+  return results.slice(0, 10)
+}
+
 export default function Topbar({ role, onToggleDesktop, onToggleMobile, theme, onToggleTheme }: TopbarProps) {
   const pathname = usePathname()
+  const router = useRouter()
   const segment = pathname.split('/').filter(Boolean)[0] ?? ''
   const label = PATH_LABELS[segment] ?? segment
 
@@ -158,10 +210,18 @@ export default function Topbar({ role, onToggleDesktop, onToggleMobile, theme, o
   const notifs = buildNotifications(role)
   const count = notifs.length
 
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchOpen, setSearchOpen] = useState(false)
+  const searchRef = useRef<HTMLDivElement>(null)
+  const searchResults = runSearch(searchQuery, role)
+
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
       if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
         setNotifOpen(false)
+      }
+      if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
+        setSearchOpen(false)
       }
     }
     document.addEventListener('mousedown', handleClick)
@@ -197,13 +257,64 @@ export default function Topbar({ role, onToggleDesktop, onToggleMobile, theme, o
       </div>
 
       {/* Search */}
-      <div className="tb-search">
+      <div className="tb-search" style={{ position: 'relative' }} ref={searchRef}>
         <Icon name="search" size={14} />
         <input
           className="input input-search"
           placeholder="Pesquisar..."
           type="search"
+          value={searchQuery}
+          onChange={e => { setSearchQuery(e.target.value); setSearchOpen(true) }}
+          onFocus={() => setSearchOpen(true)}
+          onKeyDown={e => {
+            if (e.key === 'Escape') { setSearchOpen(false); setSearchQuery('') }
+            if (e.key === 'Enter' && searchResults[0]) {
+              router.push(searchResults[0].href)
+              setSearchOpen(false); setSearchQuery('')
+            }
+          }}
         />
+        {searchOpen && searchQuery.length > 0 && (
+          <div style={{
+            position: 'absolute', top: 'calc(100% + 6px)', left: 0, right: 0,
+            background: 'var(--surface)', border: '1px solid var(--border)',
+            borderRadius: 10, boxShadow: '0 8px 24px rgba(0,0,0,0.12)', zIndex: 300,
+            overflow: 'hidden', minWidth: 320,
+          }}>
+            {searchResults.length === 0 ? (
+              <div style={{ padding: '16px', fontSize: 13, opacity: 0.45, textAlign: 'center' }}>Sem resultados para "{searchQuery}"</div>
+            ) : (
+              <>
+                {Array.from(new Set(searchResults.map(r => r.category))).map(cat => (
+                  <div key={cat}>
+                    <div style={{ padding: '8px 14px 4px', fontSize: 10, fontWeight: 700, opacity: 0.45, letterSpacing: '0.06em', textTransform: 'uppercase' }}>{cat}</div>
+                    {searchResults.filter(r => r.category === cat).map(r => (
+                      <div key={r.id}
+                        onClick={() => { router.push(r.href); setSearchOpen(false); setSearchQuery('') }}
+                        style={{
+                          display: 'flex', gap: 10, padding: '9px 14px', cursor: 'pointer',
+                          alignItems: 'center',
+                          transition: 'background 0.1s',
+                        }}
+                        onMouseEnter={e => (e.currentTarget.style.background = 'var(--surface-2)')}
+                        onMouseLeave={e => (e.currentTarget.style.background = '')}
+                      >
+                        <span style={{ opacity: 0.5 }}><Icon name={r.icon} size={14} /></span>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontSize: 13, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.label}</div>
+                          <div style={{ fontSize: 11, opacity: 0.5, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.sub}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ))}
+                <div style={{ padding: '8px 14px', borderTop: '1px solid var(--border)', fontSize: 11, opacity: 0.4 }}>
+                  Enter para ir ao primeiro resultado · Esc para fechar
+                </div>
+              </>
+            )}
+          </div>
+        )}
       </div>
 
       <div className="tb-spacer" />

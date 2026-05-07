@@ -49,6 +49,11 @@ export default function PageAgenda() {
   })
   const [filterTipo, setFilterTipo] = useState<EventoTipo | 'todos'>('todos')
   const [expandedEvent, setExpandedEvent] = useState<string | null>(null)
+  const [convocResponses, setConvocResponses] = useState<Record<string, 'aceite' | 'recusado'>>({})
+
+  const respondConvoc = (id: string, resp: 'aceite' | 'recusado') => {
+    setConvocResponses(prev => ({ ...prev, [id]: resp }))
+  }
 
   // ── Role-aware filtering ───────────────────────────────────────────────────
   const visibleEventos = eventos.filter(e => {
@@ -224,7 +229,8 @@ export default function PageAgenda() {
                   selectedEvents.map(e => {
                     const m = TIPO_META[e.tipo]
                     const enrolled = enrolledIds.has(e.id)
-                    const canEnroll = role === 'bolseiro' && !e.obrigatorio
+                    const canEnroll = (role === 'bolseiro' || role === 'estagiario' || role === 'mentor') && !e.obrigatorio && e.tipo !== 'convocatoria'
+                    const convocResp = convocResponses[e.id]
                     return (
                       <div key={e.id} style={{ marginBottom: 12, paddingBottom: 12, borderBottom: '1px solid var(--border)' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
@@ -234,6 +240,16 @@ export default function PageAgenda() {
                         <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 4 }}>{e.titulo}</div>
                         <div style={{ fontSize: 12, opacity: 0.6, marginBottom: 2 }}>{e.horaInicio} – {e.horaFim}</div>
                         <div style={{ fontSize: 12, opacity: 0.6, marginBottom: 8 }}>{e.local}</div>
+                        {e.tipo === 'convocatoria' && (role === 'bolseiro' || role === 'estagiario' || role === 'mentor') && (
+                          convocResp === 'aceite' ? <span style={{ fontSize: 12, color: '#065F46', fontWeight: 600 }}>✓ Presença confirmada</span>
+                          : convocResp === 'recusado' ? <span style={{ fontSize: 12, color: '#DC2626', fontWeight: 600 }}>✗ Recusado</span>
+                          : (
+                            <div style={{ display: 'flex', gap: 6 }}>
+                              <button className="btn btn-sm btn-primary" onClick={() => respondConvoc(e.id, 'aceite')}>Aceitar</button>
+                              <button className="btn btn-sm" style={{ borderColor: '#FCA5A5', color: '#DC2626' }} onClick={() => respondConvoc(e.id, 'recusado')}>Recusar</button>
+                            </div>
+                          )
+                        )}
                         {canEnroll && (
                           <button
                             className={`btn btn-sm${enrolled ? '' : ' btn-primary'}`}
@@ -243,7 +259,7 @@ export default function PageAgenda() {
                             {enrolled ? '✓ Inscrito' : 'Inscrever'}
                           </button>
                         )}
-                        {e.obrigatorio && (
+                        {e.obrigatorio && e.tipo !== 'convocatoria' && (
                           <span style={{ fontSize: 12, color: '#065F46', fontWeight: 600 }}>✓ Confirmado automaticamente</span>
                         )}
                       </div>
@@ -358,11 +374,26 @@ export default function PageAgenda() {
                     </div>
                   )}
 
-                  <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
                     <button className="btn btn-sm" onClick={() => setExpandedEvent(expanded ? null : e.id)} style={{ fontSize: 11 }}>
                       {expanded ? 'Menos info' : 'Mais info'}
                     </button>
-                    {canEnroll && (
+                    {e.tipo === 'convocatoria' && !past && (role === 'bolseiro' || role === 'estagiario' || role === 'mentor') && (() => {
+                      const resp = convocResponses[e.id]
+                      if (resp === 'aceite') return (
+                        <span style={{ fontSize: 12, color: '#065F46', fontWeight: 600 }}>✓ Presença confirmada</span>
+                      )
+                      if (resp === 'recusado') return (
+                        <span style={{ fontSize: 12, color: '#DC2626', fontWeight: 600 }}>✗ Recusado</span>
+                      )
+                      return (
+                        <>
+                          <button className="btn btn-sm btn-primary" onClick={() => respondConvoc(e.id, 'aceite')}>Aceitar</button>
+                          <button className="btn btn-sm" style={{ borderColor: '#FCA5A5', color: '#DC2626' }} onClick={() => respondConvoc(e.id, 'recusado')}>Recusar</button>
+                        </>
+                      )
+                    })()}
+                    {e.tipo !== 'convocatoria' && canEnroll && (
                       <button
                         className={`btn btn-sm${enrolled ? '' : ' btn-primary'}`}
                         style={enrolled ? { background: '#D1FAE5', color: '#065F46', borderColor: '#A7F3D0' } : {}}
@@ -371,7 +402,7 @@ export default function PageAgenda() {
                         {enrolled ? '✓ Inscrito' : '+ Inscrever'}
                       </button>
                     )}
-                    {e.obrigatorio && !past && (
+                    {e.tipo !== 'convocatoria' && e.obrigatorio && !past && (
                       <span style={{ fontSize: 12, color: '#065F46', fontWeight: 600 }}>✓ Presença confirmada</span>
                     )}
                     {past && (

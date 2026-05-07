@@ -2,7 +2,11 @@
 
 import { useState } from 'react'
 import { talents, programs } from '@/lib/data'
+import { useRole } from '@/lib/useRole'
 import type { Talent } from '@/types'
+
+const MENTOR_NAME = 'Edmilson Cardoso'
+const mentorMenteeIds = new Set(talents.filter(t => t.mentor === MENTOR_NAME).map(t => t.id))
 import Avatar from '@/components/ui/Avatar'
 import Pill from '@/components/ui/Pill'
 import KPI from '@/components/ui/KPI'
@@ -35,15 +39,17 @@ const DEFAULT_EVAL: EvalState = {
 }
 
 export default function AvaliacoesPage() {
+  const role = useRole()
+  const isMentor = role === 'mentor'
   const [submitted, setSubmitted] = useState<Set<string>>(new Set())
   const [selectedTalent, setSelectedTalent] = useState<Talent | null>(null)
   const [evalState, setEvalState] = useState<EvalState>(DEFAULT_EVAL)
 
-  // For Q2 2026 cycle, mark submitted for perf > 93
-  const isSubmitted = (t: Talent) =>
-    submitted.has(t.id) || t.perf > 93
+  const talentPool = isMentor ? talents.filter(t => mentorMenteeIds.has(t.id)) : talents
 
-  const evaluations = talents.map(t => ({
+  const isSubmitted = (t: Talent) => submitted.has(t.id) || t.perf > 93
+
+  const evaluations = talentPool.map(t => ({
     talent: t,
     submitted: isSubmitted(t),
   }))
@@ -85,13 +91,19 @@ export default function AvaliacoesPage() {
       <div className="page-head">
         <div>
           <h1 className="page-title">Avaliações 360°</h1>
-          <p className="page-subtitle">Ciclo {CYCLE} · Prazo {DUE}</p>
+          <p className="page-subtitle">{isMentor ? `Os meus mentorandos · ` : ''} Ciclo {CYCLE} · Prazo {DUE}</p>
         </div>
         <button className="btn btn-primary" onClick={() => window.print()}>
           <Icon name="download" size={15} />
           Exportar relatório
         </button>
       </div>
+
+      {isMentor && (
+        <div style={{ marginBottom: 16, padding: '10px 14px', borderRadius: 8, background: '#FFF7ED', border: '1px solid #FED7AA', fontSize: 13, color: '#9A3412' }}>
+          A ver apenas os seus mentorandos ({mentorMenteeIds.size} talentos). Submeta avaliações até {DUE}.
+        </div>
+      )}
 
       {/* KPIs */}
       <div className="grid cols-4" style={{ marginBottom: 24 }}>
