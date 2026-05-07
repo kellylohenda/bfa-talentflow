@@ -1,6 +1,7 @@
 'use client'
 import { useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 
 const STEPS = [
   { id: 1, title: 'Programa',      desc: 'Escolha do percurso' },
@@ -40,10 +41,13 @@ const INIT: FormData = {
 }
 
 export default function CandidaturaPage() {
+  const router = useRouter()
   const [step, setStep] = useState(1)
   const [done, setDone] = useState<number[]>([])
   const [d, setD] = useState<FormData>(INIT)
-  const [ref] = useState(() => `BFA-2026-${Math.floor(Math.random() * 9000 + 1000)}`)
+  const [ref, setRef] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState('')
 
   const set = (k: keyof FormData, v: string | boolean | null) => setD(prev => ({ ...prev, [k]: v }))
 
@@ -64,6 +68,28 @@ export default function CandidaturaPage() {
   const prev = () => { setStep(s => s - 1); window.scrollTo({ top: 0 }) }
 
   const progName = PROGRAMS.find(p => p.id === d.program)?.name ?? ''
+
+  async function handleSubmit() {
+    setSubmitting(true)
+    setSubmitError('')
+    try {
+      const res = await fetch('/api/candidaturas', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(d),
+      })
+      if (!res.ok) throw new Error()
+      const { ref: newRef } = await res.json()
+      setRef(newRef)
+      setDone(prev => [...prev, 6])
+      setStep(7)
+      window.scrollTo({ top: 0 })
+    } catch {
+      setSubmitError('Erro ao submeter. Verifica a tua ligação e tenta de novo.')
+    } finally {
+      setSubmitting(false)
+    }
+  }
 
   return (
     <>
@@ -176,10 +202,12 @@ export default function CandidaturaPage() {
                 </svg>
               </div>
               <h1>Candidatura submetida!</h1>
-              <p>Obrigado, {d.nome.split(' ')[0] || 'candidato'}. Recebemos a tua candidatura ao programa <b>{progName}</b>. Vamos enviar uma confirmação para <b>{d.email}</b> nos próximos minutos.</p>
+              <p>Obrigado, {d.nome.split(' ')[0] || 'candidato'}. Recebemos a tua candidatura ao programa <b>{progName}</b>. Enviámos uma confirmação para <b>{d.email}</b>.</p>
               <div className="success-ref">Referência · <b>{ref}</b></div>
-              <p style={{ fontSize: 13 }}><b>Próximos passos:</b><br />Análise inicial em até 14 dias úteis. Se passares à fase seguinte, recebes convite para a prova online em Julho.</p>
-              <Link href="/programa" className="pub-cta" style={{ marginTop: 24, padding: '12px 22px', display: 'inline-flex' }}>Voltar ao programa</Link>
+              <p style={{ fontSize: 13 }}><b>Próximos passos:</b><br />Análise inicial em até 14 dias úteis. Podes acompanhar o estado no portal do candidato.</p>
+              <Link href="/portal" className="pub-cta" style={{ marginTop: 24, padding: '12px 22px', display: 'inline-flex', background: '#FF7607' }}>Ver estado da candidatura →</Link>
+              <br />
+              <Link href="/programa" className="pub-cta" style={{ marginTop: 12, padding: '10px 20px', display: 'inline-flex', background: '#fff', color: '#1A1A1A', border: '1px solid #E7E5E1' }}>Voltar ao programa</Link>
             </div>
           </div>
         </div>
@@ -402,11 +430,14 @@ export default function CandidaturaPage() {
               </>
             )}
 
+            {submitError && (
+              <div style={{ background: '#FEE2E2', color: '#991B1B', padding: '10px 14px', borderRadius: 8, fontSize: 13, marginTop: 16 }}>{submitError}</div>
+            )}
             <div className="form-actions">
               <button className="btn-back" onClick={prev} disabled={step === 1}>← Voltar</button>
               {step < 6
                 ? <button className="btn-next" onClick={next} disabled={!valid[step]}>Continuar →</button>
-                : <button className="btn-submit" onClick={() => { setDone(prev => [...prev, 6]); setStep(7); window.scrollTo({ top: 0 }) }} disabled={!valid[6]}>Submeter candidatura</button>
+                : <button className="btn-submit" onClick={handleSubmit} disabled={!valid[6] || submitting}>{submitting ? 'A enviar…' : 'Submeter candidatura'}</button>
               }
             </div>
           </div>

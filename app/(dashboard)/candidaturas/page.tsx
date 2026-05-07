@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { applications, stages, programs } from '@/lib/data'
 import type { Application } from '@/types'
+import type { CandidaturaRecord } from '@/lib/store'
 import Pill from '@/components/ui/Pill'
 import KPI from '@/components/ui/KPI'
 import Modal from '@/components/ui/Modal'
@@ -28,8 +29,54 @@ function stageLabel(stageId: string) {
   return stages.find(s => s.id === stageId)?.label ?? stageId
 }
 
+const PROG_NAMES: Record<string, string> = {
+  fbfa: 'Futuro BFA',
+  bif:  'Bolsa Internacional',
+  bnac: 'Bolsa Nacional',
+  lid:  'Programa Liderança+',
+  mest: 'Mestrado Patrocinado',
+}
+
+function StatusPill({ status }: { status: CandidaturaRecord['status'] }) {
+  const cfg = {
+    pendente:  { bg: '#FEF3C7', color: '#92400E', label: 'Pendente' },
+    aprovada:  { bg: '#D1FAE5', color: '#065F46', label: 'Aprovada' },
+    recusada:  { bg: '#FEE2E2', color: '#991B1B', label: 'Recusada' },
+  }[status]
+  return (
+    <span style={{ background: cfg.bg, color: cfg.color, padding: '2px 10px', borderRadius: 20, fontSize: 12, fontWeight: 600 }}>
+      {cfg.label}
+    </span>
+  )
+}
+
 export default function CandidaturasPage() {
   const [selected, setSelected] = useState<Application | null>(null)
+  const [realCandidaturas, setRealCandidaturas] = useState<CandidaturaRecord[]>([])
+  const [loadingReal, setLoadingReal] = useState(true)
+  const [actionLoading, setActionLoading] = useState<string | null>(null)
+
+  useEffect(() => {
+    fetch('/api/candidaturas')
+      .then(r => r.json())
+      .then(setRealCandidaturas)
+      .catch(() => {})
+      .finally(() => setLoadingReal(false))
+  }, [])
+
+  async function updateStatus(ref: string, status: 'aprovada' | 'recusada') {
+    setActionLoading(ref + status)
+    try {
+      await fetch(`/api/candidaturas/${ref}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status }),
+      })
+      setRealCandidaturas(prev => prev.map(c => c.ref === ref ? { ...c, status } : c))
+    } finally {
+      setActionLoading(null)
+    }
+  }
 
   const total = applications.length
   const inProcess = applications.filter(a => !['oferta', 'rejeitado'].includes(a.stage)).length
@@ -274,6 +321,79 @@ export default function CandidaturasPage() {
             })}
           </tbody>
         </table>
+      </div>
+
+      {/* Real portal submissions */}
+      <div className="card" style={{ marginTop: 24 }}>
+        <div className="card-head">
+          <span className="card-title">Candidaturas recebidas via portal</span>
+          <span style={{ fontSize: 12, opacity: 0.55 }}>{realCandidaturas.length} {realCandidaturas.length === 1 ? 'registo' : 'registos'}</span>
+        </div>
+        {loadingReal ? (
+          <p style={{ padding: '20px 0', fontSize: 13, opacity: 0.5 }}>A carregar…</p>
+        ) : realCandidaturas.length === 0 ? (
+          <p style={{ padding: '20px 0', fontSize: 13, opacity: 0.5 }}>Nenhuma candidatura submetida pelo portal ainda.</p>
+        ) : (
+          <table className="tbl">
+            <thead>
+              <tr>
+                <th>Referência</th>
+                <th>Nome</th>
+                <th>Programa</th>
+                <th>Curso · Universidade</th>
+                <th>Média</th>
+                <th>Estado</th>
+                <th>Submetida em</th>
+                <th>Acções</th>
+              </tr>
+            </thead>
+            <tbody>
+              {realCandidaturas.map(c => (
+                <tr key={c.ref}>
+                  <td style={{ fontFamily: 'monospace', fontSize: 12, opacity: 0.7 }}>{c.ref}</td>
+                  <td>
+                    <div className="cell-person">
+                      <Avatar name={c.nome} size={28} />
+                      <div className="meta">
+                        <span className="name">{c.nome}</span>
+                        <span className="sub">{c.email}</span>
+                      </div>
+                    </div>
+                  </td>
+                  <td style={{ fontSize: 13 }}>{PROG_NAMES[c.program] ?? c.program}</td>
+                  <td style={{ fontSize: 13 }}>{c.curso} · {c.uni}</td>
+                  <td style={{ fontSize: 13 }}>{c.media}/20</td>
+                  <td><StatusPill status={c.status} /></td>
+                  <td style={{ fontSize: 12, opacity: 0.6 }}>{new Date(c.submittedAt).toLocaleDateString('pt-PT')}</td>
+                  <td>
+                    {c.status === 'pendente' ? (
+                      <div style={{ display: 'flex', gap: 6 }}>
+                        <button
+                          className="btn btn-sm"
+                          style={{ background: '#065F46', color: '#fff', borderColor: '#065F46' }}
+                          disabled={!!actionLoading}
+                          onClick={() => updateStatus(c.ref, 'aprovada')}
+                        >
+                          {actionLoading === c.ref + 'aprovada' ? '…' : 'Aprovar'}
+                        </button>
+                        <button
+                          className="btn btn-sm"
+                          style={{ background: '#FEE2E2', color: '#991B1B', borderColor: '#FCA5A5' }}
+                          disabled={!!actionLoading}
+                          onClick={() => updateStatus(c.ref, 'recusada')}
+                        >
+                          {actionLoading === c.ref + 'recusada' ? '…' : 'Recusar'}
+                        </button>
+                      </div>
+                    ) : (
+                      <span style={{ fontSize: 12, opacity: 0.5 }}>—</span>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
 
       {/* Detail Modal */}
