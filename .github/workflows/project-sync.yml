@@ -1,0 +1,17 @@
+name: Sync to HLT Master Board
+
+on:
+  issues:
+    types: [opened, assigned, closed]
+  pull_request:
+    types: [closed]
+
+jobs:
+  sync:
+    uses: hard-life-tech/.github/.github/workflows/project-sync.yml@main
+    with:
+      duo: "Helson + Kelly"
+      phase: "team testing/refactor"
+      project_name: "BFA TalentFlow"
+    secrets:
+      PROJECT_TOKEN: ${{ secrets.PROJECT_TOKEN }}
