@@ -88,9 +88,9 @@ export default function SucessaoIndex({ data, resumo }: Props) {
                         potencialLevels.map((pot, col) => {
                             const talents = grid[row][col];
                             return (
-                                <Card key={`${row}-${col}`} className={`${boxColors[row][col]} border-2`}>
+                                <Card key={`${row}-${col}`} className={`${boxColors[row][col]} border-2 text-foreground`}>
                                     <CardHeader className="pb-2">
-                                        <CardTitle className="text-xs font-medium">
+                                        <CardTitle className="text-xs font-medium text-foreground">
                                             {boxLabels[row][col]}
                                         </CardTitle>
                                         <p className="text-[10px] text-muted-foreground">
@@ -99,9 +99,9 @@ export default function SucessaoIndex({ data, resumo }: Props) {
                                     </CardHeader>
                                     <CardContent className="space-y-1">
                                         {talents.map((t) => (
-                                            <div key={t.id} className="flex items-center justify-between rounded bg-background/80 px-2 py-1 text-xs">
+                                            <div key={t.id} className="flex items-center justify-between rounded bg-background/60 px-2 py-1 text-xs text-foreground">
                                                 <span className="font-medium truncate">{t.name}</span>
-                                                <Badge variant="outline" className="text-[10px]">{t.status}</Badge>
+                                                <Badge variant="outline" className="text-[10px] text-foreground">{t.status}</Badge>
                                             </div>
                                         ))}
                                         {talents.length === 0 && (

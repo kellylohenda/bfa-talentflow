@@ -1,4 +1,4 @@
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Eye, Plus, X } from 'lucide-react';
 import { TablePagination } from '@/components/table-pagination';
 import Heading from '@/components/heading';
@@ -102,7 +102,7 @@ export default function WorkflowsIndex({ workflows, filters }: Props) {
                                     <td className="px-4 py-3">
                                         <div className="flex justify-end">
                                             <Button variant="ghost" size="sm" asChild>
-                                                <Link href={show([team, w.id]).url}><Eye className="h-4 w-4" /></Link>
+                                                <Link href={show({ workflow: w.id }).url}><Eye className="h-4 w-4" /></Link>
                                             </Button>
                                         </div>
                                     </td>

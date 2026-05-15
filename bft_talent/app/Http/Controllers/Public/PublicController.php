@@ -10,7 +10,6 @@ use App\Models\Program;
 use App\Models\Stage;
 use App\Models\Talent;
 use App\Models\University;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -50,7 +49,7 @@ class PublicController extends Controller
         ]);
     }
 
-    public function candidaturaStore(Request $request): JsonResponse
+    public function candidaturaStore(Request $request): RedirectResponse
     {
         $validated = $request->validate([
             'program_code' => ['required', 'string', 'exists:programs,code'],
@@ -95,7 +94,7 @@ class PublicController extends Controller
             'observacoes' => $obs ?: null,
         ]);
 
-        return response()->json(['ref' => $ref]);
+        return to_route('candidatura')->with('ref', $ref);
     }
 
     public function portal(): Response

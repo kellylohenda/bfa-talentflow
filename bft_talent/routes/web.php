@@ -81,6 +81,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('horas', [HorasController::class, 'index'])->name('horas.index');
     Route::get('chat', [ChatController::class, 'index'])->name('chat.index');
     Route::get('notificacoes', [NotificacoesController::class, 'index'])->name('notificacoes.index');
+    Route::patch('notificacoes/{id}', [NotificacoesController::class, 'markAsRead'])->name('notificacoes.mark-as-read');
+    Route::post('notificacoes/read-all', [NotificacoesController::class, 'markAllAsRead'])->name('notificacoes.read-all');
     Route::get('geografia', [GeografiaController::class, 'index'])->name('geografia.index');
     Route::get('roi', [RoiController::class, 'index'])->name('roi.index');
     Route::get('compliance', [ComplianceController::class, 'index'])->name('compliance.index');

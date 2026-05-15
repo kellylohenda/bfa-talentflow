@@ -13,25 +13,29 @@ class BolseiroController extends Controller
     {
         $user = $request->user();
 
-        $talents = Talent::query()
-            ->whereIn('kind', ['bolseiro'])
-            ->with(['program', 'university', 'department', 'mentor'])
-            ->latest()
-            ->paginate(25)
-            ->withQueryString();
-
         $bolseiro = Talent::where('user_id', $user->id)->first();
 
         $payments = $bolseiro?->payments()->latest()->get() ?? collect();
         $tasks = $bolseiro?->tasks()->latest()->get() ?? collect();
         $mentorSessions = $bolseiro?->mentorSessions()->latest()->get() ?? collect();
 
+        $tarefasPendentes = $tasks->where('status', '!=', 'concluida')->count();
+        $pagamentosPendentes = $payments->where('status', 'pendente')->count();
+        $sessoesMes = $mentorSessions
+            ->filter(fn ($s) => $s->scheduled_at?->isCurrentMonth())
+            ->count();
+        $desempenho = $bolseiro?->perf ?? 0;
+
         return Inertia::render('bolseiro/index', [
-            'talents' => $talents,
-            'bolseiro' => $bolseiro,
-            'payments' => $payments,
-            'tasks' => $tasks,
-            'mentorSessions' => $mentorSessions,
+            'kpis' => [
+                'tarefasPendentes' => $tarefasPendentes,
+                'pagamentosPendentes' => $pagamentosPendentes,
+                'sessoesMes' => $sessoesMes,
+                'desempenho' => $desempenho,
+            ],
+            'mentor' => $bolseiro?->mentor,
+            'tarefas' => $tasks,
+            'pagamentos' => $payments,
         ]);
     }
 }

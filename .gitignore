@@ -41,3 +41,5 @@ dist/
 npm-debug.log*
 .remember/
 .claude/
+CREDENCIAIS.md
+bft_talent/testing

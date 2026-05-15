@@ -16,6 +16,10 @@ class HoursEntry extends Model
         'validado', 'validado_por_user_id', 'validado_at',
     ];
 
+    protected $appends = [
+        'date', 'hours', 'status',
+    ];
+
     protected function casts(): array
     {
         return [
@@ -39,5 +43,27 @@ class HoursEntry extends Model
     public function validadoPor(): BelongsTo
     {
         return $this->belongsTo(User::class, 'validado_por_user_id');
+    }
+
+    public function getDateAttribute(): ?string
+    {
+        return $this->data?->toDateString();
+    }
+
+    public function getHoursAttribute(): string
+    {
+        return $this->horas;
+    }
+
+    public function getStatusAttribute(): string
+    {
+        if ($this->validado === true) {
+            return 'validado';
+        }
+        if ($this->validado === false) {
+            return 'rejeitado';
+        }
+
+        return 'pendente';
     }
 }

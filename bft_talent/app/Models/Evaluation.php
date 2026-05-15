@@ -16,6 +16,10 @@ class Evaluation extends Model
         'pontos_fortes', 'areas_melhoria', 'comentarios',
     ];
 
+    protected $appends = [
+        'feedback', 'criterio', 'periodo',
+    ];
+
     public function talent(): BelongsTo
     {
         return $this->belongsTo(Talent::class);
@@ -29,5 +33,30 @@ class Evaluation extends Model
     public function evaluator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'evaluator_user_id');
+    }
+
+    public function target(): BelongsTo
+    {
+        return $this->belongsTo(Talent::class, 'talent_id');
+    }
+
+    public function reviewer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'evaluator_user_id');
+    }
+
+    public function getFeedbackAttribute(): ?string
+    {
+        return $this->comentarios;
+    }
+
+    public function getCriterioAttribute(): string
+    {
+        return $this->tipo;
+    }
+
+    public function getPeriodoAttribute(): string
+    {
+        return $this->period;
     }
 }

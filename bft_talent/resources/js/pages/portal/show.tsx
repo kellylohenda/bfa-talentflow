@@ -112,7 +112,7 @@ export default function PortalShow({ application, stages }: { application: Appli
                         })}
                     </div>
 
-                    <Link href={portal()} style={{ display: 'block', textAlign: 'center', fontSize: 13, color: 'var(--text-3)', textDecoration: 'none', padding: 8 }}>
+                    <Link href={portal().url} style={{ display: 'block', textAlign: 'center', fontSize: 13, color: 'var(--text-3)', textDecoration: 'none', padding: 8 }}>
                         ← Voltar ao portal
                     </Link>
                 </div>

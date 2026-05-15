@@ -32,7 +32,7 @@ export default function DocumentosIndex({ documentos, filters }: Props) {
 
     function handleDelete(d: Document) {
         if (confirm(`Remover documento "${d.name}"?`)) {
-            router.delete(destroy([team, d.id]).url);
+            router.delete(destroy({ documento: d.id }).url);
         }
     }
 
@@ -88,7 +88,7 @@ export default function DocumentosIndex({ documentos, filters }: Props) {
                                     <td className="px-4 py-3">
                                         <div className="flex items-center justify-end gap-1">
                                             <Button variant="ghost" size="sm" asChild>
-                                                <Link href={show([team, d.id]).url}><Eye className="h-4 w-4" /></Link>
+                                                <Link href={show({ documento: d.id }).url}><Eye className="h-4 w-4" /></Link>
                                             </Button>
                                             <Button variant="ghost" size="sm" onClick={() => handleDelete(d)}>
                                                 <Trash2 className="h-4 w-4 text-destructive" />

@@ -1,7 +1,7 @@
 import { Head, Link } from '@inertiajs/react';
-import { Users, ClipboardList, CreditCard, HandHeart, Calendar, TrendingUp, AlertTriangle, ArrowUpRight } from 'lucide-react';
+import { Users, ClipboardList, CreditCard, HandHeart, Calendar, TrendingUp, AlertTriangle, ArrowUpRight, LayoutGrid } from 'lucide-react';
 
-type Stat = { label: string; value: number | string; icon: typeof LayoutGrid; color: string };
+type Stat = { label: string; value: number | string; color: string };
 
 type Props = {
     stats: {
@@ -41,15 +41,15 @@ export default function Dashboard({ stats, talentsByProgram, talentsByStatus, re
     };
 
     const kpis: Stat[] = [
-        { label: 'Total Talentos', value: stats.totalTalents, icon: Users, color: '#FF7607' },
-        { label: 'Activos', value: stats.activeTalents, icon: TrendingUp, color: '#0E7C4A' },
-        { label: 'Candidaturas', value: stats.totalApplications, icon: ClipboardList, color: '#1D4ED8' },
-        { label: 'Pagamentos', value: `${stats.totalPayments}`, icon: CreditCard, color: '#7C3AED' },
+        { label: 'Total Talentos', value: stats.totalTalents, color: '#FF7607' },
+        { label: 'Activos', value: stats.activeTalents, color: '#0E7C4A' },
+        { label: 'Candidaturas', value: stats.totalApplications, color: '#1D4ED8' },
+        { label: 'Pagamentos', value: `${stats.totalPayments}`, color: '#7C3AED' },
     ];
 
     const secondaryKpis: Stat[] = [
-        { label: 'Voluntários', value: stats.totalVolunteers, icon: HandHeart, color: '#0891B2' },
-        { label: 'Eventos', value: stats.totalEvents, icon: Calendar, color: '#B45309' },
+        { label: 'Voluntários', value: stats.totalVolunteers, color: '#0891B2' },
+        { label: 'Eventos', value: stats.totalEvents, color: '#B45309' },
     ];
 
     const talentRiskCount = topTalents.filter(t => parseFloat(t.risk_score) > 0.3).length;

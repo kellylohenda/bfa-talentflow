@@ -26,20 +26,11 @@ export function AppSidebarHeader({
 
     return (
         <header className="topbar">
-            {/* Desktop collapse toggle */}
+            {/* Hamburger — collapse sidebar on desktop, overlay on mobile */}
             <button
                 className="btn btn-ghost tb-toggle-desktop"
-                onClick={onToggleDesktop}
+                onClick={() => window.innerWidth <= 768 ? onToggleMobile() : onToggleDesktop()}
                 title={collapsed ? 'Expandir menu' : 'Colapsar menu'}
-                style={{ padding: '6px', flexShrink: 0 }}
-            >
-                <Menu size={18} />
-            </button>
-
-            {/* Mobile hamburger */}
-            <button
-                className="btn btn-ghost tb-toggle-mobile"
-                onClick={onToggleMobile}
                 aria-label="Abrir menu"
                 style={{ padding: '6px', flexShrink: 0 }}
             >

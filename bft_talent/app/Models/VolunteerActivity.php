@@ -17,6 +17,10 @@ class VolunteerActivity extends Model
         'vagas_total', 'inscritos_count', 'status', 'descricao',
     ];
 
+    protected $appends = [
+        'title', 'description', 'area', 'date', 'vagas', 'total_horas',
+    ];
+
     protected function casts(): array
     {
         return ['data' => 'date'];
@@ -35,5 +39,35 @@ class VolunteerActivity extends Model
     public function hoursEntries(): HasMany
     {
         return $this->hasMany(HoursEntry::class, 'activity_id');
+    }
+
+    public function getTitleAttribute(): string
+    {
+        return $this->nome;
+    }
+
+    public function getDescriptionAttribute(): ?string
+    {
+        return $this->descricao;
+    }
+
+    public function getAreaAttribute(): string
+    {
+        return $this->tipo;
+    }
+
+    public function getDateAttribute(): ?string
+    {
+        return $this->data?->toDateString();
+    }
+
+    public function getVagasAttribute(): ?int
+    {
+        return $this->vagas_total;
+    }
+
+    public function getTotalHorasAttribute(): float
+    {
+        return (float) $this->hoursEntries()->sum('horas');
     }
 }

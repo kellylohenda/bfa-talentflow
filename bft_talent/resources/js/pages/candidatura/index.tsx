@@ -157,7 +157,7 @@ export default function CandidaturaIndex({ programs }: { programs: Program[] }) 
             preserveState: true,
             preserveScroll: true,
             onSuccess: (page) => {
-                const responseRef = (page.props as Record<string, unknown>).ref as string;
+                const responseRef = (page.props.flash as Record<string, unknown>)?.ref as string | undefined;
                 if (responseRef) {
                     setRef(responseRef);
                     setStep(6);

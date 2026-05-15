@@ -15,6 +15,7 @@ class FaltasController extends Controller
         $absences = Absence::query()
             ->with(['talent'])
             ->when($request->input('status'), fn ($q, $v) => $q->where('status', $v))
+            ->when($request->input('type'), fn ($q, $v) => $q->where('tipo', $v))
             ->when($request->input('search'), fn ($q, $s) => $q->where(function ($q) use ($s) {
                 $q->where('motivo', 'like', "%{$s}%");
             }))
@@ -23,8 +24,8 @@ class FaltasController extends Controller
             ->withQueryString();
 
         return Inertia::render('faltas/index', [
-            'absences' => $absences,
-            'filters' => $request->only(['status', 'search']),
+            'faltas' => $absences,
+            'filters' => $request->only(['status', 'search', 'type']),
         ]);
     }
 
@@ -52,7 +53,7 @@ class FaltasController extends Controller
     public function show(Request $request, Absence $falta): Response
     {
         return Inertia::render('faltas/show', [
-            'absence' => $falta->load(['talent']),
+            'falta' => $falta->load(['talent']),
         ]);
     }
 

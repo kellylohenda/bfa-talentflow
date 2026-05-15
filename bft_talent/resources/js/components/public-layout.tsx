@@ -1,6 +1,6 @@
 import { Link } from '@inertiajs/react';
 import { Menu, Moon, Sun, X } from 'lucide-react';
-import { candidatura, home, portal } from '@/routes';
+import { candidatura, home, login, portal, register } from '@/routes';
 import { useState, type ReactNode } from 'react';
 import { useAppearance } from '@/hooks/use-appearance';
 
@@ -165,12 +165,14 @@ export function PublicLayout({ children }: { children: ReactNode }) {
             `}</style>
             <header className="pl-header">
                 <div className="pl-header-inner">
-                    <Link href={home()} className="pl-logo">
+                    <Link href={home().url} className="pl-logo">
                         <div className="pl-logo-badge">B</div>
                         BFA Talento
                     </Link>
                     <nav className="pl-nav">
-                        <Link href={portal()} className="pl-nav-link">Portal candidato</Link>
+                        <Link href={portal().url} className="pl-nav-link">Portal candidato</Link>
+                        <Link href={login().url} className="pl-nav-link">Entrar</Link>
+                        <Link href={register().url} className="pl-nav-link">Registar</Link>
                         <button
                             onClick={() => updateAppearance(resolvedAppearance === 'dark' ? 'light' : 'dark')}
                             aria-label={resolvedAppearance === 'dark' ? 'Modo claro' : 'Modo escuro'}
@@ -178,7 +180,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
                         >
                             {resolvedAppearance === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
                         </button>
-                        <Link href={candidatura()} className="pl-nav-cta">Candidatar-me →</Link>
+                        <Link href={candidatura().url} className="pl-nav-cta">Candidatar-me →</Link>
                     </nav>
                     <button
                         className="pl-hamburger"
@@ -189,7 +191,9 @@ export function PublicLayout({ children }: { children: ReactNode }) {
                     </button>
                 </div>
                 <div className={`pl-mobile-menu${menuOpen ? ' open' : ''}`}>
-                    <Link href={portal()} className="pl-mobile-link" onClick={() => setMenuOpen(false)}>Portal candidato</Link>
+                    <Link href={portal().url} className="pl-mobile-link" onClick={() => setMenuOpen(false)}>Portal candidato</Link>
+                    <Link href={login().url} className="pl-mobile-link" onClick={() => setMenuOpen(false)}>Entrar</Link>
+                    <Link href={register().url} className="pl-mobile-link" onClick={() => setMenuOpen(false)}>Registar</Link>
                     <button
                         onClick={() => { updateAppearance(resolvedAppearance === 'dark' ? 'light' : 'dark'); setMenuOpen(false); }}
                         className="pl-mobile-link"
@@ -198,7 +202,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
                         {resolvedAppearance === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
                         {resolvedAppearance === 'dark' ? 'Modo claro' : 'Modo escuro'}
                     </button>
-                    <Link href={candidatura()} className="pl-mobile-cta" onClick={() => setMenuOpen(false)}>Candidatar-me →</Link>
+                    <Link href={candidatura().url} className="pl-mobile-cta" onClick={() => setMenuOpen(false)}>Candidatar-me →</Link>
                 </div>
             </header>
             <main>{children}</main>

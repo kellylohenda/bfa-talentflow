@@ -11,18 +11,28 @@ class HorasController extends Controller
 {
     public function index(Request $request): Response
     {
-        $entries = HoursEntry::query()
-            ->with(['volunteer'])
+        $horas = HoursEntry::query()
+            ->with(['volunteer', 'activity'])
             ->when($request->input('search'), fn ($q, $s) => $q->where(function ($q) use ($s) {
                 $q->where('descricao', 'like', "%{$s}%");
             }))
+            ->when($request->input('status'), function ($q, $v) {
+                if ($v === 'pendente') {
+                    $q->whereNull('validado');
+                } elseif ($v === 'validado') {
+                    $q->where('validado', true);
+                } elseif ($v === 'rejeitado') {
+                    $q->where('validado', false);
+                }
+            })
             ->latest()
             ->paginate(25)
             ->withQueryString();
 
         return Inertia::render('horas/index', [
-            'entries' => $entries,
-            'filters' => $request->only(['search']),
+            'horas' => $horas,
+            'filters' => $request->only(['search', 'status']),
+            'canValidate' => $request->user()?->can('gerir-talentos'),
         ]);
     }
 }

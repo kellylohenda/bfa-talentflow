@@ -80,13 +80,15 @@
   --info-bg: #E6EEFD;
   --info-border: #B7CCF5;
 
-  /* Sidebar */
-  --sidebar-bg: #1F1F1E;
-  --sidebar-border: #2D2D2C;
-  --sidebar-text: #C9C7C2;
-  --sidebar-text-2: #807E78;
-  --sidebar-active: #2A2A29;
-  --sidebar-active-text: #FFFFFF;
+  /* Sidebar — light */
+  --sidebar-bg: #FFFFFF;
+  --sidebar-border: #E7E5E1;
+  --sidebar-text: #525252;
+  --sidebar-text-2: #8A8A8A;
+  --sidebar-active: #FFF0E5;
+  --sidebar-active-text: #1A1A1A;
+  --sidebar-hover-bg: rgba(0, 0, 0, 0.04);
+  --sidebar-avatar-bg: linear-gradient(135deg, #E7E5E1, #D4D2CD);
 
   /* Radius */
   --r-xs: 3px;
@@ -136,33 +138,41 @@
 
 [data-theme="dark"] {
   --bg: #0F0F0E;
-  --surface: #1A1A19;
-  --surface-2: #1F1F1E;
-  --surface-3: #262625;
+  --surface: #1E1E1D;
+  --surface-2: #222221;
+  --surface-3: #2A2A28;
   --disabled: #2D2D2B;
-  --border: #2D2D2B;
-  --border-strong: #3A3A38;
+  --border: #333332;
+  --border-strong: #40403E;
   --text: #F0EFEC;
-  --text-2: #B0AEA9;
-  --text-3: #807E78;
+  --text-2: #B8B6B1;
+  --text-3: #8A8883;
   --text-4: #5A5853;
 
-  --primary-soft: rgba(255, 118, 7, 0.12);
-  --primary-glow: rgba(255, 118, 7, 0.22);
+  --primary-soft: rgba(255, 118, 7, 0.14);
+  --primary-glow: rgba(255, 118, 7, 0.25);
 
-  --success-bg: rgba(14, 124, 74, 0.16);
+  --success-bg: rgba(14, 124, 74, 0.18);
   --success-border: rgba(14, 124, 74, 0.4);
-  --warn-bg: rgba(245, 158, 11, 0.14);
+  --warn-bg: rgba(245, 158, 11, 0.16);
   --warn-border: rgba(245, 158, 11, 0.4);
-  --danger-bg: rgba(220, 38, 38, 0.14);
+  --danger-bg: rgba(220, 38, 38, 0.16);
   --danger-border: rgba(220, 38, 38, 0.4);
-  --info-bg: rgba(59, 130, 246, 0.14);
+  --info-bg: rgba(59, 130, 246, 0.16);
   --info-border: rgba(59, 130, 246, 0.4);
 
   --sidebar-bg: #0A0A09;
   --sidebar-border: #1C1C1B;
-  --sidebar-text: #B5B3AE;
-  --sidebar-active: #1F1F1E;
+  --sidebar-text: #C9C7C2;
+  --sidebar-text-2: #7A7873;
+  --sidebar-active: #2A2A28;
+  --sidebar-active-text: #FFFFFF;
+  --sidebar-hover-bg: rgba(255, 255, 255, 0.06);
+  --sidebar-avatar-bg: linear-gradient(135deg, #4A4A48, #2A2A28);
+
+  --shadow-1: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-2: 0 2px 8px rgba(0, 0, 0, 0.35), 0 1px 2px rgba(0, 0, 0, 0.25);
+  --shadow-3: 0 8px 24px rgba(0, 0, 0, 0.45), 0 2px 6px rgba(0, 0, 0, 0.3);
 }
 
 /* ─── Base ────────────────────────────────────────── */
@@ -250,7 +260,7 @@
   min-width: 0;
 }
 .sb-brand-text b {
-  color: #fff; font-size: 13px; font-weight: 600;
+  color: var(--sidebar-text); font-size: 13px; font-weight: 600;
   letter-spacing: -0.01em; white-space: nowrap;
 }
 .sb-brand-text span {
@@ -299,7 +309,7 @@
   white-space: nowrap;
   text-decoration: none;
 }
-.sb-link:hover { background: rgba(255,255,255,0.04); color: #fff; }
+.sb-link:hover { background: var(--sidebar-hover-bg); color: var(--sidebar-text); }
 .sb-link.active {
   background: var(--sidebar-active);
   color: var(--sidebar-active-text);
@@ -316,7 +326,7 @@
   margin-left: auto;
   font-size: 10px;
   background: var(--primary);
-  color: #fff;
+  color: #FFFFFF;
   padding: 1px 6px;
   border-radius: var(--r-pill);
   font-weight: 600;
@@ -332,8 +342,8 @@
 .sb-avatar {
   width: 28px; height: 28px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #4A4A48, #2A2A28);
-  color: #fff;
+  background: var(--sidebar-avatar-bg);
+  color: var(--sidebar-text);
   display: flex; align-items: center; justify-content: center;
   font-size: 11px; font-weight: 600;
   flex-shrink: 0;
@@ -343,7 +353,7 @@
   min-width: 0;
 }
 .sb-user-text b {
-  font-size: 12px; color: #fff; font-weight: 500;
+  font-size: 12px; color: var(--sidebar-text); font-weight: 500;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .sb-user-text span {
@@ -436,8 +446,7 @@
   border: 1px solid var(--success-border);
 }
 
-/* Desktop: show desktop toggle, hide hamburger */
-.tb-toggle-mobile { display: none; }
+/* Hamburger toggle — always visible */
 .tb-toggle-desktop { display: flex; }
 
 /* ─── Page ────────────────────────────────────────── */
@@ -874,8 +883,6 @@
 
 /* ─── Responsive ──────────────────────────────────── */
 @media (max-width: 768px) {
-  .tb-toggle-desktop { display: none; }
-  .tb-toggle-mobile  { display: flex; }
   .tb-search { display: none; }
 
   .app { grid-template-columns: 1fr; }

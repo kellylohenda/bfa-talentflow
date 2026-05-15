@@ -17,12 +17,12 @@ class AgendaController extends Controller
                 $q->where('titulo', 'like', "%{$s}%");
             }))
             ->latest()
-            ->paginate(25)
-            ->withQueryString();
+            ->get();
 
         return Inertia::render('agenda/index', [
             'eventos' => $eventos,
             'filters' => $request->only(['search']),
+            'mesAtual' => now()->format('Y-m-d'),
         ]);
     }
 }

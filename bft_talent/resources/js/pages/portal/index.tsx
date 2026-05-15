@@ -143,7 +143,7 @@ export default function PortalIndex() {
 
                     <p style={{ fontSize: 13, color: 'var(--text-3)', textAlign: 'center', marginTop: 20 }}>
                         Ainda não te candidataste?{' '}
-                        <a href={candidatura()} style={{ color: 'var(--primary)', textDecoration: 'none', fontWeight: 600 }}>Candidata-te agora</a>
+                        <a href={candidatura().url} style={{ color: 'var(--primary)', textDecoration: 'none', fontWeight: 600 }}>Candidata-te agora</a>
                     </p>
                 </div>
             </div>

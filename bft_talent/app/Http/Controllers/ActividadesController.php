@@ -11,17 +11,16 @@ class ActividadesController extends Controller
 {
     public function index(Request $request): Response
     {
-        $activities = VolunteerActivity::query()
-            ->with(['volunteer'])
+        $actividades = VolunteerActivity::query()
+            ->with(['coordenador'])
             ->when($request->input('search'), fn ($q, $s) => $q->where(function ($q) use ($s) {
                 $q->where('nome', 'like', "%{$s}%");
             }))
             ->latest()
-            ->paginate(25)
-            ->withQueryString();
+            ->get();
 
         return Inertia::render('actividades/index', [
-            'activities' => $activities,
+            'actividades' => $actividades,
             'filters' => $request->only(['search']),
         ]);
     }

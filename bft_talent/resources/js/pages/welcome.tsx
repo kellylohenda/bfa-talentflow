@@ -84,7 +84,7 @@ export default function Welcome({ programs, stats, faqs, processSteps }: { progr
                         alignItems: heroVertical ? 'stretch' : 'center',
                     }}>
                         <Link
-                            href={candidatura()}
+                            href={candidatura().url}
                             style={{
                                 background: 'var(--primary)', color: '#fff',
                                 fontWeight: 700, fontSize: 15,
@@ -244,7 +244,7 @@ export default function Welcome({ programs, stats, faqs, processSteps }: { progr
                                         ))}
                                     </ul>
                                     <Link
-                                        href={`${candidatura()}?program=${p.code}`}
+                                        href={candidatura().url + `?program=${p.code}`}
                                         style={{
                                             marginTop: 'auto', display: 'block',
                                             textAlign: 'center',
@@ -395,7 +395,7 @@ export default function Welcome({ programs, stats, faqs, processSteps }: { progr
                         As candidaturas encerram a 30 de Junho. Não deixes para amanhã.
                     </p>
                     <Link
-                        href={candidatura()}
+                        href={candidatura().url}
                         style={{
                             background: 'var(--primary)', color: '#fff',
                             fontWeight: 700, fontSize: 16,
