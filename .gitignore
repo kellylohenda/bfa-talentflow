@@ -1,17 +1,43 @@
-# Dependencies
+# Node / Next
 node_modules/
-
-# Build output
 .next/
 out/
-
-# Env files
-.env
+*.tsbuildinfo
 .env.local
 .env.*.local
+.pnpm-store/
+.turbo/
 
-# Debug
-npm-debug.log*
+# PHP / Laravel
+vendor/
+.env
+.env.backup
+.phpunit.result.cache
+.phpunit.cache/
+storage/*.key
+storage/logs/*
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/testing/*
+storage/framework/views/*
+public/storage
+public/hot
+bootstrap/cache/*.php
 
-# OS
+# Editors
+.idea/
+.vscode/
+*.swp
 .DS_Store
+.zed/
+
+# Build / Coverage
+coverage/
+build/
+dist/
+
+# Misc
+*.log
+npm-debug.log*
+.remember/
+.claude/
