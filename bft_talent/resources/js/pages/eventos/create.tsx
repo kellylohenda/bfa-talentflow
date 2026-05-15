@@ -1,4 +1,4 @@
-import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import { Head, Link, useForm } from '@inertiajs/react';
 import { ArrowLeft } from 'lucide-react';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
@@ -10,9 +10,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { index, store } from '@/routes/eventos';
 
 export default function EventosCreate() {
-    const { props } = usePage<{ currentTeam: { slug: string } }>();
-    const team = props.currentTeam.slug;
-
     const { data, setData, post, processing, errors } = useForm({
         titulo: '',
         tipo: 'formacao',
@@ -26,7 +23,7 @@ export default function EventosCreate() {
 
     function submit(e: React.FormEvent) {
         e.preventDefault();
-        post(store(team).url);
+        post(store().url);
     }
 
     return (
@@ -35,7 +32,7 @@ export default function EventosCreate() {
             <div className="flex flex-col gap-6 p-4">
                 <div className="flex items-center gap-4">
                     <Button variant="ghost" size="sm" asChild>
-                        <Link href={index(team).url}><ArrowLeft className="h-4 w-4" /></Link>
+                        <Link href={index().url}><ArrowLeft className="h-4 w-4" /></Link>
                     </Button>
                     <Heading title="Novo Evento" description="Agendar evento ou actividade" />
                 </div>
@@ -113,7 +110,7 @@ export default function EventosCreate() {
                             <div className="flex gap-2 pt-2">
                                 <Button type="submit" disabled={processing}>Criar Evento</Button>
                                 <Button type="button" variant="outline" asChild>
-                                    <Link href={index(team).url}>Cancelar</Link>
+                                    <Link href={index().url}>Cancelar</Link>
                                 </Button>
                             </div>
                         </form>
@@ -124,9 +121,9 @@ export default function EventosCreate() {
     );
 }
 
-EventosCreate.layout = (props: { currentTeam?: { slug: string } | null }) => ({
+EventosCreate.layout = () => ({
     breadcrumbs: [
-        { title: 'Eventos', href: props.currentTeam ? index(props.currentTeam.slug).url : '/' },
+        { title: 'Eventos', href: index().url },
         { title: 'Novo', href: '#' },
     ],
 });

@@ -45,6 +45,9 @@
 
 /* ─── BFA Design Tokens ──────────────────────────── */
 :root {
+  /* Disabled state */
+  --disabled: #E7E5E1;
+
   /* Brand */
   --primary: #FF7607;
   --primary-deep: #9C4500;
@@ -136,6 +139,7 @@
   --surface: #1A1A19;
   --surface-2: #1F1F1E;
   --surface-3: #262625;
+  --disabled: #2D2D2B;
   --border: #2D2D2B;
   --border-strong: #3A3A38;
   --text: #F0EFEC;

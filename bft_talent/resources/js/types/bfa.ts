@@ -153,3 +153,95 @@ export type Evento = {
     vagas: number | null;
     created_at: string;
 };
+
+export type Task = {
+    id: number;
+    title: string;
+    description: string | null;
+    status: 'pendente' | 'em_andamento' | 'concluida' | 'cancelada';
+    priority: 'baixa' | 'media' | 'alta' | 'urgente';
+    due_date: string | null;
+    assigned_to: Mentor | null;
+    talent: Talent | null;
+    created_by: Mentor | null;
+    created_at: string;
+    updated_at: string;
+};
+
+export type Absence = {
+    id: number;
+    type: string;
+    reason: string | null;
+    start_date: string;
+    end_date: string;
+    status: 'pendente' | 'aprovado' | 'rejeitado';
+    justificado: boolean;
+    talent: Talent | null;
+    approved_by: Mentor | null;
+    created_at: string;
+    updated_at: string;
+};
+
+export type Avaliacao = {
+    id: number;
+    score: number | null;
+    feedback: string | null;
+    reviewer: Mentor | null;
+    target: Talent | null;
+    criterio: string;
+    periodo: string;
+    created_at: string;
+};
+
+export type VolunteerActivity = {
+    id: number;
+    title: string;
+    description: string | null;
+    area: string;
+    date: string;
+    local: string | null;
+    vagas: number | null;
+    total_horas: number;
+    status: string;
+    created_at: string;
+};
+
+export type HoursEntry = {
+    id: number;
+    date: string;
+    hours: string;
+    description: string | null;
+    status: 'pendente' | 'validado' | 'rejeitado';
+    volunteer: Volunteer | null;
+    activity: VolunteerActivity | null;
+    validated_by: Mentor | null;
+    created_at: string;
+};
+
+export type Notification = {
+    id: number;
+    type: string;
+    title: string;
+    message: string;
+    read_at: string | null;
+    created_at: string;
+};
+
+export type Conversation = {
+    id: number;
+    participant: Mentor | null;
+    last_message: string | null;
+    last_message_at: string | null;
+    unread_count: number;
+    created_at: string;
+};
+
+export type Rotation = {
+    id: number;
+    department: Department | null;
+    start_date: string;
+    end_date: string | null;
+    status: string;
+    talent: Talent | null;
+    created_at: string;
+};

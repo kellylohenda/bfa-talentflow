@@ -1,4 +1,4 @@
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import { ArrowLeft, Calendar, MapPin, Users } from 'lucide-react';
 import Heading from '@/components/heading';
 import { Badge } from '@/components/ui/badge';
@@ -17,16 +17,13 @@ const statusVariant: Record<string, 'default' | 'secondary' | 'destructive'> = {
 };
 
 export default function EventosShow({ evento }: Props) {
-    const { props } = usePage<{ currentTeam: { slug: string } }>();
-    const team = props.currentTeam.slug;
-
     return (
         <>
             <Head title={evento.titulo} />
             <div className="flex flex-col gap-6 p-4">
                 <div className="flex items-center gap-4">
                     <Button variant="ghost" size="sm" asChild>
-                        <Link href={index(team).url}><ArrowLeft className="h-4 w-4" /></Link>
+                        <Link href={index().url}><ArrowLeft className="h-4 w-4" /></Link>
                     </Button>
                     <Heading title={evento.titulo} description={`${evento.tipo} · ${evento.formato}`} />
                     <Badge variant={statusVariant[evento.status] ?? 'secondary'} className="ml-auto">
@@ -77,14 +74,12 @@ export default function EventosShow({ evento }: Props) {
     );
 }
 
-EventosShow.layout = (props: { currentTeam?: { slug: string } | null; evento?: Evento }) => ({
+EventosShow.layout = (props: { evento?: Evento }) => ({
     breadcrumbs: [
-        { title: 'Eventos', href: props.currentTeam ? index(props.currentTeam.slug).url : '/' },
+        { title: 'Eventos', href: index().url },
         {
             title: props.evento?.titulo ?? 'Detalhe',
-            href: props.currentTeam && props.evento
-                ? show([props.currentTeam.slug, props.evento.id]).url
-                : '/',
+            href: props.evento ? show(props.evento.id).url : '/',
         },
     ],
 });

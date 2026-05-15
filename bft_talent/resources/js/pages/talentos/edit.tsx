@@ -1,4 +1,4 @@
-import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import { Head, Link, useForm } from '@inertiajs/react';
 import { ArrowLeft } from 'lucide-react';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
@@ -19,9 +19,6 @@ type Props = {
 };
 
 export default function TalentosEdit({ talent, programs, universities, departments, mentors }: Props) {
-    const { props } = usePage<{ currentTeam: { slug: string } }>();
-    const team = props.currentTeam.slug;
-
     const { data, setData, patch, processing, errors } = useForm({
         name: talent.name,
         email: talent.email ?? '',
@@ -36,7 +33,7 @@ export default function TalentosEdit({ talent, programs, universities, departmen
 
     function submit(e: React.FormEvent) {
         e.preventDefault();
-        patch(update([team, talent.id]).url);
+        patch(update(talent.id).url);
     }
 
     return (
@@ -46,7 +43,7 @@ export default function TalentosEdit({ talent, programs, universities, departmen
             <div className="flex flex-col gap-6 p-4">
                 <div className="flex items-center gap-4">
                     <Button variant="ghost" size="sm" asChild>
-                        <Link href={show([team, talent.id]).url}>
+                        <Link href={show(talent.id).url}>
                             <ArrowLeft className="h-4 w-4" />
                         </Link>
                     </Button>
@@ -185,7 +182,7 @@ export default function TalentosEdit({ talent, programs, universities, departmen
                                     Guardar Alterações
                                 </Button>
                                 <Button type="button" variant="outline" asChild>
-                                    <Link href={show([team, talent.id]).url}>Cancelar</Link>
+                                    <Link href={show(talent.id).url}>Cancelar</Link>
                                 </Button>
                             </div>
                         </form>
@@ -198,13 +195,8 @@ export default function TalentosEdit({ talent, programs, universities, departmen
 
 TalentosEdit.layout = (props: { currentTeam?: { slug: string } | null; talent?: Talent }) => ({
     breadcrumbs: [
-        { title: 'Talentos', href: props.currentTeam ? index(props.currentTeam.slug).url : '/' },
-        {
-            title: props.talent?.name ?? 'Editar',
-            href: props.currentTeam && props.talent
-                ? show([props.currentTeam.slug, props.talent.id]).url
-                : '/',
-        },
+        { title: 'Talentos', href: index().url },
+        { title: props.talent?.name ?? 'Editar', href: show(props.talent.id).url },
         { title: 'Editar', href: '#' },
     ],
 });

@@ -1,4 +1,4 @@
-import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import { Head, Link, useForm } from '@inertiajs/react';
 import { ArrowLeft } from 'lucide-react';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
@@ -18,9 +18,6 @@ type Props = {
 };
 
 export default function TalentosCreate({ programs, universities, departments, mentors }: Props) {
-    const { props } = usePage<{ currentTeam: { slug: string } }>();
-    const team = props.currentTeam.slug;
-
     const { data, setData, post, processing, errors } = useForm({
         name: '',
         email: '',
@@ -37,7 +34,7 @@ export default function TalentosCreate({ programs, universities, departments, me
 
     function submit(e: React.FormEvent) {
         e.preventDefault();
-        post(store(team).url);
+        post(store().url);
     }
 
     return (
@@ -47,7 +44,7 @@ export default function TalentosCreate({ programs, universities, departments, me
             <div className="flex flex-col gap-6 p-4">
                 <div className="flex items-center gap-4">
                     <Button variant="ghost" size="sm" asChild>
-                        <Link href={index(team).url}>
+                        <Link href={index().url}>
                             <ArrowLeft className="h-4 w-4" />
                         </Link>
                     </Button>
@@ -217,7 +214,7 @@ export default function TalentosCreate({ programs, universities, departments, me
                                     Criar Talento
                                 </Button>
                                 <Button type="button" variant="outline" asChild>
-                                    <Link href={index(team).url}>Cancelar</Link>
+                                    <Link href={index().url}>Cancelar</Link>
                                 </Button>
                             </div>
                         </form>
@@ -230,7 +227,7 @@ export default function TalentosCreate({ programs, universities, departments, me
 
 TalentosCreate.layout = (props: { currentTeam?: { slug: string } | null }) => ({
     breadcrumbs: [
-        { title: 'Talentos', href: props.currentTeam ? index(props.currentTeam.slug).url : '/' },
+        { title: 'Talentos', href: index().url },
         { title: 'Novo', href: '#' },
     ],
 });

@@ -1,4 +1,4 @@
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import { ArrowLeft } from 'lucide-react';
 import Heading from '@/components/heading';
 import { Badge } from '@/components/ui/badge';
@@ -10,9 +10,6 @@ import type { Application } from '@/types';
 type Props = { candidatura: Application };
 
 export default function CandidaturasShow({ candidatura }: Props) {
-    const { props } = usePage<{ currentTeam: { slug: string } }>();
-    const team = props.currentTeam.slug;
-
     return (
         <>
             <Head title={candidatura.name} />
@@ -20,7 +17,7 @@ export default function CandidaturasShow({ candidatura }: Props) {
             <div className="flex flex-col gap-6 p-4">
                 <div className="flex items-center gap-4">
                     <Button variant="ghost" size="sm" asChild>
-                        <Link href={index(team).url}>
+                        <Link href={index().url}>
                             <ArrowLeft className="h-4 w-4" />
                         </Link>
                     </Button>
@@ -68,12 +65,7 @@ export default function CandidaturasShow({ candidatura }: Props) {
 
 CandidaturasShow.layout = (props: { currentTeam?: { slug: string } | null; candidatura?: Application }) => ({
     breadcrumbs: [
-        { title: 'Candidaturas', href: props.currentTeam ? index(props.currentTeam.slug).url : '/' },
-        {
-            title: props.candidatura?.name ?? 'Detalhe',
-            href: props.currentTeam && props.candidatura
-                ? show([props.currentTeam.slug, props.candidatura.id]).url
-                : '/',
-        },
+        { title: 'Candidaturas', href: index().url },
+        { title: props.candidatura?.name ?? 'Detalhe', href: show(props.candidatura.id).url },
     ],
 });

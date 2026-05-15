@@ -1,4 +1,4 @@
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import { ArrowLeft, Calendar, Mail, User } from 'lucide-react';
 import Heading from '@/components/heading';
 import { Badge } from '@/components/ui/badge';
@@ -10,9 +10,6 @@ import type { Talent } from '@/types';
 type Props = { talent: Talent };
 
 export default function TalentosShow({ talent }: Props) {
-    const { props } = usePage<{ currentTeam: { slug: string } }>();
-    const team = props.currentTeam.slug;
-
     return (
         <>
             <Head title={talent.name} />
@@ -20,7 +17,7 @@ export default function TalentosShow({ talent }: Props) {
             <div className="flex flex-col gap-6 p-4">
                 <div className="flex items-center gap-4">
                     <Button variant="ghost" size="sm" asChild>
-                        <Link href={index(team).url}>
+                        <Link href={index().url}>
                             <ArrowLeft className="h-4 w-4" />
                         </Link>
                     </Button>
@@ -134,12 +131,7 @@ export default function TalentosShow({ talent }: Props) {
 
 TalentosShow.layout = (props: { currentTeam?: { slug: string } | null; talent?: Talent }) => ({
     breadcrumbs: [
-        { title: 'Talentos', href: props.currentTeam ? index(props.currentTeam.slug).url : '/' },
-        {
-            title: props.talent?.name ?? 'Detalhe',
-            href: props.currentTeam && props.talent
-                ? show([props.currentTeam.slug, props.talent.id]).url
-                : '/',
-        },
+        { title: 'Talentos', href: index().url },
+        { title: props.talent?.name ?? 'Detalhe', href: show(props.talent.id).url },
     ],
 });

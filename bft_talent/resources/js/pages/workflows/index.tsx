@@ -1,4 +1,4 @@
-import { Head, Link, router, usePage } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { Eye, Plus, X } from 'lucide-react';
 import { TablePagination } from '@/components/table-pagination';
 import Heading from '@/components/heading';

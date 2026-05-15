@@ -1,4 +1,4 @@
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import { ArrowLeft } from 'lucide-react';
 import Heading from '@/components/heading';
 import { Badge } from '@/components/ui/badge';
@@ -10,16 +10,13 @@ import type { Volunteer } from '@/types';
 type Props = { voluntario: Volunteer };
 
 export default function VoluntariosShow({ voluntario }: Props) {
-    const { props } = usePage<{ currentTeam: { slug: string } }>();
-    const team = props.currentTeam.slug;
-
     return (
         <>
             <Head title={voluntario.nome} />
             <div className="flex flex-col gap-6 p-4">
                 <div className="flex items-center gap-4">
                     <Button variant="ghost" size="sm" asChild>
-                        <Link href={index(team).url}><ArrowLeft className="h-4 w-4" /></Link>
+                        <Link href={index().url}><ArrowLeft className="h-4 w-4" /></Link>
                     </Button>
                     <Heading title={voluntario.nome} description={voluntario.volunteer_code} />
                     <Badge className="ml-auto">{voluntario.status}</Badge>
@@ -70,14 +67,12 @@ export default function VoluntariosShow({ voluntario }: Props) {
     );
 }
 
-VoluntariosShow.layout = (props: { currentTeam?: { slug: string } | null; voluntario?: Volunteer }) => ({
+VoluntariosShow.layout = (props: { voluntario?: Volunteer }) => ({
     breadcrumbs: [
-        { title: 'Voluntários', href: props.currentTeam ? index(props.currentTeam.slug).url : '/' },
+        { title: 'Voluntários', href: index().url },
         {
             title: props.voluntario?.nome ?? 'Detalhe',
-            href: props.currentTeam && props.voluntario
-                ? show([props.currentTeam.slug, props.voluntario.id]).url
-                : '/',
+            href: props.voluntario ? show(props.voluntario.id).url : '/',
         },
     ],
 });

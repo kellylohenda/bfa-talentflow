@@ -2,15 +2,12 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Program extends Model
 {
-    use HasFactory;
-
-    protected $fillable = ['code', 'name', 'descricao', 'activo'];
+    protected $fillable = ['code', 'name', 'tag', 'descricao', 'activo'];
 
     protected function casts(): array
     {
@@ -25,5 +22,10 @@ class Program extends Model
     public function applications(): HasMany
     {
         return $this->hasMany(Application::class);
+    }
+
+    public function benefits(): HasMany
+    {
+        return $this->hasMany(ProgramBenefit::class)->orderBy('sort_order');
     }
 }

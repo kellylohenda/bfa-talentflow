@@ -1,4 +1,4 @@
-import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import { Head, Link, useForm } from '@inertiajs/react';
 import { ArrowLeft } from 'lucide-react';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
@@ -13,9 +13,6 @@ import type { Talent } from '@/types';
 type Props = { talents: Pick<Talent, 'id' | 'name' | 'talent_code'>[] };
 
 export default function PagamentosCreate({ talents }: Props) {
-    const { props } = usePage<{ currentTeam: { slug: string } }>();
-    const team = props.currentTeam.slug;
-
     const { data, setData, post, processing, errors } = useForm({
         talent_id: '',
         type: 'bolsa',
@@ -26,7 +23,7 @@ export default function PagamentosCreate({ talents }: Props) {
 
     function submit(e: React.FormEvent) {
         e.preventDefault();
-        post(store(team).url);
+        post(store().url);
     }
 
     return (
@@ -35,7 +32,7 @@ export default function PagamentosCreate({ talents }: Props) {
             <div className="flex flex-col gap-6 p-4">
                 <div className="flex items-center gap-4">
                     <Button variant="ghost" size="sm" asChild>
-                        <Link href={index(team).url}><ArrowLeft className="h-4 w-4" /></Link>
+                        <Link href={index().url}><ArrowLeft className="h-4 w-4" /></Link>
                     </Button>
                     <Heading title="Novo Pagamento" description="Registar bolsa ou subsídio" />
                 </div>
@@ -91,7 +88,7 @@ export default function PagamentosCreate({ talents }: Props) {
                             <div className="flex gap-2 pt-2">
                                 <Button type="submit" disabled={processing}>Criar Pagamento</Button>
                                 <Button type="button" variant="outline" asChild>
-                                    <Link href={index(team).url}>Cancelar</Link>
+                                    <Link href={index().url}>Cancelar</Link>
                                 </Button>
                             </div>
                         </form>
@@ -104,7 +101,7 @@ export default function PagamentosCreate({ talents }: Props) {
 
 PagamentosCreate.layout = (props: { currentTeam?: { slug: string } | null }) => ({
     breadcrumbs: [
-        { title: 'Pagamentos', href: props.currentTeam ? index(props.currentTeam.slug).url : '/' },
+        { title: 'Pagamentos', href: index().url },
         { title: 'Novo', href: '#' },
     ],
 });

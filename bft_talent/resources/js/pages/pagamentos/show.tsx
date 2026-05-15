@@ -1,4 +1,4 @@
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import { ArrowLeft } from 'lucide-react';
 import Heading from '@/components/heading';
 import { Badge } from '@/components/ui/badge';
@@ -10,9 +10,6 @@ import type { Payment } from '@/types';
 type Props = { pagamento: Payment };
 
 export default function PagamentosShow({ pagamento }: Props) {
-    const { props } = usePage<{ currentTeam: { slug: string } }>();
-    const team = props.currentTeam.slug;
-
     return (
         <>
             <Head title={pagamento.payment_ref} />
@@ -20,7 +17,7 @@ export default function PagamentosShow({ pagamento }: Props) {
             <div className="flex flex-col gap-6 p-4">
                 <div className="flex items-center gap-4">
                     <Button variant="ghost" size="sm" asChild>
-                        <Link href={index(team).url}><ArrowLeft className="h-4 w-4" /></Link>
+                        <Link href={index().url}><ArrowLeft className="h-4 w-4" /></Link>
                     </Button>
                     <Heading title={pagamento.payment_ref} description={pagamento.period} />
                     <Badge className="ml-auto">{pagamento.status}</Badge>
@@ -64,12 +61,7 @@ export default function PagamentosShow({ pagamento }: Props) {
 
 PagamentosShow.layout = (props: { currentTeam?: { slug: string } | null; pagamento?: Payment }) => ({
     breadcrumbs: [
-        { title: 'Pagamentos', href: props.currentTeam ? index(props.currentTeam.slug).url : '/' },
-        {
-            title: props.pagamento?.payment_ref ?? 'Detalhe',
-            href: props.currentTeam && props.pagamento
-                ? show([props.currentTeam.slug, props.pagamento.id]).url
-                : '/',
-        },
+        { title: 'Pagamentos', href: index().url },
+        { title: props.pagamento?.payment_ref ?? 'Detalhe', href: show(props.pagamento.id).url },
     ],
 });

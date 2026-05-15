@@ -4,7 +4,12 @@ namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
 use App\Models\Application;
+use App\Models\Faq;
+use App\Models\ProcessStep;
 use App\Models\Program;
+use App\Models\Stage;
+use App\Models\Talent;
+use App\Models\University;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -15,8 +20,26 @@ class PublicController extends Controller
 {
     public function programa(): Response
     {
+        $programs = Program::where('activo', true)
+            ->with('benefits')
+            ->orderBy('id')
+            ->get(['id', 'code', 'name', 'descricao', 'tag']);
+
+        $totalTalentos = Talent::count();
+        $admitidos = Talent::whereIn('status', ['activo', 'concluido'])->count();
+        $taxaContratacao = $totalTalentos > 0 ? round(($admitidos / $totalTalentos) * 100) : 87;
+        $universidades = University::count();
+
         return Inertia::render('welcome', [
-            'programs' => Program::where('activo', true)->orderBy('id')->get(['id', 'code', 'name', 'descricao']),
+            'programs' => $programs,
+            'stats' => [
+                ['n' => $taxaContratacao.'%', 'label' => 'taxa de contratação Futuro BFA'],
+                ['n' => $totalTalentos.'+', 'label' => 'talentos formados desde 2018'],
+                ['n' => strval($universidades), 'label' => 'universidades parceiras'],
+                ['n' => strval($programs->count()), 'label' => 'programas activos em 2026'],
+            ],
+            'faqs' => Faq::where('active', true)->orderBy('sort_order')->get(['question', 'answer']),
+            'processSteps' => ProcessStep::where('active', true)->orderBy('sort_order')->get(['period', 'title', 'description']),
         ]);
     }
 
@@ -34,8 +57,9 @@ class PublicController extends Controller
             'nome' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:applications,email'],
             'tel' => ['nullable', 'string', 'max:30'],
-            'uni' => ['nullable', 'string', 'max:255'],
-            'curso' => ['nullable', 'string', 'max:255'],
+            'grau' => ['required', 'string', 'max:50'],
+            'uni' => ['required', 'string', 'max:255'],
+            'curso' => ['required', 'string', 'max:255'],
             'motivacao' => ['nullable', 'string', 'max:3000'],
             'rgpd' => ['accepted'],
         ]);
@@ -50,8 +74,9 @@ class PublicController extends Controller
         };
 
         $obs = collect([
-            $validated['uni'] ? 'Universidade: '.$validated['uni'] : null,
-            $validated['curso'] ? 'Curso: '.$validated['curso'] : null,
+            'Grau: '.$validated['grau'],
+            'Universidade: '.$validated['uni'],
+            'Curso: '.$validated['curso'],
             $validated['motivacao'] ?: null,
         ])->filter()->implode("\n");
 
@@ -78,7 +103,7 @@ class PublicController extends Controller
         return Inertia::render('portal/index');
     }
 
-    public function portalCheck(Request $request): JsonResponse|RedirectResponse
+    public function portalCheck(Request $request): RedirectResponse
     {
         $request->validate([
             'ref' => ['required', 'string'],
@@ -90,12 +115,12 @@ class PublicController extends Controller
             ->first();
 
         if (! $application) {
-            return response()->json(['message' => 'Referência ou email inválidos.'], 422);
+            return back()->withErrors(['ref' => 'Referência ou email inválidos.']);
         }
 
         $request->session()->put('portal_ref', $application->application_ref);
 
-        return response()->json(['ref' => $application->application_ref]);
+        return to_route('portal.status', $application->application_ref);
     }
 
     public function portalStatus(Request $request, string $ref): Response|RedirectResponse
@@ -108,6 +133,8 @@ class PublicController extends Controller
             ->where('application_ref', strtoupper($ref))
             ->firstOrFail();
 
+        $stages = Stage::orderBy('sort')->get(['code', 'label', 'is_terminal']);
+
         return Inertia::render('portal/show', [
             'application' => [
                 'ref' => $application->application_ref,
@@ -118,6 +145,7 @@ class PublicController extends Controller
                 'stage_label' => $application->stage->label(),
                 'submitted_at' => $application->created_at->toIso8601String(),
             ],
+            'stages' => $stages->mapWithKeys(fn ($s) => [$s->code => ['label' => $s->label, 'is_terminal' => $s->is_terminal]]),
         ]);
     }
 }

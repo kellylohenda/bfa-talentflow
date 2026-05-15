@@ -1,4 +1,4 @@
-import { Head, Link, router, usePage } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { Eye, Plus, Trash2, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { TablePagination } from '@/components/table-pagination';
@@ -26,34 +26,31 @@ const clean = (f: Record<string, string | undefined>) =>
     Object.fromEntries(Object.entries(f).filter(([, v]) => v !== '' && v !== undefined));
 
 export default function CandidaturasIndex({ candidaturas, filters }: Props) {
-    const { props } = usePage<{ currentTeam: { slug: string } }>();
-    const team = props.currentTeam.slug;
-
     const [search, setSearch] = useState(filters.search ?? '');
     const mounted = useRef(false);
 
     useEffect(() => {
         if (!mounted.current) { mounted.current = true; return; }
         const t = setTimeout(() => {
-            router.get(index(team).url, clean({ ...filters, search }), { preserveState: true, replace: true });
+            router.get(index().url, clean({ ...filters, search }), { preserveState: true, replace: true });
         }, 350);
         return () => clearTimeout(t);
     }, [search]);
 
     function setFilter(key: keyof Filters, value: string) {
-        router.get(index(team).url, clean({ ...filters, [key]: value }), { preserveState: true, replace: true });
+        router.get(index().url, clean({ ...filters, [key]: value }), { preserveState: true, replace: true });
     }
 
     function clearFilters() {
         setSearch('');
-        router.get(index(team).url, {}, { preserveState: false, replace: true });
+        router.get(index().url, {}, { preserveState: false, replace: true });
     }
 
     const hasFilters = !!(filters.search || filters.stage || filters.tipo);
 
     function handleDelete(c: Application) {
         if (confirm(`Apagar candidatura de "${c.name}"?`)) {
-            router.delete(destroy([team, c.id]).url);
+            router.delete(destroy(c.id).url);
         }
     }
 
@@ -64,7 +61,7 @@ export default function CandidaturasIndex({ candidaturas, filters }: Props) {
                 <div className="flex items-center justify-between">
                     <Heading title="Candidaturas" description="Gestão de candidaturas ao programa" />
                     <Button asChild>
-                        <Link href={create(team).url}><Plus className="h-4 w-4" /> Nova Candidatura</Link>
+                        <Link href={create().url}><Plus className="h-4 w-4" /> Nova Candidatura</Link>
                     </Button>
                 </div>
 
@@ -131,7 +128,7 @@ export default function CandidaturasIndex({ candidaturas, filters }: Props) {
                                     <td className="px-4 py-3">
                                         <div className="flex items-center justify-end gap-1">
                                             <Button variant="ghost" size="sm" asChild>
-                                                <Link href={show([team, c.id]).url}><Eye className="h-4 w-4" /></Link>
+                                                <Link href={show(c.id).url}><Eye className="h-4 w-4" /></Link>
                                             </Button>
                                             <Button variant="ghost" size="sm" onClick={() => handleDelete(c)}>
                                                 <Trash2 className="h-4 w-4 text-destructive" />
@@ -158,5 +155,5 @@ export default function CandidaturasIndex({ candidaturas, filters }: Props) {
 }
 
 CandidaturasIndex.layout = (props: { currentTeam?: { slug: string } | null }) => ({
-    breadcrumbs: [{ title: 'Candidaturas', href: props.currentTeam ? index(props.currentTeam.slug).url : '/' }],
+    breadcrumbs: [{ title: 'Candidaturas', href: index().url }],
 });

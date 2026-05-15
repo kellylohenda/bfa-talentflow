@@ -1,4 +1,4 @@
-import { Head, Link, router, usePage } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { Eye, Plus, Trash2, X } from 'lucide-react';
 import { TablePagination } from '@/components/table-pagination';
 import Heading from '@/components/heading';
@@ -21,18 +21,15 @@ const clean = (f: Record<string, string | undefined>) =>
     Object.fromEntries(Object.entries(f).filter(([, v]) => v !== '' && v !== undefined));
 
 export default function VoluntariosIndex({ voluntarios, filters }: Props) {
-    const { props } = usePage<{ currentTeam: { slug: string } }>();
-    const team = props.currentTeam.slug;
-
     function setFilter(key: keyof Filters, value: string) {
-        router.get(index(team).url, clean({ ...filters, [key]: value }), { preserveState: true, replace: true });
+        router.get(index().url, clean({ ...filters, [key]: value }), { preserveState: true, replace: true });
     }
 
     const hasFilters = !!(filters.status);
 
     function handleDelete(v: Volunteer) {
         if (confirm(`Apagar voluntário "${v.nome}"?`)) {
-            router.delete(destroy([team, v.id]).url);
+            router.delete(destroy(v.id).url);
         }
     }
 
@@ -43,7 +40,7 @@ export default function VoluntariosIndex({ voluntarios, filters }: Props) {
                 <div className="flex items-center justify-between">
                     <Heading title="Voluntários" description="Gestão de voluntários" />
                     <Button asChild>
-                        <Link href={create(team).url}><Plus className="h-4 w-4" /> Novo Voluntário</Link>
+                        <Link href={create().url}><Plus className="h-4 w-4" /> Novo Voluntário</Link>
                     </Button>
                 </div>
 
@@ -58,7 +55,7 @@ export default function VoluntariosIndex({ voluntarios, filters }: Props) {
                         </SelectContent>
                     </Select>
                     {hasFilters && (
-                        <Button variant="ghost" size="sm" onClick={() => router.get(index(team).url, {})} className="h-8 gap-1 text-muted-foreground">
+                        <Button variant="ghost" size="sm" onClick={() => router.get(index().url, {})} className="h-8 gap-1 text-muted-foreground">
                             <X className="h-3 w-3" /> Limpar
                         </Button>
                     )}
@@ -91,7 +88,7 @@ export default function VoluntariosIndex({ voluntarios, filters }: Props) {
                                     <td className="px-4 py-3">
                                         <div className="flex items-center justify-end gap-1">
                                             <Button variant="ghost" size="sm" asChild>
-                                                <Link href={show([team, v.id]).url}><Eye className="h-4 w-4" /></Link>
+                                                <Link href={show(v.id).url}><Eye className="h-4 w-4" /></Link>
                                             </Button>
                                             <Button variant="ghost" size="sm" onClick={() => handleDelete(v)}>
                                                 <Trash2 className="h-4 w-4 text-destructive" />
@@ -117,6 +114,6 @@ export default function VoluntariosIndex({ voluntarios, filters }: Props) {
     );
 }
 
-VoluntariosIndex.layout = (props: { currentTeam?: { slug: string } | null }) => ({
-    breadcrumbs: [{ title: 'Voluntários', href: props.currentTeam ? index(props.currentTeam.slug).url : '/' }],
+VoluntariosIndex.layout = () => ({
+    breadcrumbs: [{ title: 'Voluntários', href: index().url }],
 });

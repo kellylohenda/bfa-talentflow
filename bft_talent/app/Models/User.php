@@ -14,13 +14,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
+use Laravel\Sanctum\HasApiTokens;
 
 #[Fillable(['name', 'email', 'password', 'current_team_id', 'bfa_role', 'phone', 'talent_id', 'volunteer_id'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasBfaRole, HasFactory, HasTeams, Notifiable, TwoFactorAuthenticatable;
+    use HasApiTokens, HasBfaRole, HasFactory, HasTeams, Notifiable, TwoFactorAuthenticatable;
 
     protected function casts(): array
     {
