@@ -85,7 +85,7 @@ class TalentosController extends Controller
         // Fetch manually to ensure we get a fresh instance
         $talent = Talent::with([
             'program', 'university', 'department', 'mentor',
-            'rotations', 'payments', 'tasks', 'absences', 'evaluations',
+            'rotations', 'payments', 'tasks', 'absences', 'evaluations', 'documents',
         ])->find($id);
 
         if (!$talent) {

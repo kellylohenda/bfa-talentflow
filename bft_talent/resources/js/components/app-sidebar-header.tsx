@@ -1,5 +1,5 @@
 import { router, usePage } from '@inertiajs/react';
-import { Bell, Menu, Moon, Search, Sun, X } from 'lucide-react';
+import { Bell, Menu, Moon, Search, Sun, X, Users, CreditCard, ClipboardList, CheckSquare, AlertTriangle } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { BreadcrumbItem } from '@/types';
 
@@ -76,16 +76,17 @@ const PATH_LABELS: Record<string, string> = {
     appearance: 'Aparência',
 };
 
-function getNotifIcon(icon: string): string {
-    const map: Record<string, string> = {
-        users: '👥',
-        'credit-card': '💳',
-        clipboard: '📋',
-        'check-square': '✓',
-        alert: '⚠',
+function getNotifIcon(icon: string): React.ReactNode {
+    const size = 14;
+    const map: Record<string, React.ReactNode> = {
+        users: <Users size={size} />,
+        'credit-card': <CreditCard size={size} />,
+        clipboard: <ClipboardList size={size} />,
+        'check-square': <CheckSquare size={size} />,
+        alert: <AlertTriangle size={size} />,
     };
 
-    return map[icon] ?? '•';
+    return map[icon] ?? <span>•</span>;
 }
 
 function getNotifToneColor(tone: string): { bg: string; color: string } {
