@@ -168,20 +168,26 @@ export default function Welcome({ programs, stats, faqs, processSteps }: Props) 
                 </svg>
                 <div className="hero-grid">
                     <div>
-                        <span className="pub-eyebrow">Candidaturas abertas · Edição {new Date().getFullYear()}</span>
-                        <h1>O teu percurso<br/>começa <em>aqui.</em></h1>
-                        <p>O Programa BFA Talento prepara a próxima geração de líderes da banca angolana com formação académica, mentoria sénior e experiência prática nas áreas mais estratégicas do banco.</p>
+                        <span className="pub-eyebrow">Candidaturas abertas · Programa Futuro BFA {new Date().getFullYear()}</span>
+                        <h1>Liderar a <em>banca</em><br/>do amanhã.</h1>
+                        <p>O <strong>Futuro BFA</strong> identifica e capacita jovens talentos angolanos para os desafios da transformação digital e financeira. Desde 2019, o programa já integrou dezenas de profissionais nas áreas de Gestão, IT, Ciência de Dados e Cibersegurança.</p>
                         <div className="hero-actions">
-                            <Link href={candidatura().url} className="pub-cta pub-cta-primary">Iniciar candidatura</Link>
-                            <a href="#programas" className="pub-cta" style={{ background: '#fff', color: '#1A1A1A', border: '1px solid #E7E5E1' }}>Ver programas</a>
+                            <Link href={candidatura().url} className="pub-cta pub-cta-primary">Iniciar percurso no BFA</Link>
+                            <a href="#programas" className="pub-cta" style={{ background: '#fff', color: '#1A1A1A', border: '1px solid #E7E5E1' }}>Descobrir o impacto BFA</a>
                         </div>
                         <div className="hero-meta">
-                            {stats.slice(0,3).map(s => (
-                                <div key={s.label}>
-                                    <div className="num">{s.n}</div>
-                                    <div className="lbl" style={{ textTransform: 'capitalize' }}>{s.label}</div>
-                                </div>
-                            ))}
+                            <div key="candidatos">
+                                <div className="num">1,500+</div>
+                                <div className="lbl">Candidatos/Edição</div>
+                            </div>
+                            <div key="colaboradores">
+                                <div className="num">2,400+</div>
+                                <div className="lbl">Colaboradores</div>
+                            </div>
+                            <div key="historia">
+                                <div className="num">28 anos</div>
+                                <div className="lbl">Construindo Angola</div>
+                            </div>
                         </div>
                     </div>
                     <div className="hero-collage">
@@ -190,18 +196,18 @@ export default function Welcome({ programs, stats, faqs, processSteps }: Props) 
                                 <circle cx="100" cy="80" r="38" fill="#fff" />
                                 <path d="M40 200 Q 40 130, 100 130 Q 160 130, 160 200 Z" fill="#fff" />
                             </svg>
-                            <span className="label">Lwini Capemba · Trainee Y1 · Investimento</span>
+                            <span className="label">Lwini Capemba · Trainee · Banca de Empresas</span>
                         </div>
                         <div className="hc-card hc-photo-2">
                             <svg viewBox="0 0 200 200" aria-hidden="true" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: 0.25 }}>
                                 <circle cx="100" cy="80" r="38" fill="#FF7607" />
                                 <path d="M40 200 Q 40 130, 100 130 Q 160 130, 160 200 Z" fill="#FF7607" />
                             </svg>
-                            <span className="label">Joaquim T. · Bolseiro Nova SBE · Lisboa</span>
+                            <span className="label">Joaquim T. · Ciência de Dados · Inovação BFA</span>
                         </div>
                         <div className="hc-stat">
-                            <div className="num">Kz 1,86 B</div>
-                            <div className="lbl">Investidos em Formação</div>
+                            <div className="num">360M Kz</div>
+                            <div className="lbl">Fundo BFA Solidário</div>
                         </div>
                     </div>
                 </div>
@@ -209,33 +215,63 @@ export default function Welcome({ programs, stats, faqs, processSteps }: Props) 
 
             <section className="numbers-strip">
                 <div className="numbers-grid">
-                    {stats.map(s => (
-                        <div key={s.label} className="num-item">
-                            <div className="big">{s.n}</div>
-                            <div className="lbl" style={{ textTransform: 'capitalize' }}>{s.label}</div>
-                        </div>
-                    ))}
+                    <div className="num-item">
+                        <div className="big">Nº 1</div>
+                        <div className="lbl">Instituição Privada</div>
+                    </div>
+                    <div className="num-item">
+                        <div className="big">+100</div>
+                        <div className="lbl">ONGs Apoiadas</div>
+                    </div>
+                    <div className="num-item">
+                        <div className="big">Digital</div>
+                        <div className="lbl">Foco em Inovação</div>
+                    </div>
+                    <div className="num-item">
+                        <div className="big">Lusonas</div>
+                        <div className="lbl">Identidade e Cultura</div>
+                    </div>
                 </div>
             </section>
 
             <section className="pub-section" id="programas">
                 <div className="pub-container">
-                    <span className="pub-eyebrow">Caminhos de Sucesso</span>
-                    <h2 className="pub-h2">Encontra o programa<br/>que se adequa a ti.</h2>
+                    <span className="pub-eyebrow">ADN de Excelência</span>
+                    <h2 className="pub-h2">Impacto que gera<br/>transformação real.</h2>
                     <p style={{ marginTop: 24, fontSize: 19, lineHeight: 1.55, color: '#525252', maxWidth: 640 }}>
-                        Da licenciatura ao mestrado internacional, do trainee ao programa de liderança — temos um percurso para cada fase da tua carreira.
+                        Mais do que um banco, somos um ecossistema de desenvolvimento humano. Investimos na juventude, na educação e no desenvolvimento comunitário sustentável através dos nossos eixos sociais.
                     </p>
                     <div className="programs-grid">
-                        {programs.map(p => (
-                            <Link key={p.id} href={candidatura().url + `?program=${p.code}`} className="prog-card">
-                                <span className="tag">{p.tag}</span>
-                                <h3>{p.name}</h3>
-                                <p>{p.descricao}</p>
-                                <ul>
-                                    {p.benefits.map((b, i) => <li key={i}>{b.text}</li>)}
-                                </ul>
-                            </Link>
-                        ))}
+                        <div className="prog-card">
+                            <span className="tag">Liderança</span>
+                            <h3>Futuro BFA (Trainees)</h3>
+                            <p>O pilar da nossa excelência. Formação intensiva e mentoria executiva para identificar e integrar os líderes de amanhã.</p>
+                            <ul>
+                                <li>Rotação Departamental</li>
+                                <li>Formação Técnica em IT e Finanças</li>
+                                <li>Mentoria Direta com Seniores</li>
+                            </ul>
+                        </div>
+                        <div className="prog-card" style={{ borderTopColor: '#D97706' }}>
+                            <span className="tag">Impacto</span>
+                            <h3>BFA Solidário</h3>
+                            <p>Apoio direto a instituições e ONGs focadas em Saúde e Inclusão Social. Mais de 360 milhões de kwanzas anuais destinados a quem mais precisa.</p>
+                            <ul>
+                                <li>Saúde Infantil e Nutrição</li>
+                                <li>Combate à Pobreza</li>
+                                <li>Inclusão Financeira</li>
+                            </ul>
+                        </div>
+                        <div className="prog-card" style={{ borderTopColor: '#B45309' }}>
+                            <span className="tag">Educação</span>
+                            <h3>Fundo Social BFA</h3>
+                            <p>O nosso compromisso com a base do desenvolvimento nacional: educação de qualidade e literacia financeira para todos os angolanos.</p>
+                            <ul>
+                                <li>Construção e Apoio a Escolas</li>
+                                <li>Programas de Formação Profissional</li>
+                                <li>Voluntariado Corporativo</li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -283,12 +319,22 @@ export default function Welcome({ programs, stats, faqs, processSteps }: Props) 
                     <span className="pub-eyebrow">Perguntas frequentes</span>
                     <h2 className="pub-h2">Tudo o que precisas<br/>de saber.</h2>
                     <div className="faq-list">
-                        {faqs.map((f, i) => (
-                            <details key={i} className="faq-item">
-                                <summary>{f.question}</summary>
-                                <p>{f.answer}</p>
-                            </details>
-                        ))}
+                        <details className="faq-item">
+                            <summary>O BFA oferece bolsas de estudo universitárias?</summary>
+                            <p>O BFA foca o seu investimento em formação profissional intensiva e no programa de Trainees. Atualmente, não dispomos de um programa de bolsas universitárias aberto ao público, privilegiando a capacitação técnica de recém-licenciados e o apoio a instituições de ensino através do Fundo Social BFA.</p>
+                        </details>
+                        <details className="faq-item">
+                            <summary>Quem se pode candidatar ao "Futuro BFA"?</summary>
+                            <p>Procuramos jovens angolanos recém-licenciados ou finalistas das áreas de Gestão, Economia, Finanças, Engenharia Informática e Ciência de Dados, com elevado desempenho académico e espírito de liderança.</p>
+                        </details>
+                        <details className="faq-item">
+                            <summary>Como funciona o apoio do BFA Solidário?</summary>
+                            <p>O BFA Solidário é um fundo competitivo que financia ONGs e instituições sociais legalizadas em Angola, com foco em projetos de Saúde, Educação e Inclusão Financeira que demonstrem impacto comprovado.</p>
+                        </details>
+                        <details className="faq-item">
+                            <summary>O programa de Trainees garante integração no banco?</summary>
+                            <p>Sim, o objetivo principal do Futuro BFA é a integração dos candidatos como colaboradores efetivos do banco, após um período de avaliação contínua e formação técnica intensiva.</p>
+                        </details>
                     </div>
                 </div>
             </section>
