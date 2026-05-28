@@ -61,7 +61,7 @@ export default function TalentosShow({ talent, canEdit }: Props) {
 
     const handleUpload = (e: React.FormEvent) => {
         e.preventDefault();
-        post('/api/v1/documents', {
+        post('/api/v1/documentos', {
             onSuccess: () => {
                 setUploading(false);
                 reset();
