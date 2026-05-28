@@ -1,85 +1,73 @@
 import { Head, Link } from '@inertiajs/react';
-import { ArrowLeft, Calendar, MapPin, Users } from 'lucide-react';
-import Heading from '@/components/heading';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { index, show } from '@/routes/eventos';
 import type { Evento } from '@/types';
 
 type Props = { evento: Evento };
 
-const statusVariant: Record<string, 'default' | 'secondary' | 'destructive'> = {
-    planeado: 'secondary',
-    confirmado: 'default',
-    concluido: 'default',
-    cancelado: 'destructive',
+const statusPill: Record<string, string> = {
+    planeado: 'pill-info',
+    confirmado: 'pill-success',
+    concluido: 'pill-neutral',
+    cancelado: 'pill-danger',
 };
 
 export default function EventosShow({ evento }: Props) {
     return (
         <>
             <Head title={evento.titulo} />
-            <div className="flex flex-col gap-6 p-4">
-                <div className="flex items-center gap-4">
-                    <Button variant="ghost" size="sm" asChild>
-                        <Link href={index().url}><ArrowLeft className="h-4 w-4" /></Link>
-                    </Button>
-                    <Heading title={evento.titulo} description={`${evento.tipo} · ${evento.formato}`} />
-                    <Badge variant={statusVariant[evento.status] ?? 'secondary'} className="ml-auto">
-                        {evento.status}
-                    </Badge>
+            <div className="section">
+                <div className="page-head">
+                    <div>
+                        <h1 className="page-title">{evento.titulo}</h1>
+                        <p className="page-subtitle">{evento.tipo} · {evento.formato}</p>
+                    </div>
+                    <div className="page-actions">
+                        <span className={`pill ${statusPill[evento.status] ?? 'pill-neutral'}`}>
+                            {evento.status}
+                        </span>
+                        <Link href={index().url} className="btn btn-ghost btn-sm">← Voltar</Link>
+                    </div>
                 </div>
-                <Card className="max-w-2xl">
-                    <CardHeader>
-                        <CardTitle className="text-sm font-medium text-muted-foreground">Detalhes</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-3 text-sm">
-                        <div className="flex items-center gap-2">
-                            <Calendar className="h-4 w-4 text-muted-foreground" />
-                            <span className="text-muted-foreground">Data de Início</span>
-                            <span className="ml-auto">{new Date(evento.data_inicio).toLocaleDateString('pt-PT')}</span>
+                <div className="card" style={{ maxWidth: 640 }}>
+                    <div className="card-head">
+                        <span className="card-title">Detalhes</span>
+                    </div>
+                    <div className="card-pad">
+                        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0' }}>
+                            <span className="muted">Data de Início</span>
+                            <span>{new Date(evento.data_inicio).toLocaleDateString('pt-PT')}</span>
                         </div>
                         {evento.data_fim && (
-                            <div className="flex items-center gap-2">
-                                <Calendar className="h-4 w-4 text-muted-foreground" />
-                                <span className="text-muted-foreground">Data de Fim</span>
-                                <span className="ml-auto">{new Date(evento.data_fim).toLocaleDateString('pt-PT')}</span>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0' }}>
+                                <span className="muted">Data de Fim</span>
+                                <span>{new Date(evento.data_fim).toLocaleDateString('pt-PT')}</span>
                             </div>
                         )}
                         {evento.local && (
-                            <div className="flex items-center gap-2">
-                                <MapPin className="h-4 w-4 text-muted-foreground" />
-                                <span className="text-muted-foreground">Local</span>
-                                <span className="ml-auto">{evento.local}</span>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0' }}>
+                                <span className="muted">Local</span>
+                                <span>{evento.local}</span>
                             </div>
                         )}
                         {evento.vagas !== null && (
-                            <div className="flex items-center gap-2">
-                                <Users className="h-4 w-4 text-muted-foreground" />
-                                <span className="text-muted-foreground">Vagas</span>
-                                <span className="ml-auto">{evento.vagas}</span>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0' }}>
+                                <span className="muted">Vagas</span>
+                                <span>{evento.vagas}</span>
                             </div>
                         )}
                         {evento.descricao && (
-                            <div className="pt-2">
-                                <p className="mb-1 text-muted-foreground">Descrição</p>
-                                <p className="whitespace-pre-wrap leading-relaxed">{evento.descricao}</p>
+                            <div style={{ paddingTop: 12 }}>
+                                <p className="muted" style={{ marginBottom: 4 }}>Descrição</p>
+                                <p style={{ whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>{evento.descricao}</p>
                             </div>
                         )}
-                    </CardContent>
-                </Card>
+                    </div>
+                </div>
             </div>
         </>
     );
 }
 
-EventosShow.layout = (props: { evento?: Evento }) => ({
-    breadcrumbs: [
-        { title: 'Eventos', href: index().url },
-        {
-            title: props.evento?.titulo ?? 'Detalhe',
-            href: props.evento ? show(props.evento.id).url : '/',
-        },
-    ],
-});
+EventosShow.layout = {
+    breadcrumbs: [{ title: 'Eventos' }],
+};

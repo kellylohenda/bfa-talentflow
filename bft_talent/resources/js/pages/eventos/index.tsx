@@ -2,22 +2,17 @@ import { Head, Link, router } from '@inertiajs/react';
 import { Eye, Plus, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { TablePagination } from '@/components/table-pagination';
-import Heading from '@/components/heading';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { create, index, show } from '@/routes/eventos';
 import type { Evento, Paginated } from '@/types';
 
 type Filters = { status?: string; tipo?: string; search?: string };
 type Props = { eventos: Paginated<Evento>; filters: Filters };
 
-const statusVariant: Record<string, 'default' | 'secondary' | 'destructive'> = {
-    planeado: 'secondary',
-    confirmado: 'default',
-    concluido: 'default',
-    cancelado: 'destructive',
+const statusTone: Record<string, string> = {
+    planeado: 'info',
+    confirmado: 'success',
+    concluido: 'neutral',
+    cancelado: 'danger',
 };
 
 const clean = (f: Record<string, string | undefined>) =>
@@ -28,10 +23,16 @@ export default function EventosIndex({ eventos, filters }: Props) {
     const mounted = useRef(false);
 
     useEffect(() => {
-        if (!mounted.current) { mounted.current = true; return; }
+        if (!mounted.current) {
+            mounted.current = true;
+
+            return;
+        }
+
         const t = setTimeout(() => {
             router.get(index().url, clean({ ...filters, search }), { preserveState: true, replace: true });
         }, 350);
+
         return () => clearTimeout(t);
     }, [search]);
 
@@ -49,87 +50,96 @@ export default function EventosIndex({ eventos, filters }: Props) {
     return (
         <>
             <Head title="Eventos" />
-            <div className="flex flex-col gap-6 p-4">
-                <div className="flex items-center justify-between">
-                    <Heading title="Eventos" description="Formações, workshops e actividades" />
-                    <Button asChild>
-                        <Link href={create().url}><Plus className="h-4 w-4" /> Novo Evento</Link>
-                    </Button>
+            <div className="section">
+                <div className="page-head">
+                    <div>
+                        <h1 className="page-title">Eventos</h1>
+                        <p className="page-subtitle">Formações, workshops e actividades</p>
+                    </div>
+                    <div className="page-actions">
+                        <Link href={create().url} className="btn btn-primary">
+                            <Plus size={14} /> Novo Evento
+                        </Link>
+                    </div>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2">
-                    <Input
+                <div className="toolbar">
+                    <input
+                        className="input input-search"
                         placeholder="Pesquisar por título…"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        className="h-8 w-56"
                     />
-                    <Select value={filters.tipo || 'all'} onValueChange={(v) => setFilter('tipo', v === 'all' ? '' : v)}>
-                        <SelectTrigger className="h-8 w-36"><SelectValue placeholder="Tipo" /></SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="all">Todos os tipos</SelectItem>
-                            <SelectItem value="formacao">Formação</SelectItem>
-                            <SelectItem value="palestra">Palestra</SelectItem>
-                            <SelectItem value="workshop">Workshop</SelectItem>
-                            <SelectItem value="networking">Networking</SelectItem>
-                            <SelectItem value="outro">Outro</SelectItem>
-                        </SelectContent>
-                    </Select>
-                    <Select value={filters.status || 'all'} onValueChange={(v) => setFilter('status', v === 'all' ? '' : v)}>
-                        <SelectTrigger className="h-8 w-36"><SelectValue placeholder="Estado" /></SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="all">Todos os estados</SelectItem>
-                            <SelectItem value="planeado">Planeado</SelectItem>
-                            <SelectItem value="confirmado">Confirmado</SelectItem>
-                            <SelectItem value="concluido">Concluído</SelectItem>
-                            <SelectItem value="cancelado">Cancelado</SelectItem>
-                        </SelectContent>
-                    </Select>
+                    <select
+                        className="input select"
+                        value={filters.tipo || ''}
+                        onChange={(e) => setFilter('tipo', e.target.value)}
+                    >
+                        <option value="">Todos os tipos</option>
+                        <option value="formacao">Formação</option>
+                        <option value="palestra">Palestra</option>
+                        <option value="workshop">Workshop</option>
+                        <option value="networking">Networking</option>
+                        <option value="outro">Outro</option>
+                    </select>
+                    <select
+                        className="input select"
+                        value={filters.status || ''}
+                        onChange={(e) => setFilter('status', e.target.value)}
+                    >
+                        <option value="">Todos os estados</option>
+                        <option value="planeado">Planeado</option>
+                        <option value="confirmado">Confirmado</option>
+                        <option value="concluido">Concluído</option>
+                        <option value="cancelado">Cancelado</option>
+                    </select>
                     {hasFilters && (
-                        <Button variant="ghost" size="sm" onClick={clearFilters} className="h-8 gap-1 text-muted-foreground">
-                            <X className="h-3 w-3" /> Limpar
-                        </Button>
+                        <button className="btn btn-ghost btn-sm" onClick={clearFilters}>
+                            <X size={12} /> Limpar
+                        </button>
                     )}
                 </div>
 
-                <div className="overflow-hidden rounded-lg border">
-                    <table className="w-full text-sm">
-                        <thead className="bg-muted/50">
+                <div className="table-wrap">
+                    <table className="tbl">
+                        <thead>
                             <tr>
-                                <th className="px-4 py-3 text-left font-medium">Título</th>
-                                <th className="px-4 py-3 text-left font-medium">Tipo</th>
-                                <th className="px-4 py-3 text-left font-medium">Formato</th>
-                                <th className="px-4 py-3 text-left font-medium">Estado</th>
-                                <th className="px-4 py-3 text-left font-medium">Data</th>
-                                <th className="px-4 py-3 text-left font-medium">Vagas</th>
-                                <th className="px-4 py-3 text-right font-medium">Acções</th>
+                                <th>Título</th>
+                                <th>Tipo</th>
+                                <th>Formato</th>
+                                <th>Estado</th>
+                                <th>Data</th>
+                                <th>Vagas</th>
+                                <th style={{ textAlign: 'right' }}>Acções</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y">
+                        <tbody>
                             {eventos.data.map((e) => (
-                                <tr key={e.id} className="hover:bg-muted/30">
-                                    <td className="px-4 py-3 font-medium">{e.titulo}</td>
-                                    <td className="px-4 py-3 text-muted-foreground capitalize">{e.tipo}</td>
-                                    <td className="px-4 py-3 text-muted-foreground capitalize">{e.formato}</td>
-                                    <td className="px-4 py-3">
-                                        <Badge variant={statusVariant[e.status] ?? 'secondary'}>{e.status}</Badge>
+                                <tr key={e.id}>
+                                    <td>{e.titulo}</td>
+                                    <td style={{ color: 'var(--text-2)', textTransform: 'capitalize' }}>{e.tipo}</td>
+                                    <td style={{ color: 'var(--text-2)', textTransform: 'capitalize' }}>{e.formato}</td>
+                                    <td>
+                                        <span className={`pill pill-${statusTone[e.status] ?? 'neutral'}`}>
+                                            {e.status}
+                                        </span>
                                     </td>
-                                    <td className="px-4 py-3 text-muted-foreground">
+                                    <td style={{ color: 'var(--text-2)' }}>
                                         {new Date(e.data_inicio).toLocaleDateString('pt-PT')}
                                     </td>
-                                    <td className="px-4 py-3 text-muted-foreground">{e.vagas ?? '—'}</td>
-                                    <td className="px-4 py-3">
-                                        <div className="flex justify-end">
-                                            <Button variant="ghost" size="sm" asChild>
-                                                <Link href={show(e.id).url}><Eye className="h-4 w-4" /></Link>
-                                            </Button>
+                                    <td style={{ color: 'var(--text-2)' }}>{e.vagas ?? '—'}</td>
+                                    <td>
+                                        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                                            <Link href={show(e.id).url} className="btn btn-ghost btn-sm" title="Ver">
+                                                <Eye size={14} />
+                                            </Link>
                                         </div>
                                     </td>
                                 </tr>
                             ))}
                             {eventos.data.length === 0 && (
                                 <tr>
-                                    <td colSpan={7} className="px-4 py-10 text-center text-muted-foreground">
+                                    <td colSpan={7} style={{ padding: 32, textAlign: 'center', color: 'var(--text-3)' }}>
                                         Nenhum evento encontrado.
                                     </td>
                                 </tr>

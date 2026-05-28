@@ -48,6 +48,11 @@ export type Talent = {
     university: University | null;
     department: Department | null;
     mentor: Mentor | null;
+    rotations: Rotation[];
+    payments: Payment[];
+    tasks: Task[];
+    evaluations: Avaliacao[];
+    absences: Absence[];
     created_at: string;
     updated_at: string;
 };

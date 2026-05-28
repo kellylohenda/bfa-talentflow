@@ -1,4 +1,4 @@
-import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import { Head, Link, useForm } from '@inertiajs/react';
 import { ArrowLeft } from 'lucide-react';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
@@ -12,9 +12,6 @@ import type { Talent } from '@/types';
 type Props = { talents: Pick<Talent, 'id' | 'name' | 'talent_code'>[] };
 
 export default function WorkflowsCreate({ talents }: Props) {
-    const { props } = usePage<{ currentTeam: { slug: string } }>();
-    const team = props.currentTeam.slug;
-
     const { data, setData, post, processing, errors } = useForm({
         talent_id: '',
         type: 'pagamento',
@@ -23,7 +20,7 @@ export default function WorkflowsCreate({ talents }: Props) {
 
     function submit(e: React.FormEvent) {
         e.preventDefault();
-        post(store(team).url);
+        post(store().url);
     }
 
     return (
@@ -32,7 +29,7 @@ export default function WorkflowsCreate({ talents }: Props) {
             <div className="flex flex-col gap-6 p-4">
                 <div className="flex items-center gap-4">
                     <Button variant="ghost" size="sm" asChild>
-                        <Link href={index(team).url}><ArrowLeft className="h-4 w-4" /></Link>
+                        <Link href={index().url}><ArrowLeft className="h-4 w-4" /></Link>
                     </Button>
                     <Heading title="Novo Workflow" description="Iniciar processo de aprovação" />
                 </div>
@@ -81,7 +78,7 @@ export default function WorkflowsCreate({ talents }: Props) {
                             <div className="flex gap-2 pt-2">
                                 <Button type="submit" disabled={processing}>Criar Workflow</Button>
                                 <Button type="button" variant="outline" asChild>
-                                    <Link href={index(team).url}>Cancelar</Link>
+                                    <Link href={index().url}>Cancelar</Link>
                                 </Button>
                             </div>
                         </form>
@@ -92,9 +89,9 @@ export default function WorkflowsCreate({ talents }: Props) {
     );
 }
 
-WorkflowsCreate.layout = (props: { currentTeam?: { slug: string } | null }) => ({
+WorkflowsCreate.layout = () => ({
     breadcrumbs: [
-        { title: 'Workflows', href: props.currentTeam ? index(props.currentTeam.slug).url : '/' },
+        { title: 'Workflows', href: index().url },
         { title: 'Novo', href: '#' },
     ],
 });

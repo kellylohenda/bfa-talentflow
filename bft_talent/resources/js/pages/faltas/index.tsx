@@ -1,31 +1,25 @@
-import { Head, Link, router, usePage } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { Check, Plus, X, XCircle } from 'lucide-react';
 import { TablePagination } from '@/components/table-pagination';
-import Heading from '@/components/heading';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { create, index, show, update } from '@/routes/faltas';
+import { BfaAvatar } from '@/components/ui/avatar';
+import { create, index, update } from '@/routes/faltas';
 import type { Absence, Paginated } from '@/types';
 
 type Filters = { status?: string; type?: string };
 type Props = { faltas: Paginated<Absence>; filters: Filters };
 
-const statusVariant: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
-    pendente: 'outline',
-    aprovado: 'default',
-    rejeitado: 'destructive',
-};
-
 const clean = (f: Record<string, string | undefined>) =>
     Object.fromEntries(Object.entries(f).filter(([, v]) => v !== '' && v !== undefined));
 
-export default function FaltasIndex({ faltas, filters }: Props) {
-    const { props } = usePage<{ currentTeam: { slug: string } }>();
-    const team = props.currentTeam.slug;
+const pillClass: Record<string, string> = {
+    pendente: 'pill pill-warn',
+    aprovado: 'pill pill-success',
+    rejeitado: 'pill pill-danger',
+};
 
+export default function FaltasIndex({ faltas, filters }: Props) {
     function setFilter(key: keyof Filters, value: string) {
-        router.get(index(team).url, clean({ ...filters, [key]: value }), { preserveState: true, replace: true });
+        router.get(index().url, clean({ ...filters, [key]: value }), { preserveState: true, replace: true });
     }
 
     const hasFilters = !!(filters.status || filters.type);
@@ -45,75 +39,80 @@ export default function FaltasIndex({ faltas, filters }: Props) {
     return (
         <>
             <Head title="Faltas" />
-            <div className="flex flex-col gap-6 p-4">
-                <div className="flex items-center justify-between">
-                    <Heading title="Faltas" description="Gestão de faltas e ausências" />
-                    <Button asChild>
-                        <Link href={create(team).url}><Plus className="h-4 w-4" /> Nova Falta</Link>
-                    </Button>
+            <div className="section">
+                <div className="page-head">
+                    <div>
+                        <h1 className="page-title">Faltas</h1>
+                        <p className="page-subtitle">Gestão de faltas e ausências</p>
+                    </div>
+                    <div className="page-actions">
+                        <Link href={create().url} className="btn btn-primary"><Plus /> Nova Falta</Link>
+                    </div>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2">
-                    <Select value={filters.status || 'all'} onValueChange={(v) => setFilter('status', v === 'all' ? '' : v)}>
-                        <SelectTrigger className="h-8 w-40"><SelectValue placeholder="Estado" /></SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="all">Todos os estados</SelectItem>
-                            <SelectItem value="pendente">Pendente</SelectItem>
-                            <SelectItem value="aprovado">Aprovado</SelectItem>
-                            <SelectItem value="rejeitado">Rejeitado</SelectItem>
-                        </SelectContent>
-                    </Select>
+                <div className="toolbar">
+                    <select className="select" value={filters.status || ''} onChange={(e) => setFilter('status', e.target.value)}>
+                        <option value="">Todos os estados</option>
+                        <option value="pendente">Pendente</option>
+                        <option value="aprovado">Aprovado</option>
+                        <option value="rejeitado">Rejeitado</option>
+                    </select>
                     {hasFilters && (
-                        <Button variant="ghost" size="sm" onClick={() => router.get(index(team).url, {})} className="h-8 gap-1 text-muted-foreground">
-                            <X className="h-3 w-3" /> Limpar
-                        </Button>
+                        <button type="button" className="btn btn-ghost btn-sm" onClick={() => router.get(index().url, {})}>
+                            <X /> Limpar
+                        </button>
                     )}
                 </div>
 
-                <div className="overflow-hidden rounded-lg border">
-                    <table className="w-full text-sm">
-                        <thead className="bg-muted/50">
+                <div className="table-wrap">
+                    <table className="tbl">
+                        <thead>
                             <tr>
-                                <th className="px-4 py-3 text-left font-medium">Talento</th>
-                                <th className="px-4 py-3 text-left font-medium">Tipo</th>
-                                <th className="px-4 py-3 text-left font-medium">Data Início</th>
-                                <th className="px-4 py-3 text-left font-medium">Data Fim</th>
-                                <th className="px-4 py-3 text-left font-medium">Justificado</th>
-                                <th className="px-4 py-3 text-left font-medium">Estado</th>
-                                <th className="px-4 py-3 text-right font-medium">Acções</th>
+                                <th>Talento</th>
+                                <th>Tipo</th>
+                                <th>Data Início</th>
+                                <th>Data Fim</th>
+                                <th>Justificado</th>
+                                <th>Estado</th>
+                                <th>Acções</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y">
+                        <tbody>
                             {faltas.data.map((f) => (
-                                <tr key={f.id} className="hover:bg-muted/30">
-                                    <td className="px-4 py-3 font-medium">{f.talent?.name ?? '—'}</td>
-                                    <td className="px-4 py-3 capitalize text-muted-foreground">{f.type}</td>
-                                    <td className="px-4 py-3 text-muted-foreground">
+                                <tr key={f.id}>
+                                    <td className="cell-person">
+                                        <BfaAvatar name={f.talent?.name ?? '—'} size={28} />
+                                        <div className="meta">
+                                            <b>{f.talent?.name ?? '—'}</b>
+                                        </div>
+                                    </td>
+                                    <td className="muted capitalize">{f.type}</td>
+                                    <td className="muted">
                                         {new Date(f.start_date).toLocaleDateString('pt-PT')}
                                     </td>
-                                    <td className="px-4 py-3 text-muted-foreground">
+                                    <td className="muted">
                                         {new Date(f.end_date).toLocaleDateString('pt-PT')}
                                     </td>
-                                    <td className="px-4 py-3">
+                                    <td>
                                         {f.justificado ? (
-                                            <Check className="h-4 w-4 text-green-600" />
+                                            <Check className="text-green-600" size={16} />
                                         ) : (
-                                            <XCircle className="h-4 w-4 text-muted-foreground" />
+                                            <XCircle className="muted" size={16} />
                                         )}
                                     </td>
-                                    <td className="px-4 py-3">
-                                        <Badge variant={statusVariant[f.status] ?? 'secondary'}>{f.status}</Badge>
+                                    <td>
+                                        <span className={pillClass[f.status] ?? 'pill pill-neutral'}>{f.status}</span>
                                     </td>
-                                    <td className="px-4 py-3">
+                                    <td>
                                         <div className="flex items-center justify-end gap-1">
                                             {f.status === 'pendente' && (
                                                 <>
-                                                    <Button variant="ghost" size="sm" onClick={() => handleApprove(f)}>
-                                                        <Check className="h-4 w-4 text-green-600" />
-                                                    </Button>
-                                                    <Button variant="ghost" size="sm" onClick={() => handleReject(f)}>
-                                                        <XCircle className="h-4 w-4 text-destructive" />
-                                                    </Button>
+                                                    <button type="button" className="btn btn-ghost btn-sm" onClick={() => handleApprove(f)}>
+                                                        <Check className="text-green-600" size={16} />
+                                                    </button>
+                                                    <button type="button" className="btn btn-ghost btn-sm" onClick={() => handleReject(f)}>
+                                                        <XCircle className="text-red-600" size={16} />
+                                                    </button>
                                                 </>
                                             )}
                                         </div>
@@ -122,7 +121,7 @@ export default function FaltasIndex({ faltas, filters }: Props) {
                             ))}
                             {faltas.data.length === 0 && (
                                 <tr>
-                                    <td colSpan={7} className="px-4 py-10 text-center text-muted-foreground">
+                                    <td colSpan={7} className="text-center muted" style={{ padding: '2rem 0' }}>
                                         Nenhuma falta encontrada.
                                     </td>
                                 </tr>
@@ -137,6 +136,6 @@ export default function FaltasIndex({ faltas, filters }: Props) {
     );
 }
 
-FaltasIndex.layout = (props: { currentTeam?: { slug: string } | null }) => ({
-    breadcrumbs: [{ title: 'Faltas', href: props.currentTeam ? index(props.currentTeam.slug).url : '/' }],
+FaltasIndex.layout = () => ({
+    breadcrumbs: [{ title: 'Faltas', href: index().url }],
 });

@@ -80,15 +80,32 @@ class TalentosController extends Controller
             ->with('success', 'Talento criado com sucesso.');
     }
 
-    public function show(Request $request, Talent $talent): Response
+    public function show(Request $request, $id): Response
     {
+        // Fetch manually to ensure we get a fresh instance
+        $talent = Talent::with([
+            'program', 'university', 'department', 'mentor',
+            'rotations', 'payments', 'tasks', 'absences', 'evaluations',
+        ])->find($id);
+
+        if (!$talent) {
+            abort(404);
+        }
+
         $this->authorize('view', $talent);
 
         return Inertia::render('talentos/show', [
-            'talent' => $talent->load([
-                'program', 'university', 'department', 'mentor',
-                'rotations', 'payments', 'tasks', 'absences', 'evaluations',
-            ]),
+            'talent' => $talent->toArray(),
+            'programs' => Program::orderBy('name')->get(['id', 'name', 'code']),
+            'universities' => University::orderBy('name')->get(['id', 'name']),
+            'departments' => Department::orderBy('name')->get(['id', 'name']),
+            'mentors' => User::where('bfa_role', 'mentor')->orderBy('name')->get(['id', 'name']),
+            'canEdit' => $request->user()->can('update', $talent),
+            'debugAuth' => [
+                'role' => $request->user()->bfa_role,
+                'id' => $request->user()->id,
+                'can_view' => $request->user()->can('view', $talent),
+            ]
         ]);
     }
 

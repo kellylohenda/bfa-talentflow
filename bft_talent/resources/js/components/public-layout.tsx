@@ -1,8 +1,9 @@
 import { Link } from '@inertiajs/react';
 import { Menu, Moon, Sun, X } from 'lucide-react';
-import { candidatura, home, login, portal, register } from '@/routes';
-import { useState, type ReactNode } from 'react';
+import { useState  } from 'react';
+import type {ReactNode} from 'react';
 import { useAppearance } from '@/hooks/use-appearance';
+import { candidatura, home, login, portal, register } from '@/routes';
 
 export function PublicLayout({ children }: { children: ReactNode }) {
     const [menuOpen, setMenuOpen] = useState(false);
@@ -195,7 +196,9 @@ export function PublicLayout({ children }: { children: ReactNode }) {
                     <Link href={login().url} className="pl-mobile-link" onClick={() => setMenuOpen(false)}>Entrar</Link>
                     <Link href={register().url} className="pl-mobile-link" onClick={() => setMenuOpen(false)}>Registar</Link>
                     <button
-                        onClick={() => { updateAppearance(resolvedAppearance === 'dark' ? 'light' : 'dark'); setMenuOpen(false); }}
+                        onClick={() => {
+ updateAppearance(resolvedAppearance === 'dark' ? 'light' : 'dark'); setMenuOpen(false); 
+}}
                         className="pl-mobile-link"
                         style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: 14, color: 'var(--text-2)', padding: '10px 12px' }}
                     >

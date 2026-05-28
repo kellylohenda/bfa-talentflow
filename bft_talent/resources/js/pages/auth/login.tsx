@@ -2,10 +2,7 @@ import { Form, Head } from '@inertiajs/react';
 import InputError from '@/components/input-error';
 import PasswordInput from '@/components/password-input';
 import TextLink from '@/components/text-link';
-import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import { register } from '@/routes';
 import { store } from '@/routes/login';
@@ -29,74 +26,75 @@ export default function Login({
             <Form
                 {...store.form()}
                 resetOnSuccess={['password']}
-                className="flex flex-col gap-6"
             >
                 {({ processing, errors }) => (
                     <>
-                        <div className="grid gap-6">
-                            <div className="grid gap-2">
-                                <Label htmlFor="email">Email</Label>
-                                <Input
-                                    id="email"
-                                    type="email"
-                                    name="email"
-                                    required
-                                    autoFocus
-                                    tabIndex={1}
-                                    autoComplete="email"
-                                    placeholder="seu@email.com"
-                                />
-                                <InputError message={errors.email} />
-                            </div>
+                        <div className="form-group">
+                            <label className="form-label" htmlFor="email">Email</label>
+                            <input
+                                className="input"
+                                id="email"
+                                type="email"
+                                name="email"
+                                required
+                                autoFocus
+                                tabIndex={1}
+                                autoComplete="email"
+                                placeholder="seu@email.com"
+                            />
+                            <InputError message={errors.email} />
+                        </div>
 
-                            <div className="grid gap-2">
-                                <div className="flex items-center">
-                                    <Label htmlFor="password">Palavra-passe</Label>
-                                    {canResetPassword && (
-                                        <TextLink
-                                            href={request().url}
-                                            className="ml-auto text-sm"
-                                            tabIndex={5}
-                                        >
-                                            Esqueceu-se da palavra-passe?
-                                        </TextLink>
-                                    )}
-                                </div>
-                                <PasswordInput
-                                    id="password"
-                                    name="password"
-                                    required
-                                    tabIndex={2}
-                                    autoComplete="current-password"
-                                    placeholder="Palavra-passe"
-                                />
-                                <InputError message={errors.password} />
+                        <div className="form-group">
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <label className="form-label" htmlFor="password">Palavra-passe</label>
+                                {canResetPassword && (
+                                    <TextLink
+                                        href={request().url}
+                                        className="muted"
+                                        tabIndex={5}
+                                    >
+                                        Esqueceu-se da palavra-passe?
+                                    </TextLink>
+                                )}
                             </div>
+                            <PasswordInput
+                                id="password"
+                                name="password"
+                                required
+                                tabIndex={2}
+                                autoComplete="current-password"
+                                placeholder="Palavra-passe"
+                            />
+                            <InputError message={errors.password} />
+                        </div>
 
-                            <div className="flex items-center space-x-3">
+                        <div className="form-group">
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                                 <Checkbox
                                     id="remember"
                                     name="remember"
                                     tabIndex={3}
                                 />
-                                <Label htmlFor="remember">Lembrar-me</Label>
+                                <label className="form-label" htmlFor="remember" style={{ margin: 0 }}>Lembrar-me</label>
                             </div>
-
-                            <Button
-                                type="submit"
-                                className="mt-4 w-full"
-                                tabIndex={4}
-                                disabled={processing}
-                                data-test="login-button"
-                            >
-                                {processing && <Spinner />}
-                                Entrar
-                            </Button>
                         </div>
 
+                        <button
+                            type="submit"
+                            className="btn btn-primary"
+                            style={{ width: '100%', marginTop: 8 }}
+                            tabIndex={4}
+                            disabled={processing}
+                            data-test="login-button"
+                        >
+                            {processing && <Spinner />}
+                            Entrar
+                        </button>
+
                         {canRegister && (
-                            <div className="text-center text-sm text-muted-foreground">
-                                Ainda não tem conta?{' '}
+                            <div style={{ textAlign: 'center', marginTop: 12 }}>
+                                <span className="muted">Ainda não tem conta? </span>
                                 <TextLink href={register().url} tabIndex={5}>
                                     Criar conta
                                 </TextLink>
@@ -107,8 +105,8 @@ export default function Login({
             </Form>
 
             {status && (
-                <div className="mb-4 text-center text-sm font-medium text-green-600">
-                    {status}
+                <div style={{ textAlign: 'center', marginTop: 12 }}>
+                    <span className="pill pill-success">{status}</span>
                 </div>
             )}
         </>

@@ -1,25 +1,8 @@
-import { Head, usePage } from '@inertiajs/react';
-import { Calendar, DollarSign, GraduationCap, ListChecks, User, Video } from 'lucide-react';
-import Heading from '@/components/heading';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Head } from '@inertiajs/react';
+import { BfaAvatar } from '@/components/ui/avatar';
+import { KPI } from '@/components/ui/kpi';
 import { index } from '@/routes/bolseiro';
 import type { Mentor, Task, Payment } from '@/types';
-
-type KpiCardProps = { icon: React.ReactNode; label: string; value: string | number };
-function KpiCard({ icon, label, value }: KpiCardProps) {
-    return (
-        <Card>
-            <CardContent className="flex items-center gap-4 pt-6">
-                <div className="rounded-lg bg-primary/10 p-2.5 text-primary">{icon}</div>
-                <div>
-                    <p className="text-sm text-muted-foreground">{label}</p>
-                    <p className="text-2xl font-bold">{value}</p>
-                </div>
-            </CardContent>
-        </Card>
-    );
-}
 
 type Props = {
     kpis: { tarefasPendentes: number; pagamentosPendentes: number; sessoesMes: number; desempenho: number };
@@ -28,78 +11,87 @@ type Props = {
     pagamentos: Payment[];
 };
 
-export default function BolseiroIndex({ kpis, mentor, tarefas, pagamentos }: Props) {
-    const { props } = usePage<{ currentTeam: { slug: string } }>();
-    const team = props.currentTeam.slug;
+const statusTone: Record<string, string> = {
+    pendente: 'warn',
+    concluido: 'success',
+    pago: 'success',
+    pendente_pagamento: 'warn',
+};
 
+export default function BolseiroIndex({ kpis, mentor, tarefas, pagamentos }: Props) {
     return (
         <>
             <Head title="Portal do Bolseiro" />
-            <div className="flex flex-col gap-6 p-4">
-                <Heading title="Portal do Bolseiro" description="Bem-vindo ao teu painel pessoal" />
+            <div className="section">
+                <div className="page-head">
+                    <div>
+                        <h1 className="page-title">Portal do Bolseiro</h1>
+                        <p className="page-subtitle">Bem-vindo ao teu painel pessoal</p>
+                    </div>
+                </div>
 
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                    <KpiCard icon={<ListChecks className="h-5 w-5" />} label="Tarefas Pendentes" value={kpis.tarefasPendentes} />
-                    <KpiCard icon={<DollarSign className="h-5 w-5" />} label="Pagamentos Pendentes" value={kpis.pagamentosPendentes} />
-                    <KpiCard icon={<Video className="h-5 w-5" />} label="Sessões Este Mês" value={kpis.sessoesMes} />
-                    <KpiCard icon={<GraduationCap className="h-5 w-5" />} label="Desempenho" value={`${kpis.desempenho}%`} />
+                <div className="grid cols-4">
+                    <KPI label="Tarefas Pendentes" value={kpis.tarefasPendentes} icon="check" />
+                    <KPI label="Pagamentos Pendentes" value={kpis.pagamentosPendentes} icon="cash" />
+                    <KPI label="Sessões Este Mês" value={kpis.sessoesMes} icon="calendar" />
+                    <KPI label="Desempenho" value={`${kpis.desempenho}%`} icon="chart" />
                 </div>
 
                 {mentor && (
-                    <Card>
-                        <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-medium text-muted-foreground">Meu Mentor</CardTitle>
-                        </CardHeader>
-                        <CardContent className="flex items-center gap-3">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                                <User className="h-5 w-5 text-primary" />
+                    <div className="card">
+                        <div className="card-head">
+                            <span className="card-title">Meu Mentor</span>
+                        </div>
+                        <div className="card-pad">
+                            <div className="cell-person">
+                                <BfaAvatar name={mentor.name} size={36} />
+                                <div className="meta">
+                                    <b>{mentor.name}</b>
+                                    <span>{mentor.email}</span>
+                                </div>
                             </div>
-                            <div>
-                                <p className="font-medium">{mentor.name}</p>
-                                <p className="text-xs text-muted-foreground">{mentor.email}</p>
-                            </div>
-                        </CardContent>
-                    </Card>
+                        </div>
+                    </div>
                 )}
 
-                <div className="grid gap-4 md:grid-cols-2">
-                    <Card>
-                        <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-medium text-muted-foreground">Tarefas Recentes</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-2">
-                            {tarefas.length === 0 && <p className="text-sm text-muted-foreground">Nenhuma tarefa pendente.</p>}
+                <div className="grid cols-2">
+                    <div className="card">
+                        <div className="card-head">
+                            <span className="card-title">Tarefas Recentes</span>
+                        </div>
+                        <div className="card-pad">
+                            {tarefas.length === 0 && <p className="muted">Nenhuma tarefa pendente.</p>}
                             {tarefas.slice(0, 5).map((t) => (
-                                <div key={t.id} className="flex items-center justify-between text-sm">
-                                    <span className="truncate">{t.title}</span>
-                                    <Badge variant={t.status === 'pendente' ? 'outline' : 'secondary'}>{t.status}</Badge>
+                                <div key={t.id} className="row row-between" style={{ padding: '6px 0' }}>
+                                    <span>{t.title}</span>
+                                    <span className={`pill pill-${statusTone[t.status] ?? 'neutral'}`}>{t.status}</span>
                                 </div>
                             ))}
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-medium text-muted-foreground">Últimos Pagamentos</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-2">
-                            {pagamentos.length === 0 && <p className="text-sm text-muted-foreground">Nenhum pagamento registado.</p>}
+                        </div>
+                    </div>
+                    <div className="card">
+                        <div className="card-head">
+                            <span className="card-title">Últimos Pagamentos</span>
+                        </div>
+                        <div className="card-pad">
+                            {pagamentos.length === 0 && <p className="muted">Nenhum pagamento registado.</p>}
                             {pagamentos.slice(0, 5).map((p) => (
-                                <div key={p.id} className="flex items-center justify-between text-sm">
+                                <div key={p.id} className="row row-between" style={{ padding: '6px 0' }}>
                                     <span>{p.period}</span>
-                                    <div className="flex items-center gap-2">
-                                        <span className="font-medium">{parseFloat(p.amount).toLocaleString('pt-PT')} {p.currency}</span>
-                                        <Badge variant={p.status === 'pago' ? 'default' : 'outline'}>{p.status}</Badge>
+                                    <div className="row" style={{ gap: 8, alignItems: 'center' }}>
+                                        <span className="mono">{parseFloat(p.amount).toLocaleString('pt-PT')} {p.currency}</span>
+                                        <span className={`pill pill-${statusTone[p.status] ?? 'neutral'}`}>{p.status}</span>
                                     </div>
                                 </div>
                             ))}
-                        </CardContent>
-                    </Card>
+                        </div>
+                    </div>
                 </div>
             </div>
         </>
     );
 }
 
-BolseiroIndex.layout = (props: { currentTeam?: { slug: string } | null }) => ({
-    breadcrumbs: [{ title: 'Portal do Bolseiro', href: props.currentTeam ? index(props.currentTeam.slug).url : '/' }],
+BolseiroIndex.layout = () => ({
+    breadcrumbs: [{ title: 'Portal do Bolseiro', href: index().url }],
 });

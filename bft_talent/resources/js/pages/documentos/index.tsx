@@ -1,31 +1,24 @@
-import { Head, Link, router, usePage } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { Eye, Trash2, X } from 'lucide-react';
 import { TablePagination } from '@/components/table-pagination';
-import Heading from '@/components/heading';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { destroy, index, show } from '@/routes/documentos';
 import type { Document, Paginated } from '@/types';
 
 type Filters = { status?: string; category?: string };
 type Props = { documentos: Paginated<Document>; filters: Filters };
 
-const statusVariant: Record<string, 'default' | 'secondary' | 'destructive'> = {
-    aprovado: 'default',
-    pendente: 'secondary',
-    rejeitado: 'destructive',
-};
-
 const clean = (f: Record<string, string | undefined>) =>
     Object.fromEntries(Object.entries(f).filter(([, v]) => v !== '' && v !== undefined));
 
-export default function DocumentosIndex({ documentos, filters }: Props) {
-    const { props } = usePage<{ currentTeam: { slug: string } }>();
-    const team = props.currentTeam.slug;
+const pillClass: Record<string, string> = {
+    pendente: 'pill pill-warn',
+    aprovado: 'pill pill-success',
+    rejeitado: 'pill pill-danger',
+};
 
+export default function DocumentosIndex({ documentos, filters }: Props) {
     function setFilter(key: keyof Filters, value: string) {
-        router.get(index(team).url, clean({ ...filters, [key]: value }), { preserveState: true, replace: true });
+        router.get(index().url, clean({ ...filters, [key]: value }), { preserveState: true, replace: true });
     }
 
     const hasFilters = !!(filters.status || filters.category);
@@ -39,67 +32,67 @@ export default function DocumentosIndex({ documentos, filters }: Props) {
     return (
         <>
             <Head title="Documentos" />
-            <div className="flex flex-col gap-6 p-4">
-                <div className="flex items-center justify-between">
-                    <Heading title="Documentos" description="Gestão de documentos" />
+            <div className="section">
+                <div className="page-head">
+                    <div>
+                        <h1 className="page-title">Documentos</h1>
+                        <p className="page-subtitle">Gestão de documentos</p>
+                    </div>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2">
-                    <Select value={filters.status || 'all'} onValueChange={(v) => setFilter('status', v === 'all' ? '' : v)}>
-                        <SelectTrigger className="h-8 w-36"><SelectValue placeholder="Estado" /></SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="all">Todos os estados</SelectItem>
-                            <SelectItem value="pendente">Pendente</SelectItem>
-                            <SelectItem value="aprovado">Aprovado</SelectItem>
-                            <SelectItem value="rejeitado">Rejeitado</SelectItem>
-                        </SelectContent>
-                    </Select>
+                <div className="toolbar">
+                    <select className="select" value={filters.status || ''} onChange={(e) => setFilter('status', e.target.value)}>
+                        <option value="">Todos os estados</option>
+                        <option value="pendente">Pendente</option>
+                        <option value="aprovado">Aprovado</option>
+                        <option value="rejeitado">Rejeitado</option>
+                    </select>
                     {hasFilters && (
-                        <Button variant="ghost" size="sm" onClick={() => router.get(index(team).url, {})} className="h-8 gap-1 text-muted-foreground">
-                            <X className="h-3 w-3" /> Limpar
-                        </Button>
+                        <button type="button" className="btn btn-ghost btn-sm" onClick={() => router.get(index().url, {})}>
+                            <X /> Limpar
+                        </button>
                     )}
                 </div>
 
-                <div className="overflow-hidden rounded-lg border">
-                    <table className="w-full text-sm">
-                        <thead className="bg-muted/50">
+                <div className="table-wrap">
+                    <table className="tbl">
+                        <thead>
                             <tr>
-                                <th className="px-4 py-3 text-left font-medium">Título</th>
-                                <th className="px-4 py-3 text-left font-medium">Categoria</th>
-                                <th className="px-4 py-3 text-left font-medium">Estado</th>
-                                <th className="px-4 py-3 text-left font-medium">Tipo</th>
-                                <th className="px-4 py-3 text-left font-medium">Data</th>
-                                <th className="px-4 py-3 text-right font-medium">Acções</th>
+                                <th>Título</th>
+                                <th>Categoria</th>
+                                <th>Estado</th>
+                                <th>Tipo</th>
+                                <th>Data</th>
+                                <th>Acções</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y">
+                        <tbody>
                             {documentos.data.map((d) => (
-                                <tr key={d.id} className="hover:bg-muted/30">
-                                    <td className="px-4 py-3 font-medium">{d.name}</td>
-                                    <td className="px-4 py-3 text-muted-foreground">{d.category}</td>
-                                    <td className="px-4 py-3">
-                                        <Badge variant={statusVariant[d.status] ?? 'secondary'}>{d.status}</Badge>
+                                <tr key={d.id}>
+                                    <td><b>{d.name}</b></td>
+                                    <td className="muted">{d.category}</td>
+                                    <td>
+                                        <span className={pillClass[d.status] ?? 'pill pill-neutral'}>{d.status}</span>
                                     </td>
-                                    <td className="px-4 py-3 text-xs text-muted-foreground">{d.owner_type.split('\\').pop()}</td>
-                                    <td className="px-4 py-3 text-muted-foreground">
+                                    <td className="muted">{d.owner_type.split('\\').pop()}</td>
+                                    <td className="muted">
                                         {new Date(d.created_at).toLocaleDateString('pt-PT')}
                                     </td>
-                                    <td className="px-4 py-3">
+                                    <td>
                                         <div className="flex items-center justify-end gap-1">
-                                            <Button variant="ghost" size="sm" asChild>
-                                                <Link href={show({ documento: d.id }).url}><Eye className="h-4 w-4" /></Link>
-                                            </Button>
-                                            <Button variant="ghost" size="sm" onClick={() => handleDelete(d)}>
-                                                <Trash2 className="h-4 w-4 text-destructive" />
-                                            </Button>
+                                            <Link href={show({ documento: d.id }).url} className="btn btn-ghost btn-sm">
+                                                <Eye size={16} />
+                                            </Link>
+                                            <button type="button" className="btn btn-ghost btn-sm" onClick={() => handleDelete(d)}>
+                                                <Trash2 size={16} className="text-red-600" />
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
                             ))}
                             {documentos.data.length === 0 && (
                                 <tr>
-                                    <td colSpan={6} className="px-4 py-10 text-center text-muted-foreground">
+                                    <td colSpan={6} className="text-center muted" style={{ padding: '2rem 0' }}>
                                         Nenhum documento encontrado.
                                     </td>
                                 </tr>
@@ -114,6 +107,6 @@ export default function DocumentosIndex({ documentos, filters }: Props) {
     );
 }
 
-DocumentosIndex.layout = (props: { currentTeam?: { slug: string } | null }) => ({
-    breadcrumbs: [{ title: 'Documentos', href: props.currentTeam ? index(props.currentTeam.slug).url : '/' }],
+DocumentosIndex.layout = () => ({
+    breadcrumbs: [{ title: 'Documentos', href: index().url }],
 });

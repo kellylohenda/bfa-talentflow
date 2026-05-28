@@ -1,6 +1,4 @@
-import { Head, Link } from '@inertiajs/react';
-import { PublicLayout } from '@/components/public-layout';
-import { portal } from '@/routes';
+import { Head, Link, router } from '@inertiajs/react';
 
 type Application = {
     ref: string;
@@ -12,111 +10,152 @@ type Application = {
     submitted_at: string;
 };
 
-type StageInfo = { label: string; is_terminal: boolean };
-
-const STAGE_CSS: Record<string, { bg: string; border: string; dot: string; text: string; desc: string }> = {
-    analise: {
-        bg: 'var(--warn-bg)', border: 'var(--warn-border)', dot: 'var(--warn)', text: 'var(--warn)',
-        desc: 'A tua candidatura está a ser avaliada pela nossa equipa. O prazo é de 14 dias úteis.',
-    },
-    entrevista: {
-        bg: 'var(--info-bg)', border: 'var(--info-border)', dot: 'var(--info)', text: 'var(--info)',
-        desc: 'Foste seleccionado para entrevista. A equipa de RH entrará em contacto brevemente.',
-    },
-    avaliacao: {
-        bg: 'var(--primary-soft)', border: 'var(--primary)', dot: 'var(--primary)', text: 'var(--primary-deep)',
-        desc: 'Estás na fase de avaliação técnica. Bom trabalho até aqui!',
-    },
-    oferta: {
-        bg: 'var(--success-bg)', border: 'var(--success-border)', dot: 'var(--success)', text: 'var(--success)',
-        desc: 'Recebeste uma oferta! A equipa de RH entrará em contacto brevemente para os próximos passos.',
-    },
-    convertido: {
-        bg: 'var(--success-bg)', border: 'var(--success-border)', dot: 'var(--success)', text: 'var(--success)',
-        desc: 'Parabéns! Foste admitido ao programa BFA Talento. Bem-vindo à família BFA.',
-    },
-    rejeitado: {
-        bg: 'var(--danger-bg)', border: 'var(--danger-border)', dot: 'var(--danger)', text: 'var(--danger)',
-        desc: 'Agradecemos a tua candidatura. Nesta edição não foi possível seleccionar-te, mas podes candidatar-te novamente.',
-    },
+const STATUS_CONFIG: Record<string, any> = {
+  aprovada: {
+    label: 'Candidatura Aprovada',
+    desc: 'Parabéns! Foste selecionado para o programa BFA Talento. A nossa equipa de RH entrará em contacto para os próximos passos.',
+    bg: '#ECFDF5', border: '#10B981', dot: '#059669', textColor: '#065F46',
+    icon: (
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2.5" strokeLinecap="round">
+        <circle cx="12" cy="12" r="10" />
+        <path d="M8 12l3 3 5-5" />
+      </svg>
+    ),
+  },
+  pendente: {
+    label: 'Candidatura em Análise',
+    desc: 'O teu processo está a ser avaliado. Poderemos solicitar informações adicionais ou convidar-te para provas técnicas brevemente.',
+    bg: '#FFFBEB', border: '#F59E0B', dot: '#D97706', textColor: '#92400E',
+    icon: (
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#D97706" strokeWidth="2.5" strokeLinecap="round">
+        <circle cx="12" cy="12" r="10" />
+        <line x1="12" y1="8" x2="12" y2="12" />
+        <line x1="12" y1="16" x2="12.01" y2="16" />
+      </svg>
+    ),
+  },
+  recusada: {
+    label: 'Não Seleccionado',
+    desc: 'Agradecemos o teu interesse. Nesta edição não foi possível avançar com a tua candidatura, mas convidamos-te a tentar novamente no futuro.',
+    bg: '#FFF7F7', border: '#FCA5A5', dot: '#DC2626', textColor: '#991B1B',
+    icon: (
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2" strokeLinecap="round">
+        <circle cx="12" cy="12" r="10" />
+        <line x1="15" y1="9" x2="9" y2="15" />
+        <line x1="9" y1="9" x2="15" y2="15" />
+      </svg>
+    ),
+  },
 };
 
 function fmt(iso: string) {
     return new Date(iso).toLocaleDateString('pt-PT', { day: '2-digit', month: 'long', year: 'numeric' });
 }
 
-export default function PortalShow({ application, stages }: { application: Application; stages: Record<string, StageInfo> }) {
-    const stageLabel = stages[application.stage]?.label ?? application.stage_label;
-    const status = {
-        ...STAGE_CSS[application.stage] ?? STAGE_CSS['analise'],
-        label: stageLabel,
+export default function PortalShow({ application }: { application: Application }) {
+    
+    // Map current stages to legacy status types
+    let statusKey = 'pendente';
+    if (application.stage === 'integrado' || application.stage === 'oferta') statusKey = 'aprovada';
+    if (application.stage === 'rejeitado' || application.stage === 'recusada') statusKey = 'recusada';
+    
+    const cfg = STATUS_CONFIG[statusKey];
+
+    const logout = () => {
+        router.post('/portal/logout'); // Adjust if route differs
     };
 
     return (
-        <PublicLayout>
-            <Head title={`Candidatura ${application.ref} — BFA Talento`} />
-            <div style={{ minHeight: 'calc(100vh - 200px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 'clamp(32px, 6vw, 48px) clamp(12px, 4vw, 20px)' }}>
-                <div style={{ width: '100%', maxWidth: 500 }}>
-                    {/* Status card */}
-                    <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 16, overflow: 'hidden', marginBottom: 16 }}>
-                        <div style={{ background: status.bg, border: `1px solid ${status.border}`, borderRadius: 0, padding: 'clamp(16px, 3vw, 20px) clamp(16px, 4vw, 28px)', display: 'flex', alignItems: 'flex-start', gap: 16 }}>
-                            <div style={{ width: 40, height: 40, borderRadius: '50%', background: status.dot, opacity: 0.15, position: 'absolute' }} />
-                            <div style={{ width: 12, height: 12, borderRadius: '50%', background: status.dot, marginTop: 4, flexShrink: 0 }} />
-                            <div>
-                                <div style={{ fontSize: 16, fontWeight: 700, color: status.text, marginBottom: 4 }}>{status.label}</div>
-                                <div style={{ fontSize: 13, color: status.text, opacity: 0.85, lineHeight: 1.5 }}>{status.desc}</div>
-                            </div>
-                        </div>
+        <>
+            <Head title={`Estado ${application.ref} — BFA Talento`} />
+            
+            <style>{`
+                *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+                body { background: #FAFAF9; color: #1A1A1A; font-family: Inter, system-ui, sans-serif; }
+                .top { position: sticky; top: 0; z-index: 50; background: rgba(255,255,255,0.94); backdrop-filter: blur(12px); border-bottom: 1px solid #E7E5E1; }
+                .top-inner { max-width: 1000px; margin: 0 auto; padding: 16px 32px; display: flex; align-items: center; gap: 12px; }
+                .pub-logo { width: 32px; height: 32px; background: #1A1A1A; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; border-radius: 5px; }
+                .brand { font-weight: 700; font-size: 17px; text-decoration: none; color: #1A1A1A; display: flex; align-items: center; gap: 10px; }
+                .logout-btn { margin-left: auto; background: none; border: 1px solid #E7E5E1; padding: 8px 14px; border-radius: 6px; font-size: 13px; color: #525252; cursor: pointer; }
+                .logout-btn:hover { background: #F2F2F0; }
+                
+                .main { max-width: 700px; margin: 40px auto; padding: 0 20px 80px; }
+                .status-card { border: 2px solid; border-radius: 14px; padding: 28px 32px; margin-bottom: 24px; display: flex; gap: 18px; align-items: flex-start; }
+                .status-icon { flex-shrink: 0; width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+                .status-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
+                .status-title { font-size: 22px; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 6px; }
+                .status-desc { font-size: 14px; line-height: 1.6; }
+                
+                .card { background: #fff; border: 1px solid #E7E5E1; border-radius: 12px; padding: 28px 32px; margin-bottom: 16px; }
+                .card-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #8A8A87; margin-bottom: 16px; }
+                .row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #F2F2F0; font-size: 14px; }
+                .row:last-child { border: none; }
+                .row span { color: #525252; }
+                .row b { color: #1A1A1A; font-weight: 500; }
+                
+                .ref-badge { display: inline-block; background: #F2F2F0; padding: 6px 14px; border-radius: 6px; font-family: monospace; font-size: 14px; margin-bottom: 20px; }
+                .ref-badge b { color: #FF7607; }
+                
+                @media (max-width: 600px) {
+                  .status-card { flex-direction: column; padding: 22px; }
+                }
+            `}</style>
 
-                        <div style={{ padding: 'clamp(20px, 4vw, 24px) clamp(16px, 4vw, 28px)', display: 'flex', flexDirection: 'column', gap: 14 }}>
-                            {[
-                                { label: 'Referência', value: application.ref, mono: true },
-                                { label: 'Nome', value: application.nome },
-                                { label: 'Programa', value: application.program },
-                                { label: 'Submetida em', value: fmt(application.submitted_at) },
-                            ].map(({ label, value, mono }) => (
-                                <div key={label} style={{ display: 'flex', gap: 16 }}>
-                                    <div style={{ fontSize: 12, color: 'var(--text-3)', width: 100, flexShrink: 0, paddingTop: 1 }}>{label}</div>
-                                    <div style={{ fontSize: 14, color: 'var(--text)', fontWeight: 500, fontFamily: mono ? 'monospace' : undefined }}>{value}</div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Timeline */}
-                    <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 'clamp(16px, 3vw, 20px) clamp(16px, 4vw, 24px)', marginBottom: 16 }}>
-                        <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-3)', marginBottom: 16, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Processo</div>
-                        {Object.keys(STAGE_CSS).filter((s) => s !== 'rejeitado').map((s, i) => {
-                            const order = Object.keys(STAGE_CSS);
-                            const currentIdx = order.indexOf(application.stage);
-                            const stepIdx = order.indexOf(s);
-                            const done = currentIdx > stepIdx;
-                            const active = application.stage === s;
-                            const label = stages[s]?.label ?? STAGE_CSS[s]?.label ?? s;
-                            return (
-                                <div key={s} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', marginBottom: i < 4 ? 12 : 0 }}>
-                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0 }}>
-                                        <div style={{ width: 20, height: 20, borderRadius: '50%', background: done ? 'var(--success)' : active ? 'var(--primary)' : 'var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                            {done && <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="var(--bg)" strokeWidth="2"><path d="M2 5l2 2 4-4" /></svg>}
-                                            {active && <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--bg)' }} />}
-                                        </div>
-                                        {i < 4 && <div style={{ width: 1, height: 16, background: done ? 'var(--success)' : 'var(--border)', margin: '2px 0' }} />}
-                                    </div>
-                                    <div style={{ paddingBottom: i < 4 ? 12 : 0 }}>
-                                        <div style={{ fontSize: 13, fontWeight: active ? 600 : 400, color: active ? 'var(--text)' : done ? 'var(--text-2)' : 'var(--text-3)' }}>
-                                            {label}
-                                        </div>
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
-
-                    <Link href={portal().url} style={{ display: 'block', textAlign: 'center', fontSize: 13, color: 'var(--text-3)', textDecoration: 'none', padding: 8 }}>
-                        ← Voltar ao portal
+            <div className="top">
+                <div className="top-inner">
+                    <Link href="/" className="brand">
+                        <div className="pub-logo">B</div>
+                        BFA Talento
                     </Link>
+                    <Link href="/portal" className="logout-btn">Sair</Link>
                 </div>
             </div>
-        </PublicLayout>
+
+            <div className="main">
+                <div style={{ marginBottom: 24 }}>
+                  <h1 style={{ fontSize: 26, fontWeight: 700, letterSpacing: '-0.02em', marginBottom: 4 }}>
+                    Olá, {application.nome.split(' ')[0]}
+                  </h1>
+                  <p style={{ fontSize: 14, color: '#525252' }}>Acompanha aqui o progresso da tua candidatura.</p>
+                </div>
+
+                <div className="ref-badge">
+                  Referência · <b>{application.ref}</b>
+                </div>
+
+                <div className="status-card" style={{ background: cfg.bg, borderColor: cfg.border }}>
+                  <div className="status-icon" style={{ background: `${cfg.border}22` }}>
+                    {cfg.icon}
+                  </div>
+                  <div>
+                    <div className="status-label" style={{ color: cfg.dot }}>{cfg.label}</div>
+                    <div className="status-title">
+                        {statusKey === 'aprovada' ? 'Parabéns!' : statusKey === 'pendente' ? 'Em Avaliação' : 'Resultado Final'}
+                    </div>
+                    <div className="status-desc" style={{ color: cfg.textColor }}>{cfg.desc}</div>
+                  </div>
+                </div>
+
+                <div className="card">
+                  <div className="card-title">Detalhes do Processo</div>
+                  <div className="row"><span>Programa</span><b>{application.program}</b></div>
+                  <div className="row"><span>Estado Actual</span><b>{application.stage_label}</b></div>
+                  <div className="row"><span>Submetida em</span><b>{fmt(application.submitted_at)}</b></div>
+                </div>
+
+                <div className="card">
+                  <div className="card-title">Calendário Estimado</div>
+                  <div className="row"><span>Análise Inicial</span><b>Concluída</b></div>
+                  <div className="row"><span>Provas Técnicas</span><b>Em curso</b></div>
+                  <div className="row"><span>Resultado Final</span><b>Julho 2026</b></div>
+                </div>
+
+                {statusKey === 'recusada' && (
+                  <div style={{ textAlign: 'center', marginTop: 24 }}>
+                    <Link href="/candidatura" style={{ background: '#FF7607', color: '#fff', textDecoration: 'none', padding: '12px 20px', borderRadius: 8, fontSize: 14, fontWeight: 600 }}>Tentar novamente na próxima edição →</Link>
+                  </div>
+                )}
+            </div>
+        </>
     );
 }

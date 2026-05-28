@@ -705,6 +705,26 @@
   border-bottom: 1px solid var(--border);
   flex-wrap: wrap;
 }
+.chip-filter {
+  height: 26px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  color: var(--text-2);
+  font-size: 12px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+}
+.chip-filter:hover { border-color: var(--border-strong); color: var(--text); }
+.chip-filter.active {
+  background: var(--text);
+  color: var(--surface);
+  border-color: var(--text);
+}
 .input {
   height: 32px;
   padding: 0 10px;

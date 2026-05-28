@@ -1,89 +1,97 @@
-import { Head, Link, usePage } from '@inertiajs/react';
-import { ArrowLeft, Calendar, Check, User, XCircle } from 'lucide-react';
-import Heading from '@/components/heading';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Head, Link } from '@inertiajs/react';
+import { ArrowLeft, Check, XCircle } from 'lucide-react';
+import { BfaAvatar } from '@/components/ui/avatar';
 import { index, show } from '@/routes/faltas';
 import type { Absence } from '@/types';
 
 type Props = { falta: Absence };
 
-const statusVariant: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
-    pendente: 'outline',
-    aprovado: 'default',
-    rejeitado: 'destructive',
+const pillClass: Record<string, string> = {
+    pendente: 'pill pill-warn',
+    aprovado: 'pill pill-success',
+    rejeitado: 'pill pill-danger',
 };
 
 export default function FaltasShow({ falta }: Props) {
-    const { props } = usePage<{ currentTeam: { slug: string } }>();
-    const team = props.currentTeam.slug;
-
     return (
         <>
             <Head title={`Falta — ${falta.type}`} />
-            <div className="flex flex-col gap-6 p-4">
-                <div className="flex items-center gap-4">
-                    <Button variant="ghost" size="sm" asChild>
-                        <Link href={index(team).url}><ArrowLeft className="h-4 w-4" /></Link>
-                    </Button>
-                    <Heading title="Detalhe da Falta" description={falta.type} />
-                    <Badge variant={statusVariant[falta.status] ?? 'secondary'} className="ml-auto">{falta.status}</Badge>
+            <div className="section">
+                <div className="page-head">
+                    <div className="row" style={{ gap: 12 }}>
+                        <Link href={index().url} className="btn btn-ghost btn-sm"><ArrowLeft style={{ width: 14, height: 14 }} /></Link>
+                        <div>
+                            <h1 className="page-title">Detalhe da Falta</h1>
+                            <p className="page-subtitle">{falta.type}</p>
+                        </div>
+                    </div>
+                    <div className="page-actions">
+                        <span className={pillClass[falta.status] ?? 'pill pill-neutral'}>{falta.status}</span>
+                    </div>
                 </div>
 
-                <div className="grid gap-4 md:grid-cols-2">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="text-sm font-medium text-muted-foreground">Informação da Falta</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-3 text-sm">
-                            <div className="flex items-center gap-2">
-                                <User className="h-4 w-4 text-muted-foreground" />
-                                <span className="text-muted-foreground">Talento:</span>
-                                <span className="font-medium">{falta.talent?.name ?? '—'}</span>
+                <div className="grid cols-2">
+                    <div className="card">
+                        <div className="card-head">
+                            <span className="card-title">Informação da Falta</span>
+                        </div>
+                        <div className="card-pad">
+                            <div className="row" style={{ gap: 8, alignItems: 'center' }}>
+                                <BfaAvatar name={falta.talent?.name ?? '—'} size={28} />
+                                <span className="muted">Talento:</span>
+                                <span><b>{falta.talent?.name ?? '—'}</b></span>
                             </div>
-                            <div className="flex justify-between">
-                                <span className="text-muted-foreground">Tipo</span>
-                                <span className="font-medium capitalize">{falta.type}</span>
+                            <div className="divider" />
+                            <div className="row-between">
+                                <span className="muted">Tipo</span>
+                                <span><b style={{ textTransform: 'capitalize' }}>{falta.type}</b></span>
                             </div>
-                            <div className="flex items-center gap-2">
-                                <Calendar className="h-4 w-4 text-muted-foreground" />
-                                <span className="text-muted-foreground">Início:</span>
+                            <div className="divider" />
+                            <div className="row-between">
+                                <span className="muted">Início</span>
                                 <span>{new Date(falta.start_date).toLocaleDateString('pt-PT')}</span>
                             </div>
-                            <div className="flex items-center gap-2">
-                                <Calendar className="h-4 w-4 text-muted-foreground" />
-                                <span className="text-muted-foreground">Fim:</span>
+                            <div className="divider" />
+                            <div className="row-between">
+                                <span className="muted">Fim</span>
                                 <span>{new Date(falta.end_date).toLocaleDateString('pt-PT')}</span>
                             </div>
-                            <div className="flex items-center gap-2">
-                                {falta.justificado ? (
-                                    <Check className="h-4 w-4 text-green-600" />
-                                ) : (
-                                    <XCircle className="h-4 w-4 text-muted-foreground" />
-                                )}
-                                <span className="text-muted-foreground">Justificado:</span>
-                                <span>{falta.justificado ? 'Sim' : 'Não'}</span>
+                            <div className="divider" />
+                            <div className="row-between">
+                                <span className="muted">Justificado</span>
+                                <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                    {falta.justificado ? (
+                                        <Check style={{ width: 16, height: 16, color: 'var(--success)' }} />
+                                    ) : (
+                                        <XCircle style={{ width: 16, height: 16, color: 'var(--text-3)' }} />
+                                    )}
+                                    {falta.justificado ? 'Sim' : 'Não'}
+                                </span>
                             </div>
                             {falta.approved_by && (
-                                <div className="flex items-center gap-2">
-                                    <User className="h-4 w-4 text-muted-foreground" />
-                                    <span className="text-muted-foreground">Aprovado por:</span>
-                                    <span className="font-medium">{falta.approved_by.name}</span>
-                                </div>
+                                <>
+                                    <div className="divider" />
+                                    <div className="row-between">
+                                        <span className="muted">Aprovado por</span>
+                                        <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                            <BfaAvatar name={falta.approved_by.name} size={20} />
+                                            <b>{falta.approved_by.name}</b>
+                                        </span>
+                                    </div>
+                                </>
                             )}
-                        </CardContent>
-                    </Card>
+                        </div>
+                    </div>
 
                     {falta.reason && (
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="text-sm font-medium text-muted-foreground">Motivo</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <p className="text-sm whitespace-pre-wrap">{falta.reason}</p>
-                            </CardContent>
-                        </Card>
+                        <div className="card">
+                            <div className="card-head">
+                                <span className="card-title">Motivo</span>
+                            </div>
+                            <div className="card-pad">
+                                <p style={{ whiteSpace: 'pre-wrap' }}>{falta.reason}</p>
+                            </div>
+                        </div>
                     )}
                 </div>
             </div>
@@ -91,12 +99,6 @@ export default function FaltasShow({ falta }: Props) {
     );
 }
 
-FaltasShow.layout = (props: { currentTeam?: { slug: string } | null; falta?: Absence }) => ({
-    breadcrumbs: [
-        { title: 'Faltas', href: props.currentTeam ? index(props.currentTeam.slug).url : '/' },
-        {
-            title: props.falta?.type ?? 'Detalhe',
-            href: props.currentTeam && props.falta ? show({ falta: props.falta.id }).url : '/',
-        },
-    ],
-});
+FaltasShow.layout = {
+    breadcrumbs: [{ title: 'Faltas' }],
+};

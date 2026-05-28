@@ -17,13 +17,17 @@ export default function AppSidebarLayout({ children, breadcrumbs = [] }: Props) 
 
     useEffect(() => {
         const savedCollapsed = localStorage.getItem('sb-collapsed') === 'true';
-        if (savedCollapsed) setCollapsed(true);
+
+        if (savedCollapsed) {
+setCollapsed(true);
+}
     }, []);
 
     const toggleDesktop = () => {
         setCollapsed((c) => {
             const next = !c;
             localStorage.setItem('sb-collapsed', String(next));
+
             return next;
         });
     };

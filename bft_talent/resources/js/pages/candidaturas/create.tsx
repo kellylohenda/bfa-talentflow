@@ -125,7 +125,7 @@ export default function CandidaturasCreate({ programs, universities }: Props) {
     );
 }
 
-CandidaturasCreate.layout = (props: { currentTeam?: { slug: string } | null }) => ({
+CandidaturasCreate.layout = () => ({
     breadcrumbs: [
         { title: 'Candidaturas', href: index().url },
         { title: 'Nova', href: '#' },

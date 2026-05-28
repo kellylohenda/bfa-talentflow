@@ -1,74 +1,101 @@
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import { ArrowLeft, CheckCircle, XCircle } from 'lucide-react';
-import Heading from '@/components/heading';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { index, show } from '@/routes/workflows';
 import type { Workflow } from '@/types';
 
 type Props = { workflow: Workflow };
 
-export default function WorkflowsShow({ workflow }: Props) {
-    const { props } = usePage<{ currentTeam: { slug: string } }>();
-    const team = props.currentTeam.slug;
+const statusPill: Record<string, string> = {
+    pendente: 'pill pill-warn',
+    em_aprovacao: 'pill pill-info',
+    aprovado: 'pill pill-success',
+    rejeitado: 'pill pill-danger',
+    cancelado: 'pill pill-danger',
+};
 
+export default function WorkflowsShow({ workflow }: Props) {
     return (
         <>
             <Head title={workflow.workflow_code} />
-            <div className="flex flex-col gap-6 p-4">
-                <div className="flex items-center gap-4">
-                    <Button variant="ghost" size="sm" asChild>
-                        <Link href={index(team).url}><ArrowLeft className="h-4 w-4" /></Link>
-                    </Button>
-                    <Heading title={workflow.workflow_code} description={`Tipo: ${workflow.type}`} />
-                    <Badge className="ml-auto">{workflow.status}</Badge>
+            <div className="section" style={{ padding: '20px 24px 40px' }}>
+                <div className="page-head">
+                    <div className="row" style={{ gap: 16 }}>
+                        <Link href={index().url} className="btn btn-ghost btn-sm"><ArrowLeft style={{ width: 14, height: 14 }} /></Link>
+                        <div>
+                            <h1 className="page-title">{workflow.workflow_code}</h1>
+                            <p className="page-subtitle">Tipo: {workflow.type}</p>
+                        </div>
+                    </div>
+                    <span className={statusPill[workflow.status] ?? 'pill pill-neutral'}>{workflow.status}</span>
                 </div>
 
-                <div className="grid gap-4 max-w-2xl">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="text-sm font-medium text-muted-foreground">Informação</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-2 text-sm">
-                            <div className="flex justify-between">
-                                <span className="text-muted-foreground">Talento</span>
-                                <span className="font-medium">{workflow.talent?.name ?? '—'}</span>
+                <div className="grid cols-2" style={{ maxWidth: 800 }}>
+                    <div className="card">
+                        <div className="card-head">
+                            <span className="card-title">Informação</span>
+                        </div>
+                        <div className="card-pad" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                            <div className="row-between">
+                                <span className="muted">Talento</span>
+                                <span style={{ fontWeight: 500 }}>{workflow.talent?.name ?? '—'}</span>
                             </div>
-                            <div className="flex justify-between">
-                                <span className="text-muted-foreground">Passo actual</span>
+                            <div className="row-between">
+                                <span className="muted">Passo actual</span>
                                 <span>{workflow.current_step}/{workflow.total_steps}</span>
                             </div>
                             {workflow.descricao && (
-                                <div>
-                                    <span className="text-muted-foreground">Descrição</span>
-                                    <p className="mt-1">{workflow.descricao}</p>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                                    <span className="muted">Descrição</span>
+                                    <p>{workflow.descricao}</p>
                                 </div>
                             )}
-                        </CardContent>
-                    </Card>
+                        </div>
+                    </div>
 
                     {workflow.steps?.length > 0 && (
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="text-sm font-medium text-muted-foreground">Passos de Aprovação</CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-3">
-                                {workflow.steps.map((step) => (
-                                    <div key={step.id} className="flex items-center gap-3 text-sm">
-                                        {step.decision === 'aprovado' ? (
-                                            <CheckCircle className="h-4 w-4 text-green-500" />
-                                        ) : step.decision === 'rejeitado' ? (
-                                            <XCircle className="h-4 w-4 text-destructive" />
-                                        ) : (
-                                            <div className="h-4 w-4 rounded-full border-2 border-muted-foreground" />
-                                        )}
-                                        <span className="text-muted-foreground">Passo {step.step_number}</span>
-                                        <Badge variant="outline" className="ml-auto">{step.approver_role}</Badge>
-                                    </div>
-                                ))}
-                            </CardContent>
-                        </Card>
+                        <div className="card">
+                            <div className="card-head">
+                                <span className="card-title">Passos de Aprovação</span>
+                            </div>
+                            <div className="card-pad">
+                                <div className="table-wrap">
+                                    <table className="tbl">
+                                        <thead>
+                                            <tr>
+                                                <th style={{ width: 40 }}></th>
+                                                <th>Passo</th>
+                                                <th>Aprovador</th>
+                                                <th>Decisão</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {workflow.steps.map((step) => (
+                                                <tr key={step.id}>
+                                                    <td>
+                                                        {step.decision === 'aprovado' ? (
+                                                            <CheckCircle style={{ width: 16, height: 16, color: 'var(--success)' }} />
+                                                        ) : step.decision === 'rejeitado' ? (
+                                                            <XCircle style={{ width: 16, height: 16, color: 'var(--danger)' }} />
+                                                        ) : (
+                                                            <div style={{ width: 16, height: 16, borderRadius: '50%', border: '2px solid var(--text-3)' }} />
+                                                        )}
+                                                    </td>
+                                                    <td>Passo {step.step_number}</td>
+                                                    <td><span className="pill pill-neutral">{step.approver_role}</span></td>
+                                                    <td>
+                                                        {step.decision ? (
+                                                            <span className={`pill ${step.decision === 'aprovado' ? 'pill-success' : 'pill-danger'}`}>
+                                                                {step.decision}
+                                                            </span>
+                                                        ) : <span className="muted">Pendente</span>}
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
                     )}
                 </div>
             </div>
@@ -76,14 +103,6 @@ export default function WorkflowsShow({ workflow }: Props) {
     );
 }
 
-WorkflowsShow.layout = (props: { currentTeam?: { slug: string } | null; workflow?: Workflow }) => ({
-    breadcrumbs: [
-        { title: 'Workflows', href: props.currentTeam ? index(props.currentTeam.slug).url : '/' },
-        {
-            title: props.workflow?.workflow_code ?? 'Detalhe',
-            href: props.currentTeam && props.workflow
-                ? show([props.currentTeam.slug, props.workflow.id]).url
-                : '/',
-        },
-    ],
-});
+WorkflowsShow.layout = {
+    breadcrumbs: [{ title: 'Workflows' }],
+};

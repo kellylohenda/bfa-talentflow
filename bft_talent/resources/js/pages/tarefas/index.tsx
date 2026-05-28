@@ -1,57 +1,69 @@
-import { Head, Link, router, usePage } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { Eye, Pencil, Plus, Trash2, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { TablePagination } from '@/components/table-pagination';
-import Heading from '@/components/heading';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { create, destroy, edit, index, show } from '@/routes/tarefas';
 import type { Paginated, Task } from '@/types';
 
 type Filters = { status?: string; priority?: string; search?: string };
 type Props = { tarefas: Paginated<Task>; filters: Filters };
 
-const statusVariant: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
-    pendente: 'outline',
-    em_andamento: 'secondary',
-    concluida: 'default',
-    cancelada: 'destructive',
+const statusPill: Record<string, string> = {
+    pendente: 'pill pill-neutral',
+    em_andamento: 'pill pill-info',
+    concluida: 'pill pill-success',
+    cancelada: 'pill pill-danger',
 };
 
-const priorityVariant: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
-    baixa: 'secondary',
-    media: 'outline',
-    alta: 'default',
-    urgente: 'destructive',
+const statusLabel: Record<string, string> = {
+    pendente: 'Pendente',
+    em_andamento: 'Em Andamento',
+    concluida: 'Concluída',
+    cancelada: 'Cancelada',
+};
+
+const priorityPill: Record<string, string> = {
+    baixa: 'pill pill-neutral',
+    media: 'pill pill-info',
+    alta: 'pill pill-warn',
+    urgente: 'pill pill-danger',
+};
+
+const priorityLabel: Record<string, string> = {
+    baixa: 'Baixa',
+    media: 'Média',
+    alta: 'Alta',
+    urgente: 'Urgente',
 };
 
 const clean = (f: Record<string, string | undefined>) =>
     Object.fromEntries(Object.entries(f).filter(([, v]) => v !== '' && v !== undefined));
 
 export default function TarefasIndex({ tarefas, filters }: Props) {
-    const { props } = usePage<{ currentTeam: { slug: string } }>();
-    const team = props.currentTeam.slug;
-
     const [search, setSearch] = useState(filters.search ?? '');
     const mounted = useRef(false);
 
     useEffect(() => {
-        if (!mounted.current) { mounted.current = true; return; }
+        if (!mounted.current) {
+ mounted.current = true;
+
+ return; 
+}
+
         const t = setTimeout(() => {
-            router.get(index(team).url, clean({ ...filters, search }), { preserveState: true, replace: true });
+            router.get(index().url, clean({ ...filters, search }), { preserveState: true, replace: true });
         }, 350);
+
         return () => clearTimeout(t);
     }, [search]);
 
     function setFilter(key: keyof Filters, value: string) {
-        router.get(index(team).url, clean({ ...filters, [key]: value }), { preserveState: true, replace: true });
+        router.get(index().url, clean({ ...filters, [key]: value }), { preserveState: true, replace: true });
     }
 
     function clearFilters() {
         setSearch('');
-        router.get(index(team).url, {}, { preserveState: false, replace: true });
+        router.get(index().url, {}, { preserveState: false, replace: true });
     }
 
     const hasFilters = !!(filters.search || filters.status || filters.priority);
@@ -65,92 +77,94 @@ export default function TarefasIndex({ tarefas, filters }: Props) {
     return (
         <>
             <Head title="Tarefas" />
-            <div className="flex flex-col gap-6 p-4">
-                <div className="flex items-center justify-between">
-                    <Heading title="Tarefas" description="Gestão de tarefas" />
-                    <Button asChild>
-                        <Link href={create(team).url}><Plus className="h-4 w-4" /> Nova Tarefa</Link>
-                    </Button>
+            <div className="section" style={{ padding: '20px 24px 40px' }}>
+                <div className="page-head">
+                    <div>
+                        <h1 className="page-title">Tarefas</h1>
+                        <p className="page-subtitle">Gestão de tarefas</p>
+                    </div>
+                    <div className="page-actions">
+                        <Link href={create().url} className="btn btn-primary"><Plus style={{ width: 14, height: 14 }} /> Nova Tarefa</Link>
+                    </div>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2">
-                    <Input
+                <div className="toolbar">
+                    <input
+                        className="input input-search"
                         placeholder="Pesquisar por título…"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        className="h-8 w-56"
+                        style={{ width: 224 }}
                     />
-                    <Select value={filters.status || 'all'} onValueChange={(v) => setFilter('status', v === 'all' ? '' : v)}>
-                        <SelectTrigger className="h-8 w-36"><SelectValue placeholder="Estado" /></SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="all">Todos os estados</SelectItem>
-                            <SelectItem value="pendente">Pendente</SelectItem>
-                            <SelectItem value="em_andamento">Em Andamento</SelectItem>
-                            <SelectItem value="concluida">Concluída</SelectItem>
-                            <SelectItem value="cancelada">Cancelada</SelectItem>
-                        </SelectContent>
-                    </Select>
-                    <Select value={filters.priority || 'all'} onValueChange={(v) => setFilter('priority', v === 'all' ? '' : v)}>
-                        <SelectTrigger className="h-8 w-36"><SelectValue placeholder="Prioridade" /></SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="all">Todas as prioridades</SelectItem>
-                            <SelectItem value="baixa">Baixa</SelectItem>
-                            <SelectItem value="media">Média</SelectItem>
-                            <SelectItem value="alta">Alta</SelectItem>
-                            <SelectItem value="urgente">Urgente</SelectItem>
-                        </SelectContent>
-                    </Select>
+                    <select className="input select" style={{ width: 144 }} value={filters.status || ''} onChange={(e) => setFilter('status', e.target.value)}>
+                        <option value="">Todos os estados</option>
+                        <option value="pendente">Pendente</option>
+                        <option value="em_andamento">Em Andamento</option>
+                        <option value="concluida">Concluída</option>
+                        <option value="cancelada">Cancelada</option>
+                    </select>
+                    <select className="input select" style={{ width: 152 }} value={filters.priority || ''} onChange={(e) => setFilter('priority', e.target.value)}>
+                        <option value="">Todas as prioridades</option>
+                        <option value="baixa">Baixa</option>
+                        <option value="media">Média</option>
+                        <option value="alta">Alta</option>
+                        <option value="urgente">Urgente</option>
+                    </select>
                     {hasFilters && (
-                        <Button variant="ghost" size="sm" onClick={clearFilters} className="h-8 gap-1 text-muted-foreground">
-                            <X className="h-3 w-3" /> Limpar
-                        </Button>
+                        <button className="btn btn-ghost btn-sm" onClick={clearFilters} style={{ gap: 4 }}>
+                            <X style={{ width: 12, height: 12 }} /> Limpar
+                        </button>
                     )}
                 </div>
 
-                <div className="overflow-hidden rounded-lg border">
-                    <table className="w-full text-sm">
-                        <thead className="bg-muted/50">
+                <div className="table-wrap">
+                    <table className="tbl">
+                        <thead>
                             <tr>
-                                <th className="px-4 py-3 text-left font-medium">Título</th>
-                                <th className="px-4 py-3 text-left font-medium">Estado</th>
-                                <th className="px-4 py-3 text-left font-medium">Prioridade</th>
-                                <th className="px-4 py-3 text-left font-medium">Atribuído a</th>
-                                <th className="px-4 py-3 text-left font-medium">Data Limite</th>
-                                <th className="px-4 py-3 text-right font-medium">Acções</th>
+                                <th>Título</th>
+                                <th>Estado</th>
+                                <th>Prioridade</th>
+                                <th>Atribuído a</th>
+                                <th>Data Limite</th>
+                                <th style={{ textAlign: 'right' }}>Acções</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y">
+                        <tbody>
                             {tarefas.data.map((t) => (
-                                <tr key={t.id} className="hover:bg-muted/30">
-                                    <td className="px-4 py-3 font-medium">{t.title}</td>
-                                    <td className="px-4 py-3">
-                                        <Badge variant={statusVariant[t.status] ?? 'secondary'}>{t.status}</Badge>
+                                <tr key={t.id}>
+                                    <td style={{ fontWeight: 500 }}>{t.title}</td>
+                                    <td>
+                                        <span className={statusPill[t.status] ?? 'pill pill-neutral'}>
+                                            {statusLabel[t.status] ?? t.status}
+                                        </span>
                                     </td>
-                                    <td className="px-4 py-3">
-                                        <Badge variant={priorityVariant[t.priority] ?? 'outline'}>{t.priority}</Badge>
+                                    <td>
+                                        <span className={priorityPill[t.priority] ?? 'pill pill-neutral'}>
+                                            {priorityLabel[t.priority] ?? t.priority}
+                                        </span>
                                     </td>
-                                    <td className="px-4 py-3 text-muted-foreground">{t.assigned_to?.name ?? '—'}</td>
-                                    <td className="px-4 py-3 text-muted-foreground">
+                                    <td className="muted">{t.assigned_to?.name ?? '—'}</td>
+                                    <td className="muted">
                                         {t.due_date ? new Date(t.due_date).toLocaleDateString('pt-PT') : '—'}
                                     </td>
-                                    <td className="px-4 py-3">
-                                        <div className="flex items-center justify-end gap-1">
-                                            <Button variant="ghost" size="sm" asChild>
-                                                <Link href={show({ tarefa: t.id }).url}><Eye className="h-4 w-4" /></Link>
-                                            </Button>
-                                            <Button variant="ghost" size="sm" asChild>
-                                                <Link href={edit({ tarefa: t.id }).url}><Pencil className="h-4 w-4" /></Link>
-                                            </Button>
-                                            <Button variant="ghost" size="sm" onClick={() => handleDelete(t)}>
-                                                <Trash2 className="h-4 w-4 text-destructive" />
-                                            </Button>
+                                    <td>
+                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 4 }}>
+                                            <Link href={show({ tarefa: t.id }).url} className="btn btn-ghost btn-sm">
+                                                <Eye style={{ width: 14, height: 14 }} />
+                                            </Link>
+                                            <Link href={edit({ tarefa: t.id }).url} className="btn btn-ghost btn-sm">
+                                                <Pencil style={{ width: 14, height: 14 }} />
+                                            </Link>
+                                            <button className="btn btn-ghost btn-sm" onClick={() => handleDelete(t)}>
+                                                <Trash2 style={{ width: 14, height: 14, color: 'var(--danger)' }} />
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
                             ))}
                             {tarefas.data.length === 0 && (
                                 <tr>
-                                    <td colSpan={6} className="px-4 py-10 text-center text-muted-foreground">
+                                    <td colSpan={6} style={{ textAlign: 'center', padding: '40px 16px' }} className="muted">
                                         Nenhuma tarefa encontrada.
                                     </td>
                                 </tr>
@@ -165,6 +179,6 @@ export default function TarefasIndex({ tarefas, filters }: Props) {
     );
 }
 
-TarefasIndex.layout = (props: { currentTeam?: { slug: string } | null }) => ({
-    breadcrumbs: [{ title: 'Tarefas', href: props.currentTeam ? index(props.currentTeam.slug).url : '/' }],
+TarefasIndex.layout = () => ({
+    breadcrumbs: [{ title: 'Tarefas', href: index().url }],
 });

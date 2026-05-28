@@ -1,60 +1,58 @@
-import { Head, usePage } from '@inertiajs/react';
+import { Head } from '@inertiajs/react';
 import { Calendar, Clock, MapPin, Users } from 'lucide-react';
-import Heading from '@/components/heading';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { index } from '@/routes/actividades';
 import type { VolunteerActivity } from '@/types';
 
 type Props = { actividades: VolunteerActivity[] };
 
 export default function ActividadesIndex({ actividades }: Props) {
-    const { props } = usePage<{ currentTeam: { slug: string } }>();
-    const team = props.currentTeam.slug;
-
     return (
         <>
             <Head title="Actividades" />
-            <div className="flex flex-col gap-6 p-4">
-                <Heading title="Actividades de Voluntariado" description="Catálogo de actividades disponíveis" />
+            <div className="section">
+                <div className="page-head">
+                    <div>
+                        <h1 className="page-title">Actividades de Voluntariado</h1>
+                        <p className="page-subtitle">Catálogo de actividades disponíveis</p>
+                    </div>
+                </div>
 
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="grid cols-3">
                     {actividades.map((a) => (
-                        <Card key={a.id} className="flex flex-col">
-                            <CardContent className="flex flex-1 flex-col gap-3 pt-6">
-                                <div className="flex items-start justify-between">
-                                    <h3 className="font-medium">{a.title}</h3>
-                                    <Badge variant="outline" className="capitalize">{a.area}</Badge>
+                        <div key={a.id} className="card" style={{ display: 'flex', flexDirection: 'column' }}>
+                            <div className="card-pad" style={{ display: 'flex', flexDirection: 'column', gap: 12, flex: 1 }}>
+                                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+                                    <h3 style={{ fontWeight: 500 }}>{a.title}</h3>
+                                    <span className="pill pill-info" style={{ textTransform: 'capitalize' }}>{a.area}</span>
                                 </div>
                                 {a.description && (
-                                    <p className="text-sm text-muted-foreground line-clamp-2">{a.description}</p>
+                                    <p style={{ fontSize: 14, color: 'var(--text-2)', overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{a.description}</p>
                                 )}
-                                <div className="mt-auto flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-                                    <span className="flex items-center gap-1">
-                                        <Calendar className="h-3 w-3" />
+                                <div style={{ marginTop: 'auto', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 12, fontSize: 12, color: 'var(--text-3)' }}>
+                                    <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                                        <Calendar size={12} />
                                         {new Date(a.date).toLocaleDateString('pt-PT')}
                                     </span>
-                                    <span className="flex items-center gap-1">
-                                        <Clock className="h-3 w-3" /> {a.total_horas}h
+                                    <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                                        <Clock size={12} /> {a.total_horas}h
                                     </span>
                                     {a.local && (
-                                        <span className="flex items-center gap-1">
-                                            <MapPin className="h-3 w-3" /> {a.local}
+                                        <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                                            <MapPin size={12} /> {a.local}
                                         </span>
                                     )}
                                     {a.vagas !== null && (
-                                        <span className="flex items-center gap-1">
-                                            <Users className="h-3 w-3" /> {a.vagas} vagas
+                                        <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                                            <Users size={12} /> {a.vagas} vagas
                                         </span>
                                     )}
                                 </div>
-                                <Button size="sm" className="mt-2 w-full">Inscrever-me</Button>
-                            </CardContent>
-                        </Card>
+                                <button className="btn btn-primary" style={{ marginTop: 8, width: '100%' }}>Inscrever-me</button>
+                            </div>
+                        </div>
                     ))}
                     {actividades.length === 0 && (
-                        <div className="col-span-full py-10 text-center text-muted-foreground">
+                        <div style={{ gridColumn: '1 / -1', padding: 40, textAlign: 'center', color: 'var(--text-3)' }}>
                             Nenhuma actividade disponível de momento.
                         </div>
                     )}
@@ -64,6 +62,6 @@ export default function ActividadesIndex({ actividades }: Props) {
     );
 }
 
-ActividadesIndex.layout = (props: { currentTeam?: { slug: string } | null }) => ({
-    breadcrumbs: [{ title: 'Actividades', href: props.currentTeam ? index(props.currentTeam.slug).url : '/' }],
+ActividadesIndex.layout = () => ({
+    breadcrumbs: [{ title: 'Actividades', href: index().url }],
 });

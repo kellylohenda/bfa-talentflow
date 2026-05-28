@@ -1,12 +1,5 @@
 import { Head, Link, useForm } from '@inertiajs/react';
-import { ArrowLeft } from 'lucide-react';
-import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { index, store } from '@/routes/eventos';
 
 export default function EventosCreate() {
@@ -29,93 +22,88 @@ export default function EventosCreate() {
     return (
         <>
             <Head title="Novo Evento" />
-            <div className="flex flex-col gap-6 p-4">
-                <div className="flex items-center gap-4">
-                    <Button variant="ghost" size="sm" asChild>
-                        <Link href={index().url}><ArrowLeft className="h-4 w-4" /></Link>
-                    </Button>
-                    <Heading title="Novo Evento" description="Agendar evento ou actividade" />
+            <div className="section">
+                <div className="page-head">
+                    <div>
+                        <h1 className="page-title">Novo Evento</h1>
+                        <p className="page-subtitle">Agendar evento ou actividade</p>
+                    </div>
+                    <div className="page-actions">
+                        <Link href={index().url} className="btn btn-ghost btn-sm">← Voltar</Link>
+                    </div>
                 </div>
-                <Card className="max-w-2xl">
-                    <CardContent className="pt-6">
-                        <form onSubmit={submit} className="space-y-4">
-                            <div className="space-y-1">
-                                <Label htmlFor="titulo">Título *</Label>
-                                <Input id="titulo" value={data.titulo} onChange={(e) => setData('titulo', e.target.value)} autoFocus />
+                <div className="card" style={{ maxWidth: 640 }}>
+                    <div className="card-pad">
+                        <form onSubmit={submit}>
+                            <div className="form-group">
+                                <label className="form-label" htmlFor="titulo">Título *</label>
+                                <input className="input" id="titulo" value={data.titulo} onChange={(e) => setData('titulo', e.target.value)} autoFocus />
                                 <InputError message={errors.titulo} />
                             </div>
-                            <div className="grid gap-4 sm:grid-cols-2">
-                                <div className="space-y-1">
-                                    <Label htmlFor="tipo">Tipo *</Label>
-                                    <Select value={data.tipo} onValueChange={(v) => setData('tipo', v)}>
-                                        <SelectTrigger id="tipo"><SelectValue /></SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="formacao">Formação</SelectItem>
-                                            <SelectItem value="palestra">Palestra</SelectItem>
-                                            <SelectItem value="workshop">Workshop</SelectItem>
-                                            <SelectItem value="networking">Networking</SelectItem>
-                                            <SelectItem value="outro">Outro</SelectItem>
-                                        </SelectContent>
-                                    </Select>
+                            <div className="grid cols-2">
+                                <div className="form-group">
+                                    <label className="form-label" htmlFor="tipo">Tipo *</label>
+                                    <select className="input select" id="tipo" value={data.tipo} onChange={(e) => setData('tipo', e.target.value)}>
+                                        <option value="formacao">Formação</option>
+                                        <option value="palestra">Palestra</option>
+                                        <option value="workshop">Workshop</option>
+                                        <option value="networking">Networking</option>
+                                        <option value="outro">Outro</option>
+                                    </select>
                                     <InputError message={errors.tipo} />
                                 </div>
-                                <div className="space-y-1">
-                                    <Label htmlFor="formato">Formato *</Label>
-                                    <Select value={data.formato} onValueChange={(v) => setData('formato', v)}>
-                                        <SelectTrigger id="formato"><SelectValue /></SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="presencial">Presencial</SelectItem>
-                                            <SelectItem value="online">Online</SelectItem>
-                                            <SelectItem value="hibrido">Híbrido</SelectItem>
-                                        </SelectContent>
-                                    </Select>
+                                <div className="form-group">
+                                    <label className="form-label" htmlFor="formato">Formato *</label>
+                                    <select className="input select" id="formato" value={data.formato} onChange={(e) => setData('formato', e.target.value)}>
+                                        <option value="presencial">Presencial</option>
+                                        <option value="online">Online</option>
+                                        <option value="hibrido">Híbrido</option>
+                                    </select>
                                     <InputError message={errors.formato} />
                                 </div>
                             </div>
-                            <div className="grid gap-4 sm:grid-cols-2">
-                                <div className="space-y-1">
-                                    <Label htmlFor="data_inicio">Data de Início *</Label>
-                                    <Input id="data_inicio" type="date" value={data.data_inicio} onChange={(e) => setData('data_inicio', e.target.value)} />
+                            <div className="grid cols-2">
+                                <div className="form-group">
+                                    <label className="form-label" htmlFor="data_inicio">Data de Início *</label>
+                                    <input className="input" id="data_inicio" type="date" value={data.data_inicio} onChange={(e) => setData('data_inicio', e.target.value)} />
                                     <InputError message={errors.data_inicio} />
                                 </div>
-                                <div className="space-y-1">
-                                    <Label htmlFor="data_fim">Data de Fim</Label>
-                                    <Input id="data_fim" type="date" value={data.data_fim} onChange={(e) => setData('data_fim', e.target.value)} />
+                                <div className="form-group">
+                                    <label className="form-label" htmlFor="data_fim">Data de Fim</label>
+                                    <input className="input" id="data_fim" type="date" value={data.data_fim} onChange={(e) => setData('data_fim', e.target.value)} />
                                     <InputError message={errors.data_fim} />
                                 </div>
                             </div>
-                            <div className="grid gap-4 sm:grid-cols-2">
-                                <div className="space-y-1">
-                                    <Label htmlFor="local">Local</Label>
-                                    <Input id="local" value={data.local} onChange={(e) => setData('local', e.target.value)} />
+                            <div className="grid cols-2">
+                                <div className="form-group">
+                                    <label className="form-label" htmlFor="local">Local</label>
+                                    <input className="input" id="local" value={data.local} onChange={(e) => setData('local', e.target.value)} />
                                     <InputError message={errors.local} />
                                 </div>
-                                <div className="space-y-1">
-                                    <Label htmlFor="vagas">Vagas</Label>
-                                    <Input id="vagas" type="number" min="1" value={data.vagas} onChange={(e) => setData('vagas', e.target.value)} />
+                                <div className="form-group">
+                                    <label className="form-label" htmlFor="vagas">Vagas</label>
+                                    <input className="input" id="vagas" type="number" min="1" value={data.vagas} onChange={(e) => setData('vagas', e.target.value)} />
                                     <InputError message={errors.vagas} />
                                 </div>
                             </div>
-                            <div className="space-y-1">
-                                <Label htmlFor="descricao">Descrição</Label>
+                            <div className="form-group">
+                                <label className="form-label" htmlFor="descricao">Descrição</label>
                                 <textarea
                                     id="descricao"
                                     rows={3}
-                                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                    className="input"
                                     value={data.descricao}
                                     onChange={(e) => setData('descricao', e.target.value)}
                                 />
                                 <InputError message={errors.descricao} />
                             </div>
-                            <div className="flex gap-2 pt-2">
-                                <Button type="submit" disabled={processing}>Criar Evento</Button>
-                                <Button type="button" variant="outline" asChild>
-                                    <Link href={index().url}>Cancelar</Link>
-                                </Button>
+                            <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+                                <button type="submit" className="btn btn-primary" disabled={processing}>Criar Evento</button>
+                                <Link href={index().url} className="btn btn-ghost">Cancelar</Link>
                             </div>
                         </form>
-                    </CardContent>
-                </Card>
+                    </div>
+                </div>
             </div>
         </>
     );

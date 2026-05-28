@@ -1,21 +1,25 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { Eye, Plus, X } from 'lucide-react';
 import { TablePagination } from '@/components/table-pagination';
-import Heading from '@/components/heading';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { BfaAvatar } from '@/components/ui/avatar';
 import { create, index, show } from '@/routes/pagamentos';
 import type { Paginated, Payment } from '@/types';
 
 type Filters = { status?: string; period?: string; talent_id?: string };
 type Props = { pagamentos: Paginated<Payment>; filters: Filters };
 
-const statusVariant: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
-    pendente: 'outline',
-    processado: 'secondary',
-    pago: 'default',
-    cancelado: 'destructive',
+const statusTone: Record<string, string> = {
+    pendente: 'warn',
+    processado: 'info',
+    pago: 'success',
+    cancelado: 'danger',
+};
+
+const statusLabel: Record<string, string> = {
+    pendente: 'Pendente',
+    processado: 'Processado',
+    pago: 'Pago',
+    cancelado: 'Cancelado',
 };
 
 const clean = (f: Record<string, string | undefined>) =>
@@ -31,70 +35,88 @@ export default function PagamentosIndex({ pagamentos, filters }: Props) {
     return (
         <>
             <Head title="Pagamentos" />
-            <div className="flex flex-col gap-6 p-4">
-                <div className="flex items-center justify-between">
-                    <Heading title="Pagamentos" description="Gestão de bolsas e subsídios" />
-                    <Button asChild>
-                        <Link href={create().url}><Plus className="h-4 w-4" /> Novo Pagamento</Link>
-                    </Button>
+
+            <div className="section">
+                <div className="page-head">
+                    <div>
+                        <h1 className="page-title">Pagamentos</h1>
+                        <p className="page-subtitle">Gestão de bolsas e subsídios</p>
+                    </div>
+                    <div className="page-actions">
+                        <Link href={create().url} className="btn btn-primary">
+                            <Plus size={14} /> Novo Pagamento
+                        </Link>
+                    </div>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2">
-                    <Select value={filters.status || 'all'} onValueChange={(v) => setFilter('status', v === 'all' ? '' : v)}>
-                        <SelectTrigger className="h-8 w-40"><SelectValue placeholder="Estado" /></SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="all">Todos os estados</SelectItem>
-                            <SelectItem value="pendente">Pendente</SelectItem>
-                            <SelectItem value="processado">Processado</SelectItem>
-                            <SelectItem value="pago">Pago</SelectItem>
-                            <SelectItem value="cancelado">Cancelado</SelectItem>
-                        </SelectContent>
-                    </Select>
+                {/* Filters */}
+                <div className="toolbar">
+                    <select
+                        className="input select"
+                        value={filters.status || ''}
+                        onChange={(e) => setFilter('status', e.target.value)}
+                    >
+                        <option value="">Todos os estados</option>
+                        <option value="pendente">Pendente</option>
+                        <option value="processado">Processado</option>
+                        <option value="pago">Pago</option>
+                        <option value="cancelado">Cancelado</option>
+                    </select>
                     {hasFilters && (
-                        <Button variant="ghost" size="sm" onClick={() => router.get(index().url, {})} className="h-8 gap-1 text-muted-foreground">
-                            <X className="h-3 w-3" /> Limpar
-                        </Button>
+                        <button className="btn btn-ghost btn-sm" onClick={() => router.get(index().url, {})}>
+                            <X size={12} /> Limpar
+                        </button>
                     )}
                 </div>
 
-                <div className="overflow-hidden rounded-lg border">
-                    <table className="w-full text-sm">
-                        <thead className="bg-muted/50">
+                {/* Table */}
+                <div className="table-wrap">
+                    <table className="tbl">
+                        <thead>
                             <tr>
-                                <th className="px-4 py-3 text-left font-medium">Referência</th>
-                                <th className="px-4 py-3 text-left font-medium">Talento</th>
-                                <th className="px-4 py-3 text-left font-medium">Período</th>
-                                <th className="px-4 py-3 text-left font-medium">Tipo</th>
-                                <th className="px-4 py-3 text-left font-medium">Valor</th>
-                                <th className="px-4 py-3 text-left font-medium">Estado</th>
-                                <th className="px-4 py-3 text-right font-medium">Acções</th>
+                                <th>Referência</th>
+                                <th>Talento</th>
+                                <th>Período</th>
+                                <th>Tipo</th>
+                                <th>Valor</th>
+                                <th>Estado</th>
+                                <th style={{ textAlign: 'right' }}>Acções</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y">
+                        <tbody>
                             {pagamentos.data.map((p) => (
-                                <tr key={p.id} className="hover:bg-muted/30">
-                                    <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{p.payment_ref}</td>
-                                    <td className="px-4 py-3 font-medium">{p.talent?.name ?? '—'}</td>
-                                    <td className="px-4 py-3 text-muted-foreground">{p.period}</td>
-                                    <td className="px-4 py-3"><Badge variant="outline">{p.type}</Badge></td>
-                                    <td className="px-4 py-3">
-                                        {parseFloat(p.amount).toLocaleString('pt-PT')} {p.currency}
+                                <tr key={p.id}>
+                                    <td className="mono" style={{ fontSize: 11 }}>{p.payment_ref}</td>
+                                    <td>
+                                        <div className="cell-person">
+                                            <BfaAvatar name={p.talent?.name ?? 'N/A'} size={26} />
+                                            <div className="meta">
+                                                <b>{p.talent?.name ?? '—'}</b>
+                                            </div>
+                                        </div>
                                     </td>
-                                    <td className="px-4 py-3">
-                                        <Badge variant={statusVariant[p.status] ?? 'secondary'}>{p.status}</Badge>
+                                    <td style={{ color: 'var(--text-2)' }}>{p.period}</td>
+                                    <td><span className="pill pill-neutral">{p.type}</span></td>
+                                    <td style={{ fontWeight: 600 }}>
+                                        {parseFloat(p.amount).toLocaleString('pt-AO')} {p.currency}
                                     </td>
-                                    <td className="px-4 py-3">
-                                        <div className="flex justify-end">
-                                            <Button variant="ghost" size="sm" asChild>
-                                                <Link href={show(p.id).url}><Eye className="h-4 w-4" /></Link>
-                                            </Button>
+                                    <td>
+                                        <span className={`pill pill-${statusTone[p.status] ?? 'neutral'}`}>
+                                            {statusLabel[p.status] ?? p.status}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                                            <Link href={show(p.id).url} className="btn btn-ghost btn-sm" title="Ver">
+                                                <Eye size={14} />
+                                            </Link>
                                         </div>
                                     </td>
                                 </tr>
                             ))}
                             {pagamentos.data.length === 0 && (
                                 <tr>
-                                    <td colSpan={7} className="px-4 py-10 text-center text-muted-foreground">
+                                    <td colSpan={7} style={{ padding: 32, textAlign: 'center', color: 'var(--text-3)' }}>
                                         Nenhum pagamento encontrado.
                                     </td>
                                 </tr>
@@ -109,6 +131,6 @@ export default function PagamentosIndex({ pagamentos, filters }: Props) {
     );
 }
 
-PagamentosIndex.layout = (props: { currentTeam?: { slug: string } | null }) => ({
+PagamentosIndex.layout = () => ({
     breadcrumbs: [{ title: 'Pagamentos', href: index().url }],
 });

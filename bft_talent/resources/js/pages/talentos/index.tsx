@@ -2,11 +2,7 @@ import { Head, Link, router } from '@inertiajs/react';
 import { Eye, Pencil, Plus, Trash2, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { TablePagination } from '@/components/table-pagination';
-import Heading from '@/components/heading';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { BfaAvatar } from '@/components/ui/avatar';
 import { create, destroy, edit, index, show } from '@/routes/talentos';
 import type { Paginated, Talent } from '@/types';
 
@@ -14,11 +10,12 @@ type Filters = { kind?: string; status?: string; search?: string };
 type Props = { talents: Paginated<Talent>; filters: Filters };
 
 const kindLabel: Record<string, string> = { bolseiro: 'Bolseiro', estagiario: 'Estagiário' };
-const statusVariant: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
-    activo: 'default',
-    suspenso: 'outline',
-    concluido: 'secondary',
-    cancelado: 'destructive',
+
+const statusTone: Record<string, string> = {
+    activo: 'success',
+    suspenso: 'warn',
+    concluido: 'info',
+    cancelado: 'danger',
 };
 
 const clean = (f: Record<string, string | undefined>) =>
@@ -29,10 +26,16 @@ export default function TalentosIndex({ talents, filters }: Props) {
     const mounted = useRef(false);
 
     useEffect(() => {
-        if (!mounted.current) { mounted.current = true; return; }
+        if (!mounted.current) {
+            mounted.current = true;
+
+            return;
+        }
+
         const t = setTimeout(() => {
             router.get(index().url, clean({ ...filters, search }), { preserveState: true, replace: true });
         }, 350);
+
         return () => clearTimeout(t);
     }, [search]);
 
@@ -56,90 +59,110 @@ export default function TalentosIndex({ talents, filters }: Props) {
     return (
         <>
             <Head title="Talentos" />
-            <div className="flex flex-col gap-6 p-4">
-                <div className="flex items-center justify-between">
-                    <Heading title="Talentos" description="Gestão de bolseiros e estagiários" />
-                    <Button asChild>
-                        <Link href={create().url}><Plus className="h-4 w-4" /> Novo Talento</Link>
-                    </Button>
+
+            <div className="section">
+                <div className="page-head">
+                    <div>
+                        <h1 className="page-title">Talentos</h1>
+                        <p className="page-subtitle">Gestão de bolseiros e estagiários</p>
+                    </div>
+                    <div className="page-actions">
+                        <Link href={create().url} className="btn btn-primary">
+                            <Plus size={14} /> Novo Talento
+                        </Link>
+                    </div>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2">
-                    <Input
+                {/* Filters */}
+                <div className="toolbar">
+                    <input
+                        className="input input-search"
                         placeholder="Pesquisar por nome…"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        className="h-8 w-56"
                     />
-                    <Select value={filters.kind || 'all'} onValueChange={(v) => setFilter('kind', v === 'all' ? '' : v)}>
-                        <SelectTrigger className="h-8 w-36"><SelectValue placeholder="Tipo" /></SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="all">Todos os tipos</SelectItem>
-                            <SelectItem value="bolseiro">Bolseiro</SelectItem>
-                            <SelectItem value="estagiario">Estagiário</SelectItem>
-                        </SelectContent>
-                    </Select>
-                    <Select value={filters.status || 'all'} onValueChange={(v) => setFilter('status', v === 'all' ? '' : v)}>
-                        <SelectTrigger className="h-8 w-36"><SelectValue placeholder="Estado" /></SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="all">Todos os estados</SelectItem>
-                            <SelectItem value="activo">Activo</SelectItem>
-                            <SelectItem value="suspenso">Suspenso</SelectItem>
-                            <SelectItem value="concluido">Concluído</SelectItem>
-                            <SelectItem value="cancelado">Cancelado</SelectItem>
-                        </SelectContent>
-                    </Select>
+                    <select
+                        className="input select"
+                        value={filters.kind || ''}
+                        onChange={(e) => setFilter('kind', e.target.value)}
+                    >
+                        <option value="">Todos os tipos</option>
+                        <option value="bolseiro">Bolseiro</option>
+                        <option value="estagiario">Estagiário</option>
+                    </select>
+                    <select
+                        className="input select"
+                        value={filters.status || ''}
+                        onChange={(e) => setFilter('status', e.target.value)}
+                    >
+                        <option value="">Todos os estados</option>
+                        <option value="activo">Activo</option>
+                        <option value="suspenso">Suspenso</option>
+                        <option value="concluido">Concluído</option>
+                        <option value="cancelado">Cancelado</option>
+                    </select>
                     {hasFilters && (
-                        <Button variant="ghost" size="sm" onClick={clearFilters} className="h-8 gap-1 text-muted-foreground">
-                            <X className="h-3 w-3" /> Limpar
-                        </Button>
+                        <button className="btn btn-ghost btn-sm" onClick={clearFilters}>
+                            <X size={12} /> Limpar
+                        </button>
                     )}
                 </div>
 
-                <div className="overflow-hidden rounded-lg border">
-                    <table className="w-full text-sm">
-                        <thead className="bg-muted/50">
+                {/* Table */}
+                <div className="table-wrap">
+                    <table className="tbl">
+                        <thead>
                             <tr>
-                                <th className="px-4 py-3 text-left font-medium">Código</th>
-                                <th className="px-4 py-3 text-left font-medium">Nome</th>
-                                <th className="px-4 py-3 text-left font-medium">Tipo</th>
-                                <th className="px-4 py-3 text-left font-medium">Programa</th>
-                                <th className="px-4 py-3 text-left font-medium">Estado</th>
-                                <th className="px-4 py-3 text-left font-medium">Mentor</th>
-                                <th className="px-4 py-3 text-right font-medium">Acções</th>
+                                <th>Código</th>
+                                <th>Nome</th>
+                                <th>Tipo</th>
+                                <th>Programa</th>
+                                <th>Estado</th>
+                                <th>Mentor</th>
+                                <th style={{ textAlign: 'right' }}>Acções</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y">
+                        <tbody>
                             {talents.data.map((talent) => (
-                                <tr key={talent.id} className="hover:bg-muted/30">
-                                    <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{talent.talent_code}</td>
-                                    <td className="px-4 py-3 font-medium">{talent.name}</td>
-                                    <td className="px-4 py-3">
-                                        <Badge variant="outline">{kindLabel[talent.kind] ?? talent.kind}</Badge>
+                                <tr key={talent.id}>
+                                    <td className="mono" style={{ fontSize: 11 }}>{talent.talent_code}</td>
+                                    <td>
+                                        <div className="cell-person">
+                                            <BfaAvatar name={talent.name} size={26} />
+                                            <div className="meta">
+                                                <b>{talent.name}</b>
+                                                <span>{talent.email}</span>
+                                            </div>
+                                        </div>
                                     </td>
-                                    <td className="px-4 py-3 text-muted-foreground">{talent.program?.name ?? '—'}</td>
-                                    <td className="px-4 py-3">
-                                        <Badge variant={statusVariant[talent.status] ?? 'secondary'}>{talent.status}</Badge>
+                                    <td>
+                                        <span className="pill pill-primary">{kindLabel[talent.kind] ?? talent.kind}</span>
                                     </td>
-                                    <td className="px-4 py-3 text-muted-foreground">{talent.mentor?.name ?? '—'}</td>
-                                    <td className="px-4 py-3">
-                                        <div className="flex items-center justify-end gap-1">
-                                            <Button variant="ghost" size="sm" asChild>
-                                                <Link href={show(talent.id).url}><Eye className="h-4 w-4" /></Link>
-                                            </Button>
-                                            <Button variant="ghost" size="sm" asChild>
-                                                <Link href={edit(talent.id).url}><Pencil className="h-4 w-4" /></Link>
-                                            </Button>
-                                            <Button variant="ghost" size="sm" onClick={() => handleDelete(talent)}>
-                                                <Trash2 className="h-4 w-4 text-destructive" />
-                                            </Button>
+                                    <td style={{ color: 'var(--text-2)' }}>{talent.program?.name ?? '—'}</td>
+                                    <td>
+                                        <span className={`pill pill-${statusTone[talent.status] ?? 'neutral'}`}>
+                                            {talent.status}
+                                        </span>
+                                    </td>
+                                    <td style={{ color: 'var(--text-2)' }}>{talent.mentor?.name ?? '—'}</td>
+                                    <td>
+                                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 4 }}>
+                                            <Link href={show(talent.id).url} className="btn btn-ghost btn-sm" title="Ver">
+                                                <Eye size={14} />
+                                            </Link>
+                                            <Link href={edit(talent.id).url} className="btn btn-ghost btn-sm" title="Editar">
+                                                <Pencil size={14} />
+                                            </Link>
+                                            <button className="btn btn-ghost btn-sm" onClick={() => handleDelete(talent)} title="Apagar">
+                                                <Trash2 size={14} style={{ color: 'var(--danger)' }} />
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
                             ))}
                             {talents.data.length === 0 && (
                                 <tr>
-                                    <td colSpan={7} className="px-4 py-10 text-center text-muted-foreground">
+                                    <td colSpan={7} style={{ padding: 32, textAlign: 'center', color: 'var(--text-3)' }}>
                                         Nenhum talento encontrado.
                                     </td>
                                 </tr>
@@ -154,6 +177,6 @@ export default function TalentosIndex({ talents, filters }: Props) {
     );
 }
 
-TalentosIndex.layout = (props: { currentTeam?: { slug: string } | null }) => ({
+TalentosIndex.layout = () => ({
     breadcrumbs: [{ title: 'Talentos', href: index().url }],
 });

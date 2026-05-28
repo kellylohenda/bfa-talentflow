@@ -7,6 +7,7 @@ import {
     CheckSquare,
     ClipboardList,
     CreditCard,
+    Clock,
     FileText,
     GitBranch,
     Globe,
@@ -14,20 +15,27 @@ import {
     LayoutDashboard,
     LogOut,
     Mail,
-    MapPin,
     MessageSquare,
     Shield,
     TrendingUp,
-    Trophy,
     UserCheck,
     UserPlus,
     Users,
     XCircle,
 } from 'lucide-react';
-import { logout } from '@/routes';
 import type { LucideIcon } from 'lucide-react';
+import { logout } from '@/routes';
 
 type NavItem = { title: string; href: string; icon: LucideIcon; badge?: number };
+
+const ROLE_LABELS: Record<string, string> = {
+    rh: 'Gestora de Programa — RH',
+    direcao: 'Direcção de RH',
+    mentor: 'Director — Banca de Empresas',
+    estagiario: 'Estagiária Y1 — Futuro BFA',
+    bolseiro: 'Bolseiro — BIF — Nova SBE',
+    voluntario: 'Voluntária — Educação',
+};
 
 function initials(name: string): string {
     return name
@@ -43,7 +51,11 @@ function isActive(href: string, currentUrl: string): boolean {
     try {
         const path = new URL(currentUrl).pathname;
         const target = new URL(href, currentUrl).pathname;
-        if (target === '/') return path === '/';
+
+        if (target === '/') {
+return path === '/';
+}
+
         return path.startsWith(target);
     } catch {
         return false;
@@ -57,15 +69,16 @@ export function AppSidebar({ collapsed }: { collapsed: boolean }) {
     }>();
 
     const user = page.props.auth.user;
-    if (!user) return null;
+
+    if (!user) {
+        return null;
+    }
+
     const role = user.bfa_role ?? 'rh';
     const currentUrl = page.props.ziggy?.location ?? window.location.href;
 
-    const isStaff = ['rh', 'direcao', 'mentor'].includes(role);
     const isParticipant = ['bolseiro', 'estagiario'].includes(role);
     const isVoluntario = role === 'voluntario';
-    const isRH = role === 'rh' || role === 'direcao';
-    const isMentor = role === 'mentor';
 
     const operacao: NavItem[] = [];
     const desenvolvimento: NavItem[] = [];
@@ -163,6 +176,7 @@ export function AppSidebar({ collapsed }: { collapsed: boolean }) {
     const renderNav = (items: NavItem[]) =>
         items.map((item) => {
             const active = isActive(item.href, currentUrl);
+
             return (
                 <Link
                     key={item.title}
@@ -221,13 +235,16 @@ export function AppSidebar({ collapsed }: { collapsed: boolean }) {
             </nav>
 
             <div className="sb-user">
-                <div className="sb-avatar" title={user.name}>
-                    {userInitials}
-                </div>
-                <div className="sb-user-text">
-                    <b>{user.name}</b>
-                    <span>{user.email}</span>
-                </div>
+                <Link href="/settings/profile" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 10, flex: 1, minWidth: 0 }}>
+                    <div className="sb-avatar" title={user.name}>
+                        {userInitials}
+                    </div>
+                    <div className="sb-user-text">
+                        <b>{user.name}</b>
+                        <span>{ROLE_LABELS[role] ?? role}</span>
+                        <span>{user.email}</span>
+                    </div>
+                </Link>
                 <Link
                     href={logout().url}
                     method="post"
@@ -242,10 +259,3 @@ export function AppSidebar({ collapsed }: { collapsed: boolean }) {
         </aside>
     );
 }
-
-const Clock = ({ size = 16 }: { size?: number }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="10"/>
-        <polyline points="12 6 12 12 16 14"/>
-    </svg>
-);

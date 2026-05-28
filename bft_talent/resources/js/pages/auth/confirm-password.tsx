@@ -1,8 +1,6 @@
 import { Form, Head } from '@inertiajs/react';
 import InputError from '@/components/input-error';
 import PasswordInput from '@/components/password-input';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import { store } from '@/routes/password/confirm';
 
@@ -13,9 +11,9 @@ export default function ConfirmPassword() {
 
             <Form {...store.form()} resetOnSuccess={['password']}>
                 {({ processing, errors }) => (
-                    <div className="space-y-6">
-                        <div className="grid gap-2">
-                            <Label htmlFor="password">Password</Label>
+                    <>
+                        <div className="form-group">
+                            <label className="form-label" htmlFor="password">Password</label>
                             <PasswordInput
                                 id="password"
                                 name="password"
@@ -23,21 +21,19 @@ export default function ConfirmPassword() {
                                 autoComplete="current-password"
                                 autoFocus
                             />
-
                             <InputError message={errors.password} />
                         </div>
 
-                        <div className="flex items-center">
-                            <Button
-                                className="w-full"
-                                disabled={processing}
-                                data-test="confirm-password-button"
-                            >
-                                {processing && <Spinner />}
-                                Confirm password
-                            </Button>
-                        </div>
-                    </div>
+                        <button
+                            className="btn btn-primary"
+                            style={{ width: '100%' }}
+                            disabled={processing}
+                            data-test="confirm-password-button"
+                        >
+                            {processing && <Spinner />}
+                            Confirm password
+                        </button>
+                    </>
                 )}
             </Form>
         </>

@@ -1,9 +1,7 @@
 import { Head, Link } from '@inertiajs/react';
 import { Eye, Pencil, Plus } from 'lucide-react';
 import CreateTeamModal from '@/components/create-team-modal';
-import Heading from '@/components/heading';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import {
     Tooltip,
     TooltipContent,
@@ -22,34 +20,33 @@ export default function TeamsIndex({ teams }: Props) {
         <>
             <Head title="Teams" />
 
-            <h1 className="sr-only">Teams</h1>
-
-            <div className="flex flex-col space-y-6">
-                <div className="flex items-center justify-between">
-                    <Heading
-                        variant="small"
-                        title="Teams"
-                        description="Manage your teams and team memberships"
-                    />
-
-                    <CreateTeamModal>
-                        <Button data-test="teams-new-team-button">
-                            <Plus /> New team
-                        </Button>
-                    </CreateTeamModal>
+            <div className="section">
+                <div className="page-head">
+                    <div>
+                        <h1 className="page-title">Teams</h1>
+                        <p className="page-subtitle">Manage your teams and team memberships</p>
+                    </div>
+                    <div className="page-actions">
+                        <CreateTeamModal>
+                            <button className="btn btn-primary" data-test="teams-new-team-button">
+                                <Plus size={14} /> New team
+                            </button>
+                        </CreateTeamModal>
+                    </div>
                 </div>
 
-                <div className="space-y-3">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                     {teams.map((team) => (
                         <div
                             key={team.id}
                             data-test="team-row"
-                            className="flex items-center justify-between rounded-lg border p-4"
+                            className="card"
+                            style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
                         >
-                            <div className="flex items-center gap-4">
+                            <div className="card-pad" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                                 <div>
-                                    <div className="flex items-center gap-2">
-                                        <span className="font-medium">
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                        <span style={{ fontWeight: 500 }}>
                                             {team.name}
                                         </span>
                                         {team.isPersonal ? (
@@ -58,62 +55,52 @@ export default function TeamsIndex({ teams }: Props) {
                                             </Badge>
                                         ) : null}
                                     </div>
-                                    <span className="text-sm text-muted-foreground">
+                                    <span className="muted">
                                         {team.roleLabel}
                                     </span>
                                 </div>
-                            </div>
 
-                            <TooltipProvider>
-                                <div className="flex items-center gap-2">
-                                    {team.role === 'member' ? (
-                                        <Tooltip>
-                                            <TooltipTrigger asChild>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    data-test="team-view-button"
-                                                    asChild
-                                                >
+                                <TooltipProvider>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                                        {team.role === 'member' ? (
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
                                                     <Link
                                                         href={edit(team.slug)}
+                                                        className="btn btn-ghost btn-sm"
+                                                        data-test="team-view-button"
                                                     >
-                                                        <Eye className="h-4 w-4" />
+                                                        <Eye size={14} />
                                                     </Link>
-                                                </Button>
-                                            </TooltipTrigger>
-                                            <TooltipContent>
-                                                <p>View team</p>
-                                            </TooltipContent>
-                                        </Tooltip>
-                                    ) : (
-                                        <Tooltip>
-                                            <TooltipTrigger asChild>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    data-test="team-edit-button"
-                                                    asChild
-                                                >
+                                                </TooltipTrigger>
+                                                <TooltipContent>
+                                                    <p>View team</p>
+                                                </TooltipContent>
+                                            </Tooltip>
+                                        ) : (
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
                                                     <Link
                                                         href={edit(team.slug)}
+                                                        className="btn btn-ghost btn-sm"
+                                                        data-test="team-edit-button"
                                                     >
-                                                        <Pencil className="h-4 w-4" />
+                                                        <Pencil size={14} />
                                                     </Link>
-                                                </Button>
-                                            </TooltipTrigger>
-                                            <TooltipContent>
-                                                <p>Edit team</p>
-                                            </TooltipContent>
-                                        </Tooltip>
-                                    )}
-                                </div>
-                            </TooltipProvider>
+                                                </TooltipTrigger>
+                                                <TooltipContent>
+                                                    <p>Edit team</p>
+                                                </TooltipContent>
+                                            </Tooltip>
+                                        )}
+                                    </div>
+                                </TooltipProvider>
+                            </div>
                         </div>
                     ))}
 
                     {teams.length === 0 ? (
-                        <p className="py-8 text-center text-muted-foreground">
+                        <p className="muted" style={{ padding: 32, textAlign: 'center' }}>
                             You don't belong to any teams yet.
                         </p>
                     ) : null}

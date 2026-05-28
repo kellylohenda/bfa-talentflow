@@ -1,94 +1,108 @@
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import { ArrowLeft, Calendar, User } from 'lucide-react';
-import Heading from '@/components/heading';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { index, show } from '@/routes/tarefas';
 import type { Task } from '@/types';
 
 type Props = { tarefa: Task };
 
-const statusVariant: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
-    pendente: 'outline',
-    em_andamento: 'secondary',
-    concluida: 'default',
-    cancelada: 'destructive',
+const statusPill: Record<string, string> = {
+    pendente: 'pill pill-neutral',
+    em_andamento: 'pill pill-info',
+    concluida: 'pill pill-success',
+    cancelada: 'pill pill-danger',
 };
 
-const priorityVariant: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
-    baixa: 'secondary',
-    media: 'outline',
-    alta: 'default',
-    urgente: 'destructive',
+const statusLabel: Record<string, string> = {
+    pendente: 'Pendente',
+    em_andamento: 'Em Andamento',
+    concluida: 'Concluída',
+    cancelada: 'Cancelada',
+};
+
+const priorityPill: Record<string, string> = {
+    baixa: 'pill pill-neutral',
+    media: 'pill pill-info',
+    alta: 'pill pill-warn',
+    urgente: 'pill pill-danger',
+};
+
+const priorityLabel: Record<string, string> = {
+    baixa: 'Baixa',
+    media: 'Média',
+    alta: 'Alta',
+    urgente: 'Urgente',
 };
 
 export default function TarefasShow({ tarefa }: Props) {
-    const { props } = usePage<{ currentTeam: { slug: string } }>();
-    const team = props.currentTeam.slug;
-
     return (
         <>
             <Head title={tarefa.title} />
-            <div className="flex flex-col gap-6 p-4">
-                <div className="flex items-center gap-4">
-                    <Button variant="ghost" size="sm" asChild>
-                        <Link href={index(team).url}><ArrowLeft className="h-4 w-4" /></Link>
-                    </Button>
-                    <Heading title={tarefa.title} description={`Prioridade: ${tarefa.priority}`} />
+            <div className="section" style={{ padding: '20px 24px 40px' }}>
+                <div className="page-head">
+                    <div className="row" style={{ gap: 16 }}>
+                        <Link href={index().url} className="btn btn-ghost btn-sm"><ArrowLeft style={{ width: 14, height: 14 }} /></Link>
+                        <div>
+                            <h1 className="page-title">{tarefa.title}</h1>
+                            <p className="page-subtitle">Prioridade: {tarefa.priority}</p>
+                        </div>
+                    </div>
                 </div>
 
-                <div className="grid gap-4 md:grid-cols-2">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="text-sm font-medium text-muted-foreground">Detalhes</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-3 text-sm">
-                            <div className="flex justify-between">
-                                <span className="text-muted-foreground">Estado</span>
-                                <Badge variant={statusVariant[tarefa.status] ?? 'secondary'}>{tarefa.status}</Badge>
+                <div className="grid cols-2">
+                    <div className="card">
+                        <div className="card-head">
+                            <span className="card-title">Detalhes</span>
+                        </div>
+                        <div className="card-pad" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                            <div className="row-between">
+                                <span className="muted">Estado</span>
+                                <span className={statusPill[tarefa.status] ?? 'pill pill-neutral'}>
+                                    {statusLabel[tarefa.status] ?? tarefa.status}
+                                </span>
                             </div>
-                            <div className="flex justify-between">
-                                <span className="text-muted-foreground">Prioridade</span>
-                                <Badge variant={priorityVariant[tarefa.priority] ?? 'outline'}>{tarefa.priority}</Badge>
+                            <div className="row-between">
+                                <span className="muted">Prioridade</span>
+                                <span className={priorityPill[tarefa.priority] ?? 'pill pill-neutral'}>
+                                    {priorityLabel[tarefa.priority] ?? tarefa.priority}
+                                </span>
                             </div>
                             {tarefa.due_date && (
-                                <div className="flex justify-between">
-                                    <span className="text-muted-foreground">Data Limite</span>
-                                    <span className="font-medium">{new Date(tarefa.due_date).toLocaleDateString('pt-PT')}</span>
+                                <div className="row-between">
+                                    <span className="muted">Data Limite</span>
+                                    <span style={{ fontWeight: 500 }}>{new Date(tarefa.due_date).toLocaleDateString('pt-PT')}</span>
                                 </div>
                             )}
                             {tarefa.assigned_to && (
-                                <div className="flex items-center gap-2">
-                                    <User className="h-4 w-4 text-muted-foreground" />
-                                    <span className="text-muted-foreground">Atribuído a:</span>
-                                    <span className="font-medium">{tarefa.assigned_to.name}</span>
+                                <div className="row" style={{ gap: 8 }}>
+                                    <User style={{ width: 14, height: 14, color: 'var(--text-3)' }} />
+                                    <span className="muted">Atribuído a:</span>
+                                    <span style={{ fontWeight: 500 }}>{tarefa.assigned_to.name}</span>
                                 </div>
                             )}
                             {tarefa.talent && (
-                                <div className="flex items-center gap-2">
-                                    <User className="h-4 w-4 text-muted-foreground" />
-                                    <span className="text-muted-foreground">Talento:</span>
-                                    <span className="font-medium">{tarefa.talent.name}</span>
+                                <div className="row" style={{ gap: 8 }}>
+                                    <User style={{ width: 14, height: 14, color: 'var(--text-3)' }} />
+                                    <span className="muted">Talento:</span>
+                                    <span style={{ fontWeight: 500 }}>{tarefa.talent.name}</span>
                                 </div>
                             )}
-                            <div className="flex items-center gap-2">
-                                <Calendar className="h-4 w-4 text-muted-foreground" />
-                                <span className="text-muted-foreground">Criada em:</span>
+                            <div className="row" style={{ gap: 8 }}>
+                                <Calendar style={{ width: 14, height: 14, color: 'var(--text-3)' }} />
+                                <span className="muted">Criada em:</span>
                                 <span>{new Date(tarefa.created_at).toLocaleDateString('pt-PT')}</span>
                             </div>
-                        </CardContent>
-                    </Card>
+                        </div>
+                    </div>
 
                     {tarefa.description && (
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="text-sm font-medium text-muted-foreground">Descrição</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <p className="text-sm whitespace-pre-wrap">{tarefa.description}</p>
-                            </CardContent>
-                        </Card>
+                        <div className="card">
+                            <div className="card-head">
+                                <span className="card-title">Descrição</span>
+                            </div>
+                            <div className="card-pad">
+                                <p style={{ whiteSpace: 'pre-wrap' }}>{tarefa.description}</p>
+                            </div>
+                        </div>
                     )}
                 </div>
             </div>
@@ -96,12 +110,6 @@ export default function TarefasShow({ tarefa }: Props) {
     );
 }
 
-TarefasShow.layout = (props: { currentTeam?: { slug: string } | null; tarefa?: Task }) => ({
-    breadcrumbs: [
-        { title: 'Tarefas', href: props.currentTeam ? index(props.currentTeam.slug).url : '/' },
-        {
-            title: props.tarefa?.title ?? 'Detalhe',
-            href: props.currentTeam && props.tarefa ? show({ tarefa: props.tarefa.id }).url : '/',
-        },
-    ],
-});
+TarefasShow.layout = {
+    breadcrumbs: [{ title: 'Tarefas' }],
+};

@@ -1,14 +1,7 @@
-import { Head, router, useForm, usePage } from '@inertiajs/react';
+import { Head, router, useForm } from '@inertiajs/react';
 import { Star, X } from 'lucide-react';
 import { useState } from 'react';
 import { TablePagination } from '@/components/table-pagination';
-import Heading from '@/components/heading';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { index, store } from '@/routes/avaliacoes';
 import type { Avaliacao, Mentor, Paginated, Talent } from '@/types';
 
@@ -20,16 +13,20 @@ type Props = {
     mentors: Mentor[];
 };
 
+const criterioTone: Record<string, string> = {
+    desempenho: 'primary',
+    competencia: 'info',
+    comportamento: 'warn',
+    lideranca: 'success',
+};
+
 const clean = (f: Record<string, string | undefined>) =>
     Object.fromEntries(Object.entries(f).filter(([, v]) => v !== '' && v !== undefined));
 
 export default function AvaliacoesIndex({ avaliacoes, filters, talents, mentors }: Props) {
-    const { props } = usePage<{ currentTeam: { slug: string } }>();
-    const team = props.currentTeam.slug;
-
     const [modalOpen, setModalOpen] = useState(false);
 
-    const { data, setData, post, processing, errors, reset } = useForm({
+    const { data, setData, post, processing, reset } = useForm({
         target_id: '',
         reviewer_id: '',
         criterio: '',
@@ -39,7 +36,7 @@ export default function AvaliacoesIndex({ avaliacoes, filters, talents, mentors 
     });
 
     function setFilter(key: keyof Filters, value: string) {
-        router.get(index(team).url, clean({ ...filters, [key]: value }), { preserveState: true, replace: true });
+        router.get(index().url, clean({ ...filters, [key]: value }), { preserveState: true, replace: true });
     }
 
     const hasFilters = !!(filters.periodo || filters.criterio);
@@ -51,7 +48,7 @@ export default function AvaliacoesIndex({ avaliacoes, filters, talents, mentors 
 
     function submit(e: React.FormEvent) {
         e.preventDefault();
-        post(store(team).url, {
+        post(store().url, {
             onSuccess: () => {
                 setModalOpen(false);
                 reset();
@@ -62,63 +59,75 @@ export default function AvaliacoesIndex({ avaliacoes, filters, talents, mentors 
     return (
         <>
             <Head title="Avaliações" />
-            <div className="flex flex-col gap-6 p-4">
-                <div className="flex items-center justify-between">
-                    <Heading title="Avaliações 360°" description="Avaliações de desempenho" />
-                    <Button onClick={openModal}><Star className="h-4 w-4" /> Nova Avaliação</Button>
+            <div className="section">
+                <div className="page-head">
+                    <div>
+                        <h1 className="page-title">Avaliações 360°</h1>
+                        <p className="page-subtitle">Avaliações de desempenho</p>
+                    </div>
+                    <div className="page-actions">
+                        <button className="btn btn-primary" onClick={openModal}>
+                            <Star size={14} /> Nova Avaliação
+                        </button>
+                    </div>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2">
-                    <Select value={filters.criterio || 'all'} onValueChange={(v) => setFilter('criterio', v === 'all' ? '' : v)}>
-                        <SelectTrigger className="h-8 w-40"><SelectValue placeholder="Critério" /></SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="all">Todos os critérios</SelectItem>
-                            <SelectItem value="desempenho">Desempenho</SelectItem>
-                            <SelectItem value="competencia">Competência</SelectItem>
-                            <SelectItem value="comportamento">Comportamento</SelectItem>
-                            <SelectItem value="lideranca">Liderança</SelectItem>
-                        </SelectContent>
-                    </Select>
+                <div className="toolbar">
+                    <select
+                        className="input select"
+                        value={filters.criterio || ''}
+                        onChange={(e) => setFilter('criterio', e.target.value)}
+                    >
+                        <option value="">Todos os critérios</option>
+                        <option value="desempenho">Desempenho</option>
+                        <option value="competencia">Competência</option>
+                        <option value="comportamento">Comportamento</option>
+                        <option value="lideranca">Liderança</option>
+                    </select>
                     {hasFilters && (
-                        <Button variant="ghost" size="sm" onClick={() => router.get(index(team).url, {})} className="h-8 gap-1 text-muted-foreground">
-                            <X className="h-3 w-3" /> Limpar
-                        </Button>
+                        <button className="btn btn-ghost btn-sm" onClick={() => router.get(index().url, {})}>
+                            <X size={12} /> Limpar
+                        </button>
                     )}
                 </div>
 
-                <div className="overflow-hidden rounded-lg border">
-                    <table className="w-full text-sm">
-                        <thead className="bg-muted/50">
+                <div className="table-wrap">
+                    <table className="tbl">
+                        <thead>
                             <tr>
-                                <th className="px-4 py-3 text-left font-medium">Avaliado</th>
-                                <th className="px-4 py-3 text-left font-medium">Avaliador</th>
-                                <th className="px-4 py-3 text-left font-medium">Critério</th>
-                                <th className="px-4 py-3 text-left font-medium">Pontuação</th>
-                                <th className="px-4 py-3 text-left font-medium">Período</th>
-                                <th className="px-4 py-3 text-left font-medium">Data</th>
+                                <th>Avaliado</th>
+                                <th>Avaliador</th>
+                                <th>Critério</th>
+                                <th>Pontuação</th>
+                                <th>Período</th>
+                                <th>Data</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y">
+                        <tbody>
                             {avaliacoes.data.map((a) => (
-                                <tr key={a.id} className="hover:bg-muted/30">
-                                    <td className="px-4 py-3 font-medium">{a.target?.name ?? '—'}</td>
-                                    <td className="px-4 py-3 text-muted-foreground">{a.reviewer?.name ?? '—'}</td>
-                                    <td className="px-4 py-3 capitalize text-muted-foreground">{a.criterio}</td>
-                                    <td className="px-4 py-3">
-                                        <div className="flex items-center gap-1">
-                                            <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
-                                            <span className="font-medium">{a.score !== null ? `${a.score}/100` : '—'}</span>
+                                <tr key={a.id}>
+                                    <td>{a.target?.name ?? '—'}</td>
+                                    <td style={{ color: 'var(--text-2)' }}>{a.reviewer?.name ?? '—'}</td>
+                                    <td>
+                                        <span className={`pill pill-${criterioTone[a.criterio] ?? 'neutral'}`}>
+                                            {a.criterio}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                                            <Star size={13} style={{ color: '#eab308', fill: '#eab308' }} />
+                                            <span style={{ fontWeight: 500 }}>{a.score !== null ? `${a.score}/100` : '—'}</span>
                                         </div>
                                     </td>
-                                    <td className="px-4 py-3 text-muted-foreground">{a.periodo}</td>
-                                    <td className="px-4 py-3 text-muted-foreground">
+                                    <td style={{ color: 'var(--text-2)' }}>{a.periodo}</td>
+                                    <td style={{ color: 'var(--text-2)' }}>
                                         {new Date(a.created_at).toLocaleDateString('pt-PT')}
                                     </td>
                                 </tr>
                             ))}
                             {avaliacoes.data.length === 0 && (
                                 <tr>
-                                    <td colSpan={6} className="px-4 py-10 text-center text-muted-foreground">
+                                    <td colSpan={6} style={{ padding: 32, textAlign: 'center', color: 'var(--text-3)' }}>
                                         Nenhuma avaliação encontrada.
                                     </td>
                                 </tr>
@@ -129,90 +138,87 @@ export default function AvaliacoesIndex({ avaliacoes, filters, talents, mentors 
 
                 <TablePagination links={avaliacoes.links} filters={clean(filters)} />
 
-                <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-                    <DialogContent>
-                        <DialogHeader>
-                            <DialogTitle>Nova Avaliação</DialogTitle>
-                        </DialogHeader>
-                        <form onSubmit={submit} className="space-y-4">
-                            <div className="space-y-1">
-                                <Label htmlFor="target_id">Avaliado *</Label>
-                                <Select value={data.target_id} onValueChange={(v) => setData('target_id', v)}>
-                                    <SelectTrigger id="target_id"><SelectValue placeholder="Seleccionar" /></SelectTrigger>
-                                    <SelectContent>
-                                        {talents.map((t) => (
-                                            <SelectItem key={t.id} value={String(t.id)}>{t.name}</SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
+                {modalOpen && (
+                    <div style={{ position: 'fixed', inset: 0, zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.4)' }} onClick={() => setModalOpen(false)}>
+                        <div className="card" style={{ width: 520, maxHeight: '90vh', overflow: 'auto' }} onClick={(e) => e.stopPropagation()}>
+                            <div className="card-head">
+                                <h3 className="card-title">Nova Avaliação</h3>
                             </div>
-                            <div className="space-y-1">
-                                <Label htmlFor="reviewer_id">Avaliador *</Label>
-                                <Select value={data.reviewer_id} onValueChange={(v) => setData('reviewer_id', v)}>
-                                    <SelectTrigger id="reviewer_id"><SelectValue placeholder="Seleccionar" /></SelectTrigger>
-                                    <SelectContent>
-                                        {mentors.map((m) => (
-                                            <SelectItem key={m.id} value={String(m.id)}>{m.name}</SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
+                            <div className="card-pad">
+                                <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                                    <div className="form-group">
+                                        <label className="form-label">Avaliado *</label>
+                                        <select className="input select" value={data.target_id} onChange={(e) => setData('target_id', e.target.value)}>
+                                            <option value="">Seleccionar</option>
+                                            {talents.map((t) => (
+                                                <option key={t.id} value={String(t.id)}>{t.name}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <div className="form-group">
+                                        <label className="form-label">Avaliador *</label>
+                                        <select className="input select" value={data.reviewer_id} onChange={(e) => setData('reviewer_id', e.target.value)}>
+                                            <option value="">Seleccionar</option>
+                                            {mentors.map((m) => (
+                                                <option key={m.id} value={String(m.id)}>{m.name}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <div className="grid cols-2">
+                                        <div className="form-group">
+                                            <label className="form-label">Critério *</label>
+                                            <select className="input select" value={data.criterio} onChange={(e) => setData('criterio', e.target.value)}>
+                                                <option value="">Seleccionar</option>
+                                                <option value="desempenho">Desempenho</option>
+                                                <option value="competencia">Competência</option>
+                                                <option value="comportamento">Comportamento</option>
+                                                <option value="lideranca">Liderança</option>
+                                            </select>
+                                        </div>
+                                        <div className="form-group">
+                                            <label className="form-label">Pontuação (0-100)</label>
+                                            <input
+                                                className="input"
+                                                type="number"
+                                                min="0"
+                                                max="100"
+                                                value={data.score}
+                                                onChange={(e) => setData('score', e.target.value)}
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="form-group">
+                                        <label className="form-label">Período</label>
+                                        <input
+                                            className="input"
+                                            value={data.periodo}
+                                            onChange={(e) => setData('periodo', e.target.value)}
+                                            placeholder="ex: 2026-S1"
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label className="form-label">Feedback</label>
+                                        <textarea
+                                            className="input"
+                                            rows={3}
+                                            value={data.feedback}
+                                            onChange={(e) => setData('feedback', e.target.value)}
+                                        />
+                                    </div>
+                                    <div style={{ display: 'flex', gap: 8, paddingTop: 8 }}>
+                                        <button type="submit" className="btn btn-primary" disabled={processing}>Guardar Avaliação</button>
+                                        <button type="button" className="btn btn-ghost" onClick={() => setModalOpen(false)}>Cancelar</button>
+                                    </div>
+                                </form>
                             </div>
-                            <div className="grid gap-4 sm:grid-cols-2">
-                                <div className="space-y-1">
-                                    <Label htmlFor="criterio">Critério *</Label>
-                                    <Select value={data.criterio} onValueChange={(v) => setData('criterio', v)}>
-                                        <SelectTrigger id="criterio"><SelectValue placeholder="Seleccionar" /></SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="desempenho">Desempenho</SelectItem>
-                                            <SelectItem value="competencia">Competência</SelectItem>
-                                            <SelectItem value="comportamento">Comportamento</SelectItem>
-                                            <SelectItem value="lideranca">Liderança</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                                <div className="space-y-1">
-                                    <Label htmlFor="score">Pontuação (0-100)</Label>
-                                    <Input
-                                        id="score"
-                                        type="number"
-                                        min="0"
-                                        max="100"
-                                        value={data.score}
-                                        onChange={(e) => setData('score', e.target.value)}
-                                    />
-                                </div>
-                            </div>
-                            <div className="space-y-1">
-                                <Label htmlFor="periodo">Período</Label>
-                                <Input
-                                    id="periodo"
-                                    value={data.periodo}
-                                    onChange={(e) => setData('periodo', e.target.value)}
-                                    placeholder="ex: 2026-S1"
-                                />
-                            </div>
-                            <div className="space-y-1">
-                                <Label htmlFor="feedback">Feedback</Label>
-                                <textarea
-                                    id="feedback"
-                                    rows={3}
-                                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                                    value={data.feedback}
-                                    onChange={(e) => setData('feedback', e.target.value)}
-                                />
-                            </div>
-                            <div className="flex gap-2 pt-2">
-                                <Button type="submit" disabled={processing}>Guardar Avaliação</Button>
-                                <Button type="button" variant="outline" onClick={() => setModalOpen(false)}>Cancelar</Button>
-                            </div>
-                        </form>
-                    </DialogContent>
-                </Dialog>
+                        </div>
+                    </div>
+                )}
             </div>
         </>
     );
 }
 
-AvaliacoesIndex.layout = (props: { currentTeam?: { slug: string } | null }) => ({
-    breadcrumbs: [{ title: 'Avaliações', href: props.currentTeam ? index(props.currentTeam.slug).url : '/' }],
+AvaliacoesIndex.layout = () => ({
+    breadcrumbs: [{ title: 'Avaliações', href: index().url }],
 });

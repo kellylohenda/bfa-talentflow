@@ -99,7 +99,7 @@ export default function PagamentosCreate({ talents }: Props) {
     );
 }
 
-PagamentosCreate.layout = (props: { currentTeam?: { slug: string } | null }) => ({
+PagamentosCreate.layout = () => ({
     breadcrumbs: [
         { title: 'Pagamentos', href: index().url },
         { title: 'Novo', href: '#' },

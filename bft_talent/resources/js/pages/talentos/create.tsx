@@ -225,7 +225,7 @@ export default function TalentosCreate({ programs, universities, departments, me
     );
 }
 
-TalentosCreate.layout = (props: { currentTeam?: { slug: string } | null }) => ({
+TalentosCreate.layout = () => ({
     breadcrumbs: [
         { title: 'Talentos', href: index().url },
         { title: 'Novo', href: '#' },

@@ -1,8 +1,5 @@
-import { Head, usePage } from '@inertiajs/react';
-import { TrendingDown, TrendingUp, UserCheck, UserMinus, Users } from 'lucide-react';
-import Heading from '@/components/heading';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
+import { Head } from '@inertiajs/react';
+import { KPI } from '@/components/ui/kpi';
 import { index } from '@/routes/retencao';
 
 type Props = {
@@ -22,108 +19,103 @@ export default function RetencaoIndex({ data, historico, causasSaida }: Props) {
     return (
         <>
             <Head title="Retenção" />
-            <div className="flex flex-col gap-6 p-4">
-                <Heading title="Métricas de Retenção" description="Acompanhamento da retenção de talentos" />
 
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                    <Card>
-                        <CardContent className="flex items-center gap-4 pt-6">
-                            <UserCheck className={`h-8 w-8 ${data.taxaRetencaoGeral >= 70 ? 'text-green-600' : 'text-yellow-500'}`} />
-                            <div>
-                                <p className="text-sm text-muted-foreground">Taxa de Retenção</p>
-                                <p className="text-2xl font-bold">{data.taxaRetencaoGeral}%</p>
-                            </div>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardContent className="flex items-center gap-4 pt-6">
-                            <Users className="h-8 w-8 text-primary" />
-                            <div>
-                                <p className="text-sm text-muted-foreground">Total Activos</p>
-                                <p className="text-2xl font-bold">{data.totalActivos}</p>
-                            </div>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardContent className="flex items-center gap-4 pt-6">
-                            <UserMinus className="h-8 w-8 text-destructive" />
-                            <div>
-                                <p className="text-sm text-muted-foreground">Saídas Totais</p>
-                                <p className="text-2xl font-bold">{data.totalSaidas}</p>
-                            </div>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardContent className="flex items-center gap-4 pt-6">
-                            <TrendingUp className={`h-8 w-8 ${data.entradasMes >= data.saidasMes ? 'text-green-600' : 'text-destructive'}`} />
-                            <div>
-                                <p className="text-sm text-muted-foreground">Saldo do Mês</p>
-                                <p className="text-2xl font-bold">
-                                    {data.entradasMes - data.saidasMes >= 0 ? '+' : ''}
-                                    {data.entradasMes - data.saidasMes}
-                                </p>
-                            </div>
-                        </CardContent>
-                    </Card>
+            <div className="section">
+                <div className="page-head">
+                    <div>
+                        <h1 className="page-title">Retenção</h1>
+                        <p className="page-subtitle">Acompanhamento da retenção de talentos</p>
+                    </div>
                 </div>
 
-                <div className="grid gap-4 md:grid-cols-2">
+                {/* ── KPI Strip ──────────────────────────────────────────── */}
+                <div className="grid cols-4" style={{ marginBottom: 20 }}>
+                    <KPI
+                        label="Taxa de Retenção"
+                        value={`${data.taxaRetencaoGeral}%`}
+                        deltaTone={data.taxaRetencaoGeral >= 70 ? 'up' : 'down'}
+                        icon="check"
+                    />
+                    <KPI label="Total Activos" value={data.totalActivos} icon="users" />
+                    <KPI label="Saídas Totais" value={data.totalSaidas} delta="Atenção" deltaTone="down" icon="x" />
+                    <KPI
+                        label="Saldo do Mês"
+                        value={`${data.entradasMes - data.saidasMes >= 0 ? '+' : ''}${data.entradasMes - data.saidasMes}`}
+                        delta={`${data.entradasMes} entradas · ${data.saidasMes} saídas`}
+                        deltaTone={data.entradasMes >= data.saidasMes ? 'up' : 'down'}
+                        icon="trending"
+                    />
+                </div>
+
+                {/* ── Two-column: Evolution & Causes ─────────────────────── */}
+                <div className="grid cols-2">
                     {historico.length > 0 && (
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="text-sm font-medium text-muted-foreground">Evolução da Retenção</CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-3">
-                                {historico.map((h) => (
-                                    <div key={h.mes} className="space-y-1">
-                                        <div className="flex items-center justify-between text-sm">
-                                            <span className="font-medium">{h.mes}</span>
-                                            <span className="text-muted-foreground">{h.retencao}%</span>
+                        <div className="card">
+                            <div className="card-head">
+                                <span className="card-title">Evolução da Retenção</span>
+                            </div>
+                            <div className="card-pad">
+                                <div className="col" style={{ gap: 14 }}>
+                                    {historico.map((h) => (
+                                        <div key={h.mes}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginBottom: 4 }}>
+                                                <span style={{ fontWeight: 500 }}>{h.mes}</span>
+                                                <span style={{ color: 'var(--text-3)' }}>{h.retencao}%</span>
+                                            </div>
+                                            <div className="bar-track">
+                                                <div className={`bar-fill ${h.retencao >= 80 ? 'success' : h.retencao >= 60 ? 'warn' : 'danger'}`} style={{ width: `${h.retencao}%` }} />
+                                            </div>
+                                            <div style={{ display: 'flex', gap: 16, fontSize: 11, color: 'var(--text-4)', marginTop: 4 }}>
+                                                <span>Entradas: {h.entradas}</span>
+                                                <span>Saídas: {h.saidas}</span>
+                                            </div>
                                         </div>
-                                        <Progress value={h.retencao} className="h-2" />
-                                        <div className="flex gap-4 text-xs text-muted-foreground">
-                                            <span>Entradas: {h.entradas}</span>
-                                            <span>Saídas: {h.saidas}</span>
-                                        </div>
-                                    </div>
-                                ))}
-                            </CardContent>
-                        </Card>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
                     )}
 
                     {causasSaida.length > 0 && (
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="text-sm font-medium text-muted-foreground">Causas de Saída</CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-3">
-                                {causasSaida.map((c) => (
-                                    <div key={c.causa} className="space-y-1">
-                                        <div className="flex items-center justify-between text-sm">
-                                            <span className="font-medium">{c.causa}</span>
-                                            <span className="text-muted-foreground">{c.total} ({c.percentagem}%)</span>
+                        <div className="card">
+                            <div className="card-head">
+                                <span className="card-title">Causas de Saída</span>
+                            </div>
+                            <div className="card-pad">
+                                <div className="col" style={{ gap: 14 }}>
+                                    {causasSaida.map((c) => (
+                                        <div key={c.causa}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginBottom: 4 }}>
+                                                <span style={{ fontWeight: 500 }}>{c.causa}</span>
+                                                <span style={{ color: 'var(--text-3)' }}>{c.total} ({c.percentagem}%)</span>
+                                            </div>
+                                            <div className="bar-track">
+                                                <div className="bar-fill danger" style={{ width: `${c.percentagem}%` }} />
+                                            </div>
                                         </div>
-                                        <Progress value={c.percentagem} className="h-2" />
-                                    </div>
-                                ))}
-                            </CardContent>
-                        </Card>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
                     )}
                 </div>
 
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="text-sm font-medium text-muted-foreground">Tempo Médio de Permanência</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <p className="text-3xl font-bold">{data.tempoMedioPermanencia} <span className="text-sm font-normal text-muted-foreground">meses</span></p>
-                    </CardContent>
-                </Card>
+                {/* ── Avg Tenure ─────────────────────────────────────────── */}
+                <div className="card" style={{ marginTop: 20 }}>
+                    <div className="card-head">
+                        <span className="card-title">Tempo Médio de Permanência</span>
+                    </div>
+                    <div className="card-pad">
+                        <div style={{ fontSize: 32, fontWeight: 700 }}>
+                            {data.tempoMedioPermanencia} <span style={{ fontSize: 14, fontWeight: 400, color: 'var(--text-3)' }}>meses</span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </>
     );
 }
 
-RetencaoIndex.layout = (props: { currentTeam?: { slug: string } | null }) => ({
-    breadcrumbs: [{ title: 'Retenção', href: props.currentTeam ? index(props.currentTeam.slug).url : '/' }],
+RetencaoIndex.layout = () => ({
+    breadcrumbs: [{ title: 'Retenção', href: index().url }],
 });

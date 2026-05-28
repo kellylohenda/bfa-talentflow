@@ -2,24 +2,29 @@ import { Head, Link, router } from '@inertiajs/react';
 import { Eye, Plus, Trash2, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { TablePagination } from '@/components/table-pagination';
-import Heading from '@/components/heading';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { BfaAvatar } from '@/components/ui/avatar';
 import { create, destroy, index, show } from '@/routes/candidaturas';
 import type { Application, Paginated } from '@/types';
 
 type Filters = { stage?: string; tipo?: string; search?: string };
 type Props = { candidaturas: Paginated<Application>; filters: Filters };
 
-const stageVariant: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
-    analise: 'outline',
-    entrevista: 'secondary',
-    avaliacao: 'secondary',
-    oferta: 'default',
-    convertido: 'default',
-    rejeitado: 'destructive',
+const stageTone: Record<string, string> = {
+    analise: 'info',
+    entrevista: 'info',
+    avaliacao: 'warn',
+    oferta: 'success',
+    convertido: 'success',
+    rejeitado: 'danger',
+};
+
+const stageLabel: Record<string, string> = {
+    analise: 'Análise',
+    entrevista: 'Entrevista',
+    avaliacao: 'Avaliação',
+    oferta: 'Oferta',
+    convertido: 'Convertido',
+    rejeitado: 'Rejeitado',
 };
 
 const clean = (f: Record<string, string | undefined>) =>
@@ -30,10 +35,16 @@ export default function CandidaturasIndex({ candidaturas, filters }: Props) {
     const mounted = useRef(false);
 
     useEffect(() => {
-        if (!mounted.current) { mounted.current = true; return; }
+        if (!mounted.current) {
+            mounted.current = true;
+
+            return;
+        }
+
         const t = setTimeout(() => {
             router.get(index().url, clean({ ...filters, search }), { preserveState: true, replace: true });
         }, 350);
+
         return () => clearTimeout(t);
     }, [search]);
 
@@ -57,89 +68,110 @@ export default function CandidaturasIndex({ candidaturas, filters }: Props) {
     return (
         <>
             <Head title="Candidaturas" />
-            <div className="flex flex-col gap-6 p-4">
-                <div className="flex items-center justify-between">
-                    <Heading title="Candidaturas" description="Gestão de candidaturas ao programa" />
-                    <Button asChild>
-                        <Link href={create().url}><Plus className="h-4 w-4" /> Nova Candidatura</Link>
-                    </Button>
+
+            <div className="section">
+                <div className="page-head">
+                    <div>
+                        <h1 className="page-title">Candidaturas</h1>
+                        <p className="page-subtitle">Gestão de candidaturas ao programa</p>
+                    </div>
+                    <div className="page-actions">
+                        <Link href={create().url} className="btn btn-primary">
+                            <Plus size={14} /> Nova Candidatura
+                        </Link>
+                    </div>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2">
-                    <Input
+                {/* Filters */}
+                <div className="toolbar">
+                    <input
+                        className="input input-search"
                         placeholder="Pesquisar por nome…"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        className="h-8 w-56"
                     />
-                    <Select value={filters.stage || 'all'} onValueChange={(v) => setFilter('stage', v === 'all' ? '' : v)}>
-                        <SelectTrigger className="h-8 w-40"><SelectValue placeholder="Fase" /></SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="all">Todas as fases</SelectItem>
-                            <SelectItem value="analise">Análise</SelectItem>
-                            <SelectItem value="entrevista">Entrevista</SelectItem>
-                            <SelectItem value="avaliacao">Avaliação</SelectItem>
-                            <SelectItem value="oferta">Oferta</SelectItem>
-                            <SelectItem value="convertido">Convertido</SelectItem>
-                            <SelectItem value="rejeitado">Rejeitado</SelectItem>
-                        </SelectContent>
-                    </Select>
-                    <Select value={filters.tipo || 'all'} onValueChange={(v) => setFilter('tipo', v === 'all' ? '' : v)}>
-                        <SelectTrigger className="h-8 w-36"><SelectValue placeholder="Tipo" /></SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="all">Todos os tipos</SelectItem>
-                            <SelectItem value="bolseiro">Bolseiro</SelectItem>
-                            <SelectItem value="estagiario">Estagiário</SelectItem>
-                        </SelectContent>
-                    </Select>
+                    <select
+                        className="input select"
+                        value={filters.stage || ''}
+                        onChange={(e) => setFilter('stage', e.target.value)}
+                    >
+                        <option value="">Todas as fases</option>
+                        <option value="analise">Análise</option>
+                        <option value="entrevista">Entrevista</option>
+                        <option value="avaliacao">Avaliação</option>
+                        <option value="oferta">Oferta</option>
+                        <option value="convertido">Convertido</option>
+                        <option value="rejeitado">Rejeitado</option>
+                    </select>
+                    <select
+                        className="input select"
+                        value={filters.tipo || ''}
+                        onChange={(e) => setFilter('tipo', e.target.value)}
+                    >
+                        <option value="">Todos os tipos</option>
+                        <option value="bolseiro">Bolseiro</option>
+                        <option value="estagiario">Estagiário</option>
+                    </select>
                     {hasFilters && (
-                        <Button variant="ghost" size="sm" onClick={clearFilters} className="h-8 gap-1 text-muted-foreground">
-                            <X className="h-3 w-3" /> Limpar
-                        </Button>
+                        <button className="btn btn-ghost btn-sm" onClick={clearFilters}>
+                            <X size={12} /> Limpar
+                        </button>
                     )}
                 </div>
 
-                <div className="overflow-hidden rounded-lg border">
-                    <table className="w-full text-sm">
-                        <thead className="bg-muted/50">
+                {/* Table */}
+                <div className="table-wrap">
+                    <table className="tbl">
+                        <thead>
                             <tr>
-                                <th className="px-4 py-3 text-left font-medium">Nome</th>
-                                <th className="px-4 py-3 text-left font-medium">E-mail</th>
-                                <th className="px-4 py-3 text-left font-medium">Programa</th>
-                                <th className="px-4 py-3 text-left font-medium">Tipo</th>
-                                <th className="px-4 py-3 text-left font-medium">Estado</th>
-                                <th className="px-4 py-3 text-left font-medium">Data</th>
-                                <th className="px-4 py-3 text-right font-medium">Acções</th>
+                                <th>Nome</th>
+                                <th>E-mail</th>
+                                <th>Programa</th>
+                                <th>Tipo</th>
+                                <th>Estado</th>
+                                <th>Data</th>
+                                <th style={{ textAlign: 'right' }}>Acções</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y">
+                        <tbody>
                             {candidaturas.data.map((c) => (
-                                <tr key={c.id} className="hover:bg-muted/30">
-                                    <td className="px-4 py-3 font-medium">{c.name}</td>
-                                    <td className="px-4 py-3 text-muted-foreground">{c.email}</td>
-                                    <td className="px-4 py-3 text-muted-foreground">{c.program?.name ?? '—'}</td>
-                                    <td className="px-4 py-3">{c.tipo && <Badge variant="outline">{c.tipo}</Badge>}</td>
-                                    <td className="px-4 py-3">
-                                        <Badge variant={stageVariant[c.stage] ?? 'secondary'}>{c.stage}</Badge>
+                                <tr key={c.id}>
+                                    <td>
+                                        <div className="cell-person">
+                                            <BfaAvatar name={c.name} size={26} />
+                                            <div className="meta">
+                                                <b>{c.name}</b>
+                                            </div>
+                                        </div>
                                     </td>
-                                    <td className="px-4 py-3 text-muted-foreground">
+                                    <td style={{ color: 'var(--text-2)' }}>{c.email}</td>
+                                    <td style={{ color: 'var(--text-2)' }}>{c.program?.name ?? '—'}</td>
+                                    <td>
+                                        {c.tipo && <span className="pill pill-neutral">{c.tipo}</span>}
+                                    </td>
+                                    <td>
+                                        <span className={`pill pill-${stageTone[c.stage] ?? 'neutral'}`}>
+                                            {stageLabel[c.stage] ?? c.stage}
+                                        </span>
+                                    </td>
+                                    <td style={{ fontSize: 12, color: 'var(--text-3)' }}>
                                         {new Date(c.created_at).toLocaleDateString('pt-PT')}
                                     </td>
-                                    <td className="px-4 py-3">
-                                        <div className="flex items-center justify-end gap-1">
-                                            <Button variant="ghost" size="sm" asChild>
-                                                <Link href={show(c.id).url}><Eye className="h-4 w-4" /></Link>
-                                            </Button>
-                                            <Button variant="ghost" size="sm" onClick={() => handleDelete(c)}>
-                                                <Trash2 className="h-4 w-4 text-destructive" />
-                                            </Button>
+                                    <td>
+                                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 4 }}>
+                                            <Link href={show(c.id).url} className="btn btn-ghost btn-sm" title="Ver">
+                                                <Eye size={14} />
+                                            </Link>
+                                            <button className="btn btn-ghost btn-sm" onClick={() => handleDelete(c)} title="Apagar">
+                                                <Trash2 size={14} style={{ color: 'var(--danger)' }} />
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
                             ))}
                             {candidaturas.data.length === 0 && (
                                 <tr>
-                                    <td colSpan={7} className="px-4 py-10 text-center text-muted-foreground">
+                                    <td colSpan={7} style={{ padding: 32, textAlign: 'center', color: 'var(--text-3)' }}>
                                         Nenhuma candidatura encontrada.
                                     </td>
                                 </tr>
@@ -154,6 +186,6 @@ export default function CandidaturasIndex({ candidaturas, filters }: Props) {
     );
 }
 
-CandidaturasIndex.layout = (props: { currentTeam?: { slug: string } | null }) => ({
+CandidaturasIndex.layout = () => ({
     breadcrumbs: [{ title: 'Candidaturas', href: index().url }],
 });

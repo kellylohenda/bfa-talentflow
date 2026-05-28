@@ -3,28 +3,22 @@ import { ChevronDown, Mail, UserPlus, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import CancelInvitationModal from '@/components/cancel-invitation-modal';
 import DeleteTeamModal from '@/components/delete-team-modal';
-import Heading from '@/components/heading';
-import InputError from '@/components/input-error';
 import InviteMemberModal from '@/components/invite-member-modal';
 import RemoveMemberModal from '@/components/remove-member-modal';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { BfaAvatar } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import {
     Tooltip,
     TooltipContent,
     TooltipProvider,
     TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { useInitials } from '@/hooks/use-initials';
 import { edit, index, update } from '@/routes/teams';
 import { update as updateMember } from '@/routes/teams/members';
 import type {
@@ -50,8 +44,6 @@ export default function TeamEdit({
     permissions,
     availableRoles,
 }: Props) {
-    const getInitials = useInitials();
-
     const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [removeMemberDialogOpen, setRemoveMemberDialogOpen] = useState(false);
@@ -92,122 +84,117 @@ export default function TeamEdit({
         <>
             <Head title={pageTitle} />
 
-            <h1 className="sr-only">{pageTitle}</h1>
+            <div className="section">
+                {permissions.canUpdateTeam ? (
+                    <>
+                        <div className="page-head">
+                            <div>
+                                <h1 className="page-title">Team settings</h1>
+                                <p className="page-subtitle">Update your team name and settings</p>
+                            </div>
+                        </div>
 
-            <div className="flex flex-col space-y-10">
-                <div className="space-y-6">
-                    {permissions.canUpdateTeam ? (
-                        <>
-                            <Heading
-                                variant="small"
-                                title="Team settings"
-                                description="Update your team name and settings"
-                            />
+                        <div className="card">
+                            <div className="card-pad">
+                                <Form
+                                    {...update.form(team.slug)}
+                                >
+                                    {({ errors, processing }) => (
+                                        <>
+                                            <div className="form-group">
+                                                <label className="form-label" htmlFor="name">
+                                                    Team name
+                                                </label>
+                                                <input
+                                                    className="input"
+                                                    id="name"
+                                                    name="name"
+                                                    data-test="team-name-input"
+                                                    defaultValue={team.name}
+                                                    required
+                                                />
+                                                <span className="input-error">{errors.name}</span>
+                                            </div>
 
-                            <Form
-                                {...update.form(team.slug)}
-                                className="space-y-6"
-                            >
-                                {({ errors, processing }) => (
-                                    <>
-                                        <div className="grid gap-2">
-                                            <Label htmlFor="name">
-                                                Team name
-                                            </Label>
-                                            <Input
-                                                id="name"
-                                                name="name"
-                                                data-test="team-name-input"
-                                                defaultValue={team.name}
-                                                required
-                                            />
-                                            <InputError message={errors.name} />
-                                        </div>
+                                            <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+                                                <button
+                                                    type="submit"
+                                                    className="btn btn-primary"
+                                                    data-test="team-save-button"
+                                                    disabled={processing}
+                                                >
+                                                    Save
+                                                </button>
+                                            </div>
+                                        </>
+                                    )}
+                                </Form>
+                            </div>
+                        </div>
+                    </>
+                ) : (
+                    <>
+                        <div className="page-head">
+                            <div>
+                                <h1 className="page-title">{team.name}</h1>
+                            </div>
+                        </div>
+                    </>
+                )}
 
-                                        <div className="flex items-center gap-4">
-                                            <Button
-                                                type="submit"
-                                                data-test="team-save-button"
-                                                disabled={processing}
-                                            >
-                                                Save
-                                            </Button>
-                                        </div>
-                                    </>
-                                )}
-                            </Form>
-                        </>
-                    ) : (
-                        <>
-                            <Heading variant="small" title={team.name} />
-                        </>
-                    )}
-                </div>
-
-                <div className="space-y-6">
-                    <div className="flex items-center justify-between">
-                        <Heading
-                            variant="small"
-                            title="Team members"
-                            description={
-                                permissions.canCreateInvitation
-                                    ? 'Manage who belongs to this team'
-                                    : ''
-                            }
-                        />
-
-                        {permissions.canCreateInvitation ? (
-                            <Button
+                <div className="page-head">
+                    <div>
+                        <h1 className="page-title">Team members</h1>
+                        {permissions.canCreateInvitation && (
+                            <p className="page-subtitle">Manage who belongs to this team</p>
+                        )}
+                    </div>
+                    {permissions.canCreateInvitation && (
+                        <div className="page-actions">
+                            <button
+                                className="btn btn-primary"
                                 data-test="invite-member-button"
                                 onClick={() => setInviteDialogOpen(true)}
                             >
-                                <UserPlus /> Invite member
-                            </Button>
-                        ) : null}
-                    </div>
+                                <UserPlus size={14} /> Invite member
+                            </button>
+                        </div>
+                    )}
+                </div>
 
-                    <div className="space-y-3">
-                        {members.map((member) => (
-                            <div
-                                key={member.id}
-                                data-test="member-row"
-                                className="flex items-center justify-between rounded-lg border p-4"
-                            >
-                                <div className="flex items-center gap-4">
-                                    <Avatar className="h-10 w-10">
-                                        {member.avatar ? (
-                                            <AvatarImage
-                                                src={member.avatar}
-                                                alt={member.name}
-                                            />
-                                        ) : null}
-                                        <AvatarFallback>
-                                            {getInitials(member.name)}
-                                        </AvatarFallback>
-                                    </Avatar>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {members.map((member) => (
+                        <div
+                            key={member.id}
+                            data-test="member-row"
+                            className="card"
+                            style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+                        >
+                            <div className="card-pad" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                                    <BfaAvatar name={member.name} size={32} />
                                     <div>
-                                        <div className="font-medium">
+                                        <div style={{ fontWeight: 500 }}>
                                             {member.name}
                                         </div>
-                                        <div className="text-sm text-muted-foreground">
+                                        <div className="muted">
                                             {member.email}
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="flex items-center gap-2">
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                                     {member.role !== 'owner' &&
                                     permissions.canUpdateMember ? (
                                         <DropdownMenu>
                                             <DropdownMenuTrigger asChild>
-                                                <Button
-                                                    variant="outline"
-                                                    size="sm"
+                                                <button
+                                                    className="btn btn-ghost btn-sm"
                                                     data-test="member-role-trigger"
                                                 >
                                                     {member.role_label}
-                                                    <ChevronDown className="ml-2 h-4 w-4 opacity-50" />
-                                                </Button>
+                                                    <ChevronDown size={14} style={{ opacity: 0.5 }} />
+                                                </button>
                                             </DropdownMenuTrigger>
                                             <DropdownMenuContent>
                                                 {availableRoles.map((role) => (
@@ -237,9 +224,8 @@ export default function TeamEdit({
                                         <TooltipProvider>
                                             <Tooltip>
                                                 <TooltipTrigger asChild>
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="sm"
+                                                    <button
+                                                        className="btn btn-ghost btn-sm"
                                                         data-test="member-remove-button"
                                                         onClick={() =>
                                                             confirmRemoveMember(
@@ -247,8 +233,8 @@ export default function TeamEdit({
                                                             )
                                                         }
                                                     >
-                                                        <X className="h-4 w-4" />
-                                                    </Button>
+                                                        <X size={14} />
+                                                    </button>
                                                 </TooltipTrigger>
                                                 <TooltipContent>
                                                     <p>Remove member</p>
@@ -258,92 +244,99 @@ export default function TeamEdit({
                                     ) : null}
                                 </div>
                             </div>
-                        ))}
-                    </div>
+                        </div>
+                    ))}
                 </div>
 
                 {invitations.length > 0 ? (
-                    <div className="space-y-6">
-                        <Heading
-                            variant="small"
-                            title="Pending invitations"
-                            description="Invitations that haven't been accepted yet"
-                        />
+                    <>
+                        <div className="page-head">
+                            <div>
+                                <h1 className="page-title">Pending invitations</h1>
+                                <p className="page-subtitle">Invitations that haven't been accepted yet</p>
+                            </div>
+                        </div>
 
-                        <div className="space-y-3">
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                             {invitations.map((invitation) => (
                                 <div
                                     key={invitation.code}
                                     data-test="invitation-row"
-                                    className="flex items-center justify-between rounded-lg border p-4"
+                                    className="card"
+                                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
                                 >
-                                    <div className="flex items-center gap-4">
-                                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
-                                            <Mail className="h-5 w-5 text-muted-foreground" />
-                                        </div>
-                                        <div>
-                                            <div className="font-medium">
-                                                {invitation.email}
+                                    <div className="card-pad" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                                            <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--surface-2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                <Mail size={16} style={{ color: 'var(--text-3)' }} />
                                             </div>
-                                            <div className="text-sm text-muted-foreground">
-                                                {invitation.role_label}
+                                            <div>
+                                                <div style={{ fontWeight: 500 }}>
+                                                    {invitation.email}
+                                                </div>
+                                                <div className="muted">
+                                                    {invitation.role_label}
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
 
-                                    {permissions.canCancelInvitation ? (
-                                        <TooltipProvider>
-                                            <Tooltip>
-                                                <TooltipTrigger asChild>
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        data-test="invitation-cancel-button"
-                                                        onClick={() =>
-                                                            confirmCancelInvitation(
-                                                                invitation,
-                                                            )
-                                                        }
-                                                    >
-                                                        <X className="h-4 w-4" />
-                                                    </Button>
-                                                </TooltipTrigger>
-                                                <TooltipContent>
-                                                    <p>Cancel invitation</p>
-                                                </TooltipContent>
-                                            </Tooltip>
-                                        </TooltipProvider>
-                                    ) : null}
+                                        {permissions.canCancelInvitation ? (
+                                            <TooltipProvider>
+                                                <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                        <button
+                                                            className="btn btn-ghost btn-sm"
+                                                            data-test="invitation-cancel-button"
+                                                            onClick={() =>
+                                                                confirmCancelInvitation(
+                                                                    invitation,
+                                                                )
+                                                            }
+                                                        >
+                                                            <X size={14} />
+                                                        </button>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent>
+                                                        <p>Cancel invitation</p>
+                                                    </TooltipContent>
+                                                </Tooltip>
+                                            </TooltipProvider>
+                                        ) : null}
+                                    </div>
                                 </div>
                             ))}
                         </div>
-                    </div>
+                    </>
                 ) : null}
 
                 {permissions.canDeleteTeam && !team.isPersonal ? (
-                    <div className="space-y-6">
-                        <Heading
-                            variant="small"
-                            title="Delete team"
-                            description="Permanently delete your team"
-                        />
-                        <div className="space-y-4 rounded-lg border border-red-100 bg-red-50 p-4 dark:border-red-200/10 dark:bg-red-700/10">
-                            <div className="relative space-y-0.5 text-red-600 dark:text-red-100">
-                                <p className="font-medium">Warning</p>
-                                <p className="text-sm">
-                                    Please proceed with caution, this cannot be
-                                    undone.
-                                </p>
+                    <>
+                        <div className="page-head">
+                            <div>
+                                <h1 className="page-title">Delete team</h1>
+                                <p className="page-subtitle">Permanently delete your team</p>
                             </div>
-                            <Button
-                                variant="destructive"
-                                data-test="delete-team-button"
-                                onClick={() => setDeleteDialogOpen(true)}
-                            >
-                                Delete team
-                            </Button>
                         </div>
-                    </div>
+
+                        <div className="card" style={{ borderColor: 'var(--danger-border)', background: 'var(--danger-bg)' }}>
+                            <div className="card-pad">
+                                <div style={{ marginBottom: 12 }}>
+                                    <p style={{ fontWeight: 500, color: 'var(--danger)' }}>Warning</p>
+                                    <p className="muted">
+                                        Please proceed with caution, this cannot be
+                                        undone.
+                                    </p>
+                                </div>
+                                <button
+                                    className="btn btn-danger"
+                                    data-test="delete-team-button"
+                                    onClick={() => setDeleteDialogOpen(true)}
+                                >
+                                    Delete team
+                                </button>
+                            </div>
+                        </div>
+                    </>
                 ) : null}
             </div>
 
@@ -381,15 +374,6 @@ export default function TeamEdit({
     );
 }
 
-TeamEdit.layout = (props: { team: { name: string; slug: string } }) => ({
-    breadcrumbs: [
-        {
-            title: 'Teams',
-            href: index(),
-        },
-        {
-            title: props.team.name,
-            href: edit(props.team.slug),
-        },
-    ],
-});
+TeamEdit.layout = {
+    breadcrumbs: [{ title: 'Teams' }],
+};

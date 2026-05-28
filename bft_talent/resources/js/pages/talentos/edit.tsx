@@ -1,14 +1,7 @@
 import { Head, Link, useForm } from '@inertiajs/react';
-import { ArrowLeft } from 'lucide-react';
-import Heading from '@/components/heading';
-import InputError from '@/components/input-error';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { index, show, update } from '@/routes/talentos';
-import type { Department, Mentor, Program, Talent, University } from '@/types';
+import { ArrowLeft, Save, X } from 'lucide-react';
+import { show, update } from '@/routes/talentos';
+import type { Department, Mentor, Talent, Program, University } from '@/types';
 
 type Props = {
     talent: Talent;
@@ -19,184 +12,211 @@ type Props = {
 };
 
 export default function TalentosEdit({ talent, programs, universities, departments, mentors }: Props) {
+    console.log('Talent Edit Data:', talent);
+    const talentId = talent.id || (talent as any).talento_id;
+
     const { data, setData, patch, processing, errors } = useForm({
         name: talent.name,
         email: talent.email ?? '',
+        status: talent.status,
+        program_id: String(talent.program?.id ?? ''),
+        university_id: String(talent.university?.id ?? ''),
         department_id: String(talent.department?.id ?? ''),
         mentor_user_id: String(talent.mentor?.id ?? ''),
         stipend: talent.stipend ?? '',
-        status: talent.status,
         perf: String(talent.perf ?? ''),
+        risk_score: talent.risk_score ?? '',
+        start_date: talent.start_date ?? '',
         end_date: talent.end_date ?? '',
         observacoes: talent.observacoes ?? '',
     });
 
     function submit(e: React.FormEvent) {
         e.preventDefault();
-        patch(update(talent.id).url);
+        if (talentId) {
+            patch(update(talentId).url);
+        }
     }
 
     return (
         <>
             <Head title={`Editar — ${talent.name}`} />
 
-            <div className="flex flex-col gap-6 p-4">
-                <div className="flex items-center gap-4">
-                    <Button variant="ghost" size="sm" asChild>
-                        <Link href={show(talent.id).url}>
-                            <ArrowLeft className="h-4 w-4" />
+            <div className="section">
+                <div className="page-head">
+                    <div className="row" style={{ gap: 16 }}>
+                        <Link href={talentId ? show(talentId).url : '#'} className="btn btn-ghost btn-sm">
+                            <ArrowLeft style={{ width: 14, height: 14 }} />
                         </Link>
-                    </Button>
-                    <Heading title="Editar Talento" description={talent.talent_code} />
+                        <div>
+                            <h1 className="page-title">Editar Perfil</h1>
+                            <p className="page-subtitle">{talent.talent_code} &middot; {talent.name}</p>
+                        </div>
+                    </div>
                 </div>
 
-                <Card className="max-w-2xl">
-                    <CardContent className="pt-6">
-                        <form onSubmit={submit} className="space-y-4">
-                            <div className="grid gap-4 sm:grid-cols-2">
-                                <div className="space-y-1">
-                                    <Label htmlFor="name">Nome</Label>
-                                    <Input
-                                        id="name"
-                                        value={data.name}
-                                        onChange={(e) => setData('name', e.target.value)}
+                <div className="card" style={{ maxWidth: 800 }}>
+                    <form onSubmit={submit}>
+                        <div className="card-pad" style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                            
+                            {/* ── Informação Básica ── */}
+                            <div className="grid cols-2">
+                                <div className="form-group">
+                                    <label className="form-label">Nome Completo</label>
+                                    <input 
+                                        className="input" 
+                                        value={data.name} 
+                                        onChange={e => setData('name', e.target.value)} 
+                                        required
                                     />
-                                    <InputError message={errors.name} />
+                                    {errors.name && <span style={{ color: 'var(--danger)', fontSize: 11 }}>{errors.name}</span>}
                                 </div>
-                                <div className="space-y-1">
-                                    <Label htmlFor="email">E-mail</Label>
-                                    <Input
-                                        id="email"
+                                <div className="form-group">
+                                    <label className="form-label">E-mail Corporativo</label>
+                                    <input 
+                                        className="input" 
                                         type="email"
-                                        value={data.email}
-                                        onChange={(e) => setData('email', e.target.value)}
+                                        value={data.email} 
+                                        onChange={e => setData('email', e.target.value)} 
                                     />
-                                    <InputError message={errors.email} />
+                                    {errors.email && <span style={{ color: 'var(--danger)', fontSize: 11 }}>{errors.email}</span>}
                                 </div>
                             </div>
 
-                            <div className="grid gap-4 sm:grid-cols-2">
-                                <div className="space-y-1">
-                                    <Label htmlFor="status">Estado</Label>
-                                    <Select value={data.status} onValueChange={(v) => setData('status', v as Talent['status'])}>
-                                        <SelectTrigger id="status">
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="activo">Activo</SelectItem>
-                                            <SelectItem value="suspenso">Suspenso</SelectItem>
-                                            <SelectItem value="concluido">Concluído</SelectItem>
-                                            <SelectItem value="cancelado">Cancelado</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                    <InputError message={errors.status} />
+                            <div className="grid cols-2">
+                                <div className="form-group">
+                                    <label className="form-label">Estado do Talento</label>
+                                    <select className="input select" value={data.status} onChange={e => setData('status', e.target.value as any)}>
+                                        <option value="activo">Activo</option>
+                                        <option value="suspenso">Suspenso</option>
+                                        <option value="concluido">Concluído</option>
+                                        <option value="cancelado">Cancelado</option>
+                                    </select>
+                                    {errors.status && <span style={{ color: 'var(--danger)', fontSize: 11 }}>{errors.status}</span>}
                                 </div>
-                                <div className="space-y-1">
-                                    <Label htmlFor="department_id">Departamento</Label>
-                                    <Select value={data.department_id} onValueChange={(v) => setData('department_id', v)}>
-                                        <SelectTrigger id="department_id">
-                                            <SelectValue placeholder="Seleccionar" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {departments.map((d) => (
-                                                <SelectItem key={d.id} value={String(d.id)}>
-                                                    {d.name}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                    <InputError message={errors.department_id} />
+                                <div className="form-group">
+                                    <label className="form-label">Programa</label>
+                                    <select className="input select" value={data.program_id} onChange={e => setData('program_id', e.target.value)}>
+                                        <option value="">Seleccionar programa</option>
+                                        {programs.map(p => (
+                                            <option key={p.id} value={p.id}>{p.name}</option>
+                                        ))}
+                                    </select>
+                                    {errors.program_id && <span style={{ color: 'var(--danger)', fontSize: 11 }}>{errors.program_id}</span>}
                                 </div>
                             </div>
 
-                            <div className="grid gap-4 sm:grid-cols-2">
-                                <div className="space-y-1">
-                                    <Label htmlFor="mentor_user_id">Mentor</Label>
-                                    <Select value={data.mentor_user_id} onValueChange={(v) => setData('mentor_user_id', v)}>
-                                        <SelectTrigger id="mentor_user_id">
-                                            <SelectValue placeholder="Seleccionar" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {mentors.map((m) => (
-                                                <SelectItem key={m.id} value={String(m.id)}>
-                                                    {m.name}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                    <InputError message={errors.mentor_user_id} />
+                            {/* ── Institucional ── */}
+                            <div className="grid cols-2">
+                                <div className="form-group">
+                                    <label className="form-label">Universidade / Instituição</label>
+                                    <select className="input select" value={data.university_id} onChange={e => setData('university_id', e.target.value)}>
+                                        <option value="">Seleccionar instituição</option>
+                                        {universities.map(u => (
+                                            <option key={u.id} value={u.id}>{u.name}</option>
+                                        ))}
+                                    </select>
+                                    {errors.university_id && <span style={{ color: 'var(--danger)', fontSize: 11 }}>{errors.university_id}</span>}
                                 </div>
-                                <div className="space-y-1">
-                                    <Label htmlFor="stipend">Bolsa (AOA)</Label>
-                                    <Input
-                                        id="stipend"
+                                <div className="form-group">
+                                    <label className="form-label">Departamento Alocado</label>
+                                    <select className="input select" value={data.department_id} onChange={e => setData('department_id', e.target.value)}>
+                                        <option value="">Seleccionar departamento</option>
+                                        {departments.map(d => (
+                                            <option key={d.id} value={d.id}>{d.name}</option>
+                                        ))}
+                                    </select>
+                                    {errors.department_id && <span style={{ color: 'var(--danger)', fontSize: 11 }}>{errors.department_id}</span>}
+                                </div>
+                            </div>
+
+                            <div className="grid cols-2">
+                                <div className="form-group">
+                                    <label className="form-label">Mentor Responsável</label>
+                                    <select className="input select" value={data.mentor_user_id} onChange={e => setData('mentor_user_id', e.target.value)}>
+                                        <option value="">Seleccionar mentor</option>
+                                        {mentors.map(m => (
+                                            <option key={m.id} value={m.id}>{m.name}</option>
+                                        ))}
+                                    </select>
+                                    {errors.mentor_user_id && <span style={{ color: 'var(--danger)', fontSize: 11 }}>{errors.mentor_user_id}</span>}
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">Bolsa Mensal (AOA)</label>
+                                    <input 
+                                        className="input" 
                                         type="number"
-                                        min="0"
+                                        value={data.stipend} 
+                                        onChange={e => setData('stipend', e.target.value)} 
+                                    />
+                                    {errors.stipend && <span style={{ color: 'var(--danger)', fontSize: 11 }}>{errors.stipend}</span>}
+                                </div>
+                            </div>
+
+                            {/* ── Performance ── */}
+                            <div className="grid cols-3">
+                                <div className="form-group">
+                                    <label className="form-label">Performance (%)</label>
+                                    <input 
+                                        className="input" 
+                                        type="number"
+                                        min="0" max="100"
+                                        value={data.perf} 
+                                        onChange={e => setData('perf', e.target.value)} 
+                                    />
+                                    {errors.perf && <span style={{ color: 'var(--danger)', fontSize: 11 }}>{errors.perf}</span>}
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">Score de Risco (0-100)</label>
+                                    <input 
+                                        className="input" 
+                                        type="number"
                                         step="0.01"
-                                        value={String(data.stipend)}
-                                        onChange={(e) => setData('stipend', e.target.value)}
+                                        value={data.risk_score} 
+                                        onChange={e => setData('risk_score', e.target.value)} 
                                     />
-                                    <InputError message={errors.stipend} />
+                                    {errors.risk_score && <span style={{ color: 'var(--danger)', fontSize: 11 }}>{errors.risk_score}</span>}
                                 </div>
-                            </div>
-
-                            <div className="grid gap-4 sm:grid-cols-2">
-                                <div className="space-y-1">
-                                    <Label htmlFor="perf">Desempenho (%)</Label>
-                                    <Input
-                                        id="perf"
-                                        type="number"
-                                        min="0"
-                                        max="100"
-                                        value={data.perf}
-                                        onChange={(e) => setData('perf', e.target.value)}
-                                    />
-                                    <InputError message={errors.perf} />
-                                </div>
-                                <div className="space-y-1">
-                                    <Label htmlFor="end_date">Data de Fim</Label>
-                                    <Input
-                                        id="end_date"
+                                <div className="form-group">
+                                    <label className="form-label">Data Prevista de Fim</label>
+                                    <input 
+                                        className="input" 
                                         type="date"
-                                        value={data.end_date}
-                                        onChange={(e) => setData('end_date', e.target.value)}
+                                        value={data.end_date} 
+                                        onChange={e => setData('end_date', e.target.value)} 
                                     />
-                                    <InputError message={errors.end_date} />
+                                    {errors.end_date && <span style={{ color: 'var(--danger)', fontSize: 11 }}>{errors.end_date}</span>}
                                 </div>
                             </div>
 
-                            <div className="space-y-1">
-                                <Label htmlFor="observacoes">Observações</Label>
-                                <textarea
-                                    id="observacoes"
-                                    rows={3}
-                                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                                    value={data.observacoes}
-                                    onChange={(e) => setData('observacoes', e.target.value)}
+                            {/* ── Observações ── */}
+                            <div className="form-group">
+                                <label className="form-label">Observações Internas</label>
+                                <textarea 
+                                    className="input" 
+                                    style={{ height: 100, paddingTop: 8 }}
+                                    value={data.observacoes} 
+                                    onChange={e => setData('observacoes', e.target.value)} 
                                 />
-                                <InputError message={errors.observacoes} />
+                                {errors.observacoes && <span style={{ color: 'var(--danger)', fontSize: 11 }}>{errors.observacoes}</span>}
                             </div>
 
-                            <div className="flex gap-2 pt-2">
-                                <Button type="submit" disabled={processing}>
-                                    Guardar Alterações
-                                </Button>
-                                <Button type="button" variant="outline" asChild>
-                                    <Link href={show(talent.id).url}>Cancelar</Link>
-                                </Button>
-                            </div>
-                        </form>
-                    </CardContent>
-                </Card>
+                        </div>
+                        <div className="modal-foot">
+                            <Link href={show(talent.id).url} className="btn btn-ghost">
+                                <X size={14} /> Cancelar
+                            </Link>
+                            <button type="submit" className="btn btn-primary" disabled={processing}>
+                                <Save size={14} /> Guardar Alterações
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </>
     );
 }
 
-TalentosEdit.layout = (props: { currentTeam?: { slug: string } | null; talent?: Talent }) => ({
-    breadcrumbs: [
-        { title: 'Talentos', href: index().url },
-        { title: props.talent?.name ?? 'Editar', href: show(props.talent.id).url },
-        { title: 'Editar', href: '#' },
-    ],
-});
+TalentosEdit.layout = {
+    breadcrumbs: [{ title: 'Talentos' }],
+};

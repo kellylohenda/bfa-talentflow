@@ -1,8 +1,5 @@
-import { Head, usePage } from '@inertiajs/react';
-import { Clock, Heart, TrendingUp, Users } from 'lucide-react';
-import Heading from '@/components/heading';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
+import { Head } from '@inertiajs/react';
+import { KPI } from '@/components/ui/kpi';
 import { index } from '@/routes/relatorios-voluntariado';
 
 type Props = {
@@ -22,121 +19,104 @@ export default function RelatoriosVoluntariadoIndex({ data, porArea, historico }
     return (
         <>
             <Head title="Relatórios de Voluntariado" />
-            <div className="flex flex-col gap-6 p-4">
-                <Heading title="Impacto do Voluntariado" description="Relatórios e métricas de voluntariado" />
 
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                    <Card>
-                        <CardContent className="flex items-center gap-4 pt-6">
-                            <Users className="h-8 w-8 text-primary" />
-                            <div>
-                                <p className="text-sm text-muted-foreground">Total Voluntários</p>
-                                <p className="text-2xl font-bold">{data.totalVoluntarios}</p>
-                            </div>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardContent className="flex items-center gap-4 pt-6">
-                            <Clock className="h-8 w-8 text-primary" />
-                            <div>
-                                <p className="text-sm text-muted-foreground">Total de Horas</p>
-                                <p className="text-2xl font-bold">{data.totalHoras}h</p>
-                            </div>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardContent className="flex items-center gap-4 pt-6">
-                            <TrendingUp className="h-8 w-8 text-green-600" />
-                            <div>
-                                <p className="text-sm text-muted-foreground">Média Horas/Mês</p>
-                                <p className="text-2xl font-bold">{data.mediaHorasMes}h</p>
-                            </div>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardContent className="flex items-center gap-4 pt-6">
-                            <Heart className="h-8 w-8 text-red-500" />
-                            <div>
-                                <p className="text-sm text-muted-foreground">Impacto Estimado</p>
-                                <p className="text-lg font-bold">{data.impactoEstimado}</p>
-                            </div>
-                        </CardContent>
-                    </Card>
+            <div className="section">
+                <div className="page-head">
+                    <div>
+                        <h1 className="page-title">Relatórios de Voluntariado</h1>
+                        <p className="page-subtitle">Impacto do voluntariado — métricas e evolução</p>
+                    </div>
                 </div>
 
-                <div className="grid gap-4 md:grid-cols-2">
+                {/* ── KPI Strip ──────────────────────────────────────────── */}
+                <div className="grid cols-4" style={{ marginBottom: 20 }}>
+                    <KPI label="Total Voluntários" value={data.totalVoluntarios} icon="users" />
+                    <KPI label="Total de Horas" value={`${data.totalHoras}h`} icon="clock" />
+                    <KPI label="Média Horas/Mês" value={`${data.mediaHorasMes}h`} deltaTone="up" icon="trending" />
+                    <KPI label="Impacto Estimado" value={data.impactoEstimado} icon="award" />
+                </div>
+
+                {/* ── Two-column: Area & History ─────────────────────────── */}
+                <div className="grid cols-2">
                     {porArea.length > 0 && (
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="text-sm font-medium text-muted-foreground">Horas por Área de Actuação</CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-3">
-                                {porArea.map((a) => (
-                                    <div key={a.area} className="space-y-1">
-                                        <div className="flex items-center justify-between text-sm">
-                                            <span className="font-medium">{a.area}</span>
-                                            <span className="text-muted-foreground">{a.horas}h · {a.voluntarios} voluntários</span>
+                        <div className="card">
+                            <div className="card-head">
+                                <span className="card-title">Horas por Área de Actuação</span>
+                            </div>
+                            <div className="card-pad">
+                                <div className="col" style={{ gap: 14 }}>
+                                    {porArea.map((a) => (
+                                        <div key={a.area}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginBottom: 4 }}>
+                                                <span style={{ fontWeight: 500 }}>{a.area}</span>
+                                                <span style={{ color: 'var(--text-3)' }}>{a.horas}h · {a.voluntarios} voluntários</span>
+                                            </div>
+                                            <div className="bar-track">
+                                                <div className="bar-fill success" style={{ width: `${a.percentagem}%` }} />
+                                            </div>
                                         </div>
-                                        <Progress value={a.percentagem} className="h-2" />
-                                    </div>
-                                ))}
-                            </CardContent>
-                        </Card>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
                     )}
 
                     {historico.length > 0 && (
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="text-sm font-medium text-muted-foreground">Evolução Mensal</CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-3">
-                                {historico.map((h) => (
-                                    <div key={h.mes} className="flex items-center justify-between rounded-md bg-muted/30 px-3 py-2 text-sm">
-                                        <span className="font-medium">{h.mes}</span>
-                                        <div className="flex gap-4 text-muted-foreground">
-                                            <span>{h.horas}h</span>
-                                            <span>{h.voluntarios} voluntários</span>
+                        <div className="card">
+                            <div className="card-head">
+                                <span className="card-title">Evolução Mensal</span>
+                            </div>
+                            <div className="card-pad">
+                                <div className="col" style={{ gap: 14 }}>
+                                    {historico.map((h) => (
+                                        <div key={h.mes} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--surface-2)', borderRadius: 6, padding: '6px 10px', fontSize: 13 }}>
+                                            <span style={{ fontWeight: 500 }}>{h.mes}</span>
+                                            <div style={{ display: 'flex', gap: 16, color: 'var(--text-3)', fontSize: 12 }}>
+                                                <span>{h.horas}h</span>
+                                                <span>{h.voluntarios} voluntários</span>
+                                            </div>
                                         </div>
-                                    </div>
-                                ))}
-                            </CardContent>
-                        </Card>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
                     )}
                 </div>
 
-                <div className="grid gap-4 sm:grid-cols-3">
-                    <Card>
-                        <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-medium text-muted-foreground">Actividades Realizadas</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <p className="text-3xl font-bold">{data.actividadesRealizadas}</p>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-medium text-muted-foreground">Taxa de Participação</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <p className="text-3xl font-bold">{data.taxaParticipacao}%</p>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-medium text-muted-foreground">Média Horas/Voluntário</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <p className="text-3xl font-bold">
+                {/* ── Summary Cards ──────────────────────────────────────── */}
+                <div className="grid cols-3" style={{ marginTop: 20 }}>
+                    <div className="card">
+                        <div className="card-head">
+                            <span className="card-title">Actividades Realizadas</span>
+                        </div>
+                        <div className="card-pad">
+                            <div style={{ fontSize: 32, fontWeight: 700 }}>{data.actividadesRealizadas}</div>
+                        </div>
+                    </div>
+                    <div className="card">
+                        <div className="card-head">
+                            <span className="card-title">Taxa de Participação</span>
+                        </div>
+                        <div className="card-pad">
+                            <div style={{ fontSize: 32, fontWeight: 700 }}>{data.taxaParticipacao}%</div>
+                        </div>
+                    </div>
+                    <div className="card">
+                        <div className="card-head">
+                            <span className="card-title">Média Horas/Voluntário</span>
+                        </div>
+                        <div className="card-pad">
+                            <div style={{ fontSize: 32, fontWeight: 700 }}>
                                 {data.totalVoluntarios > 0 ? (data.totalHoras / data.totalVoluntarios).toFixed(1) : 0}h
-                            </p>
-                        </CardContent>
-                    </Card>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </>
     );
 }
 
-RelatoriosVoluntariadoIndex.layout = (props: { currentTeam?: { slug: string } | null }) => ({
-    breadcrumbs: [{ title: 'Relatórios Voluntariado', href: props.currentTeam ? index(props.currentTeam.slug).url : '/' }],
+RelatoriosVoluntariadoIndex.layout = () => ({
+    breadcrumbs: [{ title: 'Relatórios Voluntariado', href: index().url }],
 });

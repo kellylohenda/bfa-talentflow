@@ -1,33 +1,34 @@
-import { Head, Link, router, usePage } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { Eye, Plus, X } from 'lucide-react';
 import { TablePagination } from '@/components/table-pagination';
-import Heading from '@/components/heading';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { create, index, show } from '@/routes/workflows';
 import type { Paginated, Workflow } from '@/types';
 
 type Filters = { status?: string; type?: string };
 type Props = { workflows: Paginated<Workflow>; filters: Filters };
 
-const statusVariant: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
-    pendente: 'outline',
-    em_aprovacao: 'secondary',
-    aprovado: 'default',
-    rejeitado: 'destructive',
-    cancelado: 'destructive',
+const statusPill: Record<string, string> = {
+    pendente: 'pill pill-warn',
+    em_aprovacao: 'pill pill-info',
+    aprovado: 'pill pill-success',
+    rejeitado: 'pill pill-danger',
+    cancelado: 'pill pill-danger',
+};
+
+const statusLabel: Record<string, string> = {
+    pendente: 'Pendente',
+    em_aprovacao: 'Em aprovação',
+    aprovado: 'Aprovado',
+    rejeitado: 'Rejeitado',
+    cancelado: 'Cancelado',
 };
 
 const clean = (f: Record<string, string | undefined>) =>
     Object.fromEntries(Object.entries(f).filter(([, v]) => v !== '' && v !== undefined));
 
 export default function WorkflowsIndex({ workflows, filters }: Props) {
-    const { props } = usePage<{ currentTeam: { slug: string } }>();
-    const team = props.currentTeam.slug;
-
     function setFilter(key: keyof Filters, value: string) {
-        router.get(index(team).url, clean({ ...filters, [key]: value }), { preserveState: true, replace: true });
+        router.get(index().url, clean({ ...filters, [key]: value }), { preserveState: true, replace: true });
     }
 
     const hasFilters = !!(filters.status || filters.type);
@@ -35,82 +36,81 @@ export default function WorkflowsIndex({ workflows, filters }: Props) {
     return (
         <>
             <Head title="Workflows" />
-            <div className="flex flex-col gap-6 p-4">
-                <div className="flex items-center justify-between">
-                    <Heading title="Workflows" description="Processos de aprovação" />
-                    <Button asChild>
-                        <Link href={create(team).url}><Plus className="h-4 w-4" /> Novo Workflow</Link>
-                    </Button>
+            <div className="section" style={{ padding: '20px 24px 40px' }}>
+                <div className="page-head">
+                    <div>
+                        <h1 className="page-title">Workflows</h1>
+                        <p className="page-subtitle">Processos de aprovação</p>
+                    </div>
+                    <div className="page-actions">
+                        <Link href={create().url} className="btn btn-primary"><Plus style={{ width: 14, height: 14 }} /> Novo Workflow</Link>
+                    </div>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2">
-                    <Select value={filters.type || 'all'} onValueChange={(v) => setFilter('type', v === 'all' ? '' : v)}>
-                        <SelectTrigger className="h-8 w-40"><SelectValue placeholder="Tipo" /></SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="all">Todos os tipos</SelectItem>
-                            <SelectItem value="pagamento">Pagamento</SelectItem>
-                            <SelectItem value="contrato">Contrato</SelectItem>
-                            <SelectItem value="renovacao">Renovação</SelectItem>
-                            <SelectItem value="rescisao">Rescisão</SelectItem>
-                            <SelectItem value="outro">Outro</SelectItem>
-                        </SelectContent>
-                    </Select>
-                    <Select value={filters.status || 'all'} onValueChange={(v) => setFilter('status', v === 'all' ? '' : v)}>
-                        <SelectTrigger className="h-8 w-44"><SelectValue placeholder="Estado" /></SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="all">Todos os estados</SelectItem>
-                            <SelectItem value="pendente">Pendente</SelectItem>
-                            <SelectItem value="em_aprovacao">Em aprovação</SelectItem>
-                            <SelectItem value="aprovado">Aprovado</SelectItem>
-                            <SelectItem value="rejeitado">Rejeitado</SelectItem>
-                            <SelectItem value="cancelado">Cancelado</SelectItem>
-                        </SelectContent>
-                    </Select>
+                <div className="toolbar">
+                    <select className="input select" style={{ width: 160 }} value={filters.type || ''} onChange={(e) => setFilter('type', e.target.value)}>
+                        <option value="">Todos os tipos</option>
+                        <option value="pagamento">Pagamento</option>
+                        <option value="contrato">Contrato</option>
+                        <option value="renovacao">Renovação</option>
+                        <option value="rescisao">Rescisão</option>
+                        <option value="outro">Outro</option>
+                    </select>
+                    <select className="input select" style={{ width: 176 }} value={filters.status || ''} onChange={(e) => setFilter('status', e.target.value)}>
+                        <option value="">Todos os estados</option>
+                        <option value="pendente">Pendente</option>
+                        <option value="em_aprovacao">Em aprovação</option>
+                        <option value="aprovado">Aprovado</option>
+                        <option value="rejeitado">Rejeitado</option>
+                        <option value="cancelado">Cancelado</option>
+                    </select>
                     {hasFilters && (
-                        <Button variant="ghost" size="sm" onClick={() => router.get(index(team).url, {})} className="h-8 gap-1 text-muted-foreground">
-                            <X className="h-3 w-3" /> Limpar
-                        </Button>
+                        <button className="btn btn-ghost btn-sm" onClick={() => router.get(index().url, {})} style={{ gap: 4 }}>
+                            <X style={{ width: 12, height: 12 }} /> Limpar
+                        </button>
                     )}
                 </div>
 
-                <div className="overflow-hidden rounded-lg border">
-                    <table className="w-full text-sm">
-                        <thead className="bg-muted/50">
+                <div className="table-wrap">
+                    <table className="tbl">
+                        <thead>
                             <tr>
-                                <th className="px-4 py-3 text-left font-medium">Código</th>
-                                <th className="px-4 py-3 text-left font-medium">Talento</th>
-                                <th className="px-4 py-3 text-left font-medium">Tipo</th>
-                                <th className="px-4 py-3 text-left font-medium">Passo</th>
-                                <th className="px-4 py-3 text-left font-medium">Estado</th>
-                                <th className="px-4 py-3 text-left font-medium">Data</th>
-                                <th className="px-4 py-3 text-right font-medium">Acções</th>
+                                <th>Código</th>
+                                <th>Talento</th>
+                                <th>Tipo</th>
+                                <th>Passo</th>
+                                <th>Estado</th>
+                                <th>Data</th>
+                                <th style={{ textAlign: 'right' }}>Acções</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y">
+                        <tbody>
                             {workflows.data.map((w) => (
-                                <tr key={w.id} className="hover:bg-muted/30">
-                                    <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{w.workflow_code}</td>
-                                    <td className="px-4 py-3 font-medium">{w.talent?.name ?? '—'}</td>
-                                    <td className="px-4 py-3"><Badge variant="outline">{w.type}</Badge></td>
-                                    <td className="px-4 py-3 text-muted-foreground">{w.current_step}/{w.total_steps}</td>
-                                    <td className="px-4 py-3">
-                                        <Badge variant={statusVariant[w.status] ?? 'secondary'}>{w.status}</Badge>
+                                <tr key={w.id}>
+                                    <td className="mono muted" style={{ fontSize: 12 }}>{w.workflow_code}</td>
+                                    <td style={{ fontWeight: 500 }}>{w.talent?.name ?? '—'}</td>
+                                    <td><span className="pill pill-neutral">{w.type}</span></td>
+                                    <td className="muted">{w.current_step}/{w.total_steps}</td>
+                                    <td>
+                                        <span className={statusPill[w.status] ?? 'pill pill-neutral'}>
+                                            {statusLabel[w.status] ?? w.status}
+                                        </span>
                                     </td>
-                                    <td className="px-4 py-3 text-muted-foreground">
+                                    <td className="muted">
                                         {new Date(w.created_at).toLocaleDateString('pt-PT')}
                                     </td>
-                                    <td className="px-4 py-3">
-                                        <div className="flex justify-end">
-                                            <Button variant="ghost" size="sm" asChild>
-                                                <Link href={show({ workflow: w.id }).url}><Eye className="h-4 w-4" /></Link>
-                                            </Button>
+                                    <td>
+                                        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                                            <Link href={show({ workflow: w.id }).url} className="btn btn-ghost btn-sm">
+                                                <Eye style={{ width: 14, height: 14 }} />
+                                            </Link>
                                         </div>
                                     </td>
                                 </tr>
                             ))}
                             {workflows.data.length === 0 && (
                                 <tr>
-                                    <td colSpan={7} className="px-4 py-10 text-center text-muted-foreground">
+                                    <td colSpan={7} style={{ textAlign: 'center', padding: '40px 16px' }} className="muted">
                                         Nenhum workflow encontrado.
                                     </td>
                                 </tr>
@@ -125,6 +125,6 @@ export default function WorkflowsIndex({ workflows, filters }: Props) {
     );
 }
 
-WorkflowsIndex.layout = (props: { currentTeam?: { slug: string } | null }) => ({
-    breadcrumbs: [{ title: 'Workflows', href: props.currentTeam ? index(props.currentTeam.slug).url : '/' }],
+WorkflowsIndex.layout = () => ({
+    breadcrumbs: [{ title: 'Workflows', href: index().url }],
 });

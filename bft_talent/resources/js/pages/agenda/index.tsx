@@ -1,10 +1,6 @@
-import { Head, usePage } from '@inertiajs/react';
-import { CalendarDays, Clock, MapPin, Users } from 'lucide-react';
+import { Head } from '@inertiajs/react';
+import { Clock, MapPin, Users } from 'lucide-react';
 import { useState } from 'react';
-import Heading from '@/components/heading';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { index } from '@/routes/agenda';
 import type { Evento } from '@/types';
 
@@ -12,10 +8,14 @@ type Props = { eventos: Evento[]; mesAtual: string };
 
 const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
 
-export default function AgendaIndex({ eventos, mesAtual }: Props) {
-    const { props } = usePage<{ currentTeam: { slug: string } }>();
-    const team = props.currentTeam.slug;
+const statusTone: Record<string, string> = {
+    confirmado: 'success',
+    planeado: 'info',
+    cancelado: 'danger',
+    concluido: 'neutral',
+};
 
+export default function AgendaIndex({ eventos, mesAtual }: Props) {
     const today = new Date();
     const [currentMonth, setCurrentMonth] = useState(() => new Date(mesAtual ?? today));
 
@@ -39,92 +39,95 @@ export default function AgendaIndex({ eventos, mesAtual }: Props) {
         eventos.map((e) => new Date(e.data_inicio).toDateString()),
     );
 
-    function getEventsForDay(day: number) {
-        const dateStr = new Date(year, month, day).toDateString();
-        return eventos.filter((e) => new Date(e.data_inicio).toDateString() === dateStr);
-    }
-
     return (
         <>
             <Head title="Agenda" />
-            <div className="flex flex-col gap-6 p-4">
-                <Heading title="Agenda" description="Calendário de eventos e actividades" />
+            <div className="section">
+                <div className="page-head">
+                    <div>
+                        <h1 className="page-title">Agenda</h1>
+                        <p className="page-subtitle">Calendário de eventos e actividades</p>
+                    </div>
+                </div>
 
-                <Card>
-                    <CardHeader className="pb-2">
-                        <div className="flex items-center justify-between">
-                            <CardTitle className="text-sm font-medium">
-                                {monthNames[month]} {year}
-                            </CardTitle>
-                            <div className="flex gap-1">
-                                <Button variant="outline" size="sm" onClick={prevMonth}>&lt;</Button>
-                                <Button variant="outline" size="sm" onClick={nextMonth}>&gt;</Button>
+                <div className="card">
+                    <div className="card-head">
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                            <h3 className="card-title">{monthNames[month]} {year}</h3>
+                            <div style={{ display: 'flex', gap: 4 }}>
+                                <button className="btn btn-ghost btn-sm" onClick={prevMonth}>&lt;</button>
+                                <button className="btn btn-ghost btn-sm" onClick={nextMonth}>&gt;</button>
                             </div>
                         </div>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="grid grid-cols-7 gap-1 text-center text-sm">
+                    </div>
+                    <div className="card-pad">
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4, textAlign: 'center', fontSize: 14 }}>
                             {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map((d) => (
-                                <div key={d} className="py-1 text-xs font-medium text-muted-foreground">{d}</div>
+                                <div key={d} style={{ padding: 4, fontSize: 12, fontWeight: 500, color: 'var(--text-3)' }}>{d}</div>
                             ))}
                             {emptyDays.map((i) => <div key={`e${i}`} />)}
                             {days.map((day) => {
                                 const hasEvent = eventDates.has(new Date(year, month, day).toDateString());
                                 const isToday = today.getDate() === day && today.getMonth() === month && today.getFullYear() === year;
+
                                 return (
                                     <div
                                         key={day}
-                                        className={`rounded-md py-1.5 text-sm ${
-                                            isToday ? 'bg-primary font-bold text-primary-foreground' : ''
-                                        } ${hasEvent ? 'font-medium text-primary' : ''}`}
+                                        style={{
+                                            padding: '6px 0',
+                                            borderRadius: 6,
+                                            fontWeight: isToday ? 700 : hasEvent ? 500 : undefined,
+                                            background: isToday ? 'var(--primary)' : undefined,
+                                            color: isToday ? 'var(--primary-fg)' : hasEvent ? 'var(--primary)' : undefined,
+                                        }}
                                     >
                                         <span>{day}</span>
-                                        {hasEvent && <div className="mx-auto mt-0.5 h-1 w-1 rounded-full bg-primary" />}
+                                        {hasEvent && <div style={{ margin: '2px auto 0', width: 4, height: 4, borderRadius: '50%', background: 'var(--primary)' }} />}
                                     </div>
                                 );
                             })}
                         </div>
-                    </CardContent>
-                </Card>
+                    </div>
+                </div>
 
-                <div className="space-y-2">
-                    <h3 className="text-sm font-medium text-muted-foreground">Eventos do Mês</h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    <h3 style={{ fontSize: 14, fontWeight: 500, color: 'var(--text-3)' }}>Eventos do Mês</h3>
                     {eventos.map((e) => (
-                        <Card key={e.id}>
-                            <CardContent className="flex items-center gap-4 pt-6">
-                                <div className="flex h-12 w-12 flex-col items-center justify-center rounded-lg bg-primary/10">
-                                    <span className="text-lg font-bold text-primary">
+                        <div key={e.id} className="card">
+                            <div className="card-pad" style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                                <div style={{ display: 'flex', width: 48, height: 48, flexDirection: 'column', alignItems: 'center', justifyContent: 'center', borderRadius: 8, background: 'var(--primary-muted)' }}>
+                                    <span style={{ fontSize: 18, fontWeight: 700, color: 'var(--primary)' }}>
                                         {new Date(e.data_inicio).getDate()}
                                     </span>
-                                    <span className="text-xs text-muted-foreground">
+                                    <span style={{ fontSize: 11, color: 'var(--text-3)' }}>
                                         {monthNames[new Date(e.data_inicio).getMonth()].slice(0, 3)}
                                     </span>
                                 </div>
-                                <div className="min-w-0 flex-1">
-                                    <p className="font-medium">{e.titulo}</p>
-                                    <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-                                        <span className="flex items-center gap-1">
-                                            <Clock className="h-3 w-3" />
+                                <div style={{ minWidth: 0, flex: 1 }}>
+                                    <div style={{ fontWeight: 500 }}>{e.titulo}</div>
+                                    <div style={{ marginTop: 4, display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 12, fontSize: 12, color: 'var(--text-3)' }}>
+                                        <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                                            <Clock size={12} />
                                             {new Date(e.data_inicio).toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' })}
                                         </span>
                                         {e.local && (
-                                            <span className="flex items-center gap-1">
-                                                <MapPin className="h-3 w-3" /> {e.local}
+                                            <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                                                <MapPin size={12} /> {e.local}
                                             </span>
                                         )}
                                         {e.vagas && (
-                                            <span className="flex items-center gap-1">
-                                                <Users className="h-3 w-3" /> {e.vagas} vagas
+                                            <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                                                <Users size={12} /> {e.vagas} vagas
                                             </span>
                                         )}
                                     </div>
                                 </div>
-                                <Badge variant={e.status === 'confirmado' ? 'default' : 'secondary'}>{e.status}</Badge>
-                            </CardContent>
-                        </Card>
+                                <span className={`pill pill-${statusTone[e.status] ?? 'neutral'}`}>{e.status}</span>
+                            </div>
+                        </div>
                     ))}
                     {eventos.length === 0 && (
-                        <div className="py-10 text-center text-sm text-muted-foreground">Nenhum evento este mês.</div>
+                        <div style={{ padding: 40, textAlign: 'center', fontSize: 14, color: 'var(--text-3)' }}>Nenhum evento este mês.</div>
                     )}
                 </div>
             </div>
@@ -132,6 +135,6 @@ export default function AgendaIndex({ eventos, mesAtual }: Props) {
     );
 }
 
-AgendaIndex.layout = (props: { currentTeam?: { slug: string } | null }) => ({
-    breadcrumbs: [{ title: 'Agenda', href: props.currentTeam ? index(props.currentTeam.slug).url : '/' }],
+AgendaIndex.layout = () => ({
+    breadcrumbs: [{ title: 'Agenda', href: index().url }],
 });

@@ -1,8 +1,5 @@
-import { Head, usePage } from '@inertiajs/react';
-import { TrendingUp, Users } from 'lucide-react';
-import Heading from '@/components/heading';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Head } from '@inertiajs/react';
+import { KPI } from '@/components/ui/kpi';
 import { index } from '@/routes/sucessao';
 import type { Talent } from '@/types';
 
@@ -17,98 +14,83 @@ const boxLabels: string[][] = [
     ['Reavaliar', 'Potencial', 'Top Talento'],
 ];
 
-const boxColors: string[][] = [
-    ['border-red-300 bg-red-50 dark:bg-red-950/20', 'border-yellow-300 bg-yellow-50 dark:bg-yellow-950/20', 'border-green-300 bg-green-50 dark:bg-green-950/20'],
-    ['border-orange-300 bg-orange-50 dark:bg-orange-950/20', 'border-blue-300 bg-blue-50 dark:bg-blue-950/20', 'border-emerald-300 bg-emerald-50 dark:bg-emerald-950/20'],
-    ['border-red-400 bg-red-100 dark:bg-red-950/40', 'border-purple-300 bg-purple-50 dark:bg-purple-950/20', 'border-green-400 bg-green-100 dark:bg-green-950/40'],
-];
-
 type Props = { data: MatrixTalent[]; resumo: { total: number; altoPotencial: number; altaPerformance: number; risco: number } };
 
 export default function SucessaoIndex({ data, resumo }: Props) {
     function getBox(potencial: number, performance: number) {
         const pIdx = performance < 33 ? 0 : performance < 66 ? 1 : 2;
         const potIdx = potencial < 33 ? 0 : potencial < 66 ? 1 : 2;
+
         return { row: pIdx, col: potIdx };
     }
 
-    const grid: MatrixTalent[][] = Array.from({ length: 3 }, () => Array.from({ length: 3 }, () => [] as MatrixTalent[]));
+    const grid: MatrixTalent[][][] = Array.from({ length: 3 }, () => Array.from({ length: 3 }, () => [] as MatrixTalent[]));
     data.forEach((t) => {
         const { row, col } = getBox(t.potencial, t.performance);
         grid[row][col].push(t);
     });
 
+    const pillTone = (label: string) => {
+        if (label === 'Estrela' || label === 'Top Talento' || label === 'Alta Performance') {
+return 'success';
+}
+
+        if (label === 'Núcleo' || label === 'Potencial' || label === 'Equilibrado') {
+return 'info';
+}
+
+        if (label === 'Reavaliar' || label === 'Acompanhar') {
+return 'warn';
+}
+
+        return 'danger';
+    };
+
     return (
         <>
             <Head title="Sucessão" />
-            <div className="flex flex-col gap-6 p-4">
-                <Heading title="Matriz de Sucessão (9-Box)" description="Mapeamento de talento e potencial" />
 
-                <div className="grid gap-4 sm:grid-cols-4">
-                    <Card>
-                        <CardContent className="flex items-center gap-4 pt-6">
-                            <Users className="h-8 w-8 text-primary" />
-                            <div>
-                                <p className="text-sm text-muted-foreground">Total</p>
-                                <p className="text-2xl font-bold">{resumo.total}</p>
-                            </div>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardContent className="flex items-center gap-4 pt-6">
-                            <TrendingUp className="h-8 w-8 text-green-600" />
-                            <div>
-                                <p className="text-sm text-muted-foreground">Alto Potencial</p>
-                                <p className="text-2xl font-bold">{resumo.altoPotencial}</p>
-                            </div>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardContent className="flex items-center gap-4 pt-6">
-                            <TrendingUp className="h-8 w-8 text-blue-600" />
-                            <div>
-                                <p className="text-sm text-muted-foreground">Alta Performance</p>
-                                <p className="text-2xl font-bold">{resumo.altaPerformance}</p>
-                            </div>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardContent className="flex items-center gap-4 pt-6">
-                            <TrendingUp className="h-8 w-8 text-destructive" />
-                            <div>
-                                <p className="text-sm text-muted-foreground">Em Risco</p>
-                                <p className="text-2xl font-bold">{resumo.risco}</p>
-                            </div>
-                        </CardContent>
-                    </Card>
+            <div className="section">
+                <div className="page-head">
+                    <div>
+                        <h1 className="page-title">Matriz de Sucessão (9-Box)</h1>
+                        <p className="page-subtitle">Mapeamento de talento e potencial</p>
+                    </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-3">
+                {/* ── KPI Strip ──────────────────────────────────────────── */}
+                <div className="grid cols-4" style={{ marginBottom: 20 }}>
+                    <KPI label="Total" value={resumo.total} icon="users" />
+                    <KPI label="Alto Potencial" value={resumo.altoPotencial} delta="Destaque" deltaTone="up" icon="trending" />
+                    <KPI label="Alta Performance" value={resumo.altaPerformance} delta="Destaque" deltaTone="up" icon="star" />
+                    <KPI label="Em Risco" value={resumo.risco} delta="Atenção" deltaTone="down" icon="alert" />
+                </div>
+
+                {/* ── 9-Box Matrix ───────────────────────────────────────── */}
+                <div className="grid cols-3" style={{ gap: 12 }}>
                     {performanceLevels.map((perf, row) =>
                         potencialLevels.map((pot, col) => {
                             const talents = grid[row][col];
+                            const label = boxLabels[row][col];
+
                             return (
-                                <Card key={`${row}-${col}`} className={`${boxColors[row][col]} border-2 text-foreground`}>
-                                    <CardHeader className="pb-2">
-                                        <CardTitle className="text-xs font-medium text-foreground">
-                                            {boxLabels[row][col]}
-                                        </CardTitle>
-                                        <p className="text-[10px] text-muted-foreground">
-                                            {perf} · {pot}
-                                        </p>
-                                    </CardHeader>
-                                    <CardContent className="space-y-1">
+                                <div key={`${row}-${col}`} className="card" style={{ borderTop: '3px solid', borderColor: pillTone(label) === 'success' ? 'var(--success)' : pillTone(label) === 'warn' ? 'var(--warn)' : pillTone(label) === 'info' ? 'var(--info)' : 'var(--danger)' }}>
+                                    <div className="card-head">
+                                        <span className="card-title" style={{ fontSize: 13 }}>{label}</span>
+                                        <span className={`pill pill-${pillTone(label)}`} style={{ fontSize: 10 }}>{perf} · {pot}</span>
+                                    </div>
+                                    <div className="card-pad" style={{ padding: '8px 14px' }}>
                                         {talents.map((t) => (
-                                            <div key={t.id} className="flex items-center justify-between rounded bg-background/60 px-2 py-1 text-xs text-foreground">
-                                                <span className="font-medium truncate">{t.name}</span>
-                                                <Badge variant="outline" className="text-[10px] text-foreground">{t.status}</Badge>
+                                            <div key={t.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--surface-2)', borderRadius: 6, padding: '5px 8px', marginBottom: 4, fontSize: 12 }}>
+                                                <span style={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.name}</span>
+                                                <span className="pill pill-neutral" style={{ fontSize: 10 }}>{t.status}</span>
                                             </div>
                                         ))}
                                         {talents.length === 0 && (
-                                            <p className="py-2 text-center text-[10px] text-muted-foreground">—</p>
+                                            <p style={{ padding: '8px 0', textAlign: 'center', fontSize: 11, color: 'var(--text-4)' }}>—</p>
                                         )}
-                                    </CardContent>
-                                </Card>
+                                    </div>
+                                </div>
                             );
                         }),
                     )}
@@ -118,6 +100,6 @@ export default function SucessaoIndex({ data, resumo }: Props) {
     );
 }
 
-SucessaoIndex.layout = (props: { currentTeam?: { slug: string } | null }) => ({
-    breadcrumbs: [{ title: 'Sucessão', href: props.currentTeam ? index(props.currentTeam.slug).url : '/' }],
+SucessaoIndex.layout = () => ({
+    breadcrumbs: [{ title: 'Sucessão', href: index().url }],
 });

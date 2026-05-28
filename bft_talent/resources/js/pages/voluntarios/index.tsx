@@ -1,20 +1,17 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { Eye, Plus, Trash2, X } from 'lucide-react';
 import { TablePagination } from '@/components/table-pagination';
-import Heading from '@/components/heading';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { BfaAvatar } from '@/components/ui/avatar';
 import { create, destroy, index, show } from '@/routes/voluntarios';
 import type { Paginated, Volunteer } from '@/types';
 
 type Filters = { status?: string; area?: string; search?: string };
 type Props = { voluntarios: Paginated<Volunteer>; filters: Filters };
 
-const statusVariant: Record<string, 'default' | 'secondary' | 'destructive'> = {
-    activo: 'default',
-    inactivo: 'secondary',
-    suspenso: 'destructive',
+const statusTone: Record<string, string> = {
+    activo: 'success',
+    inactivo: 'neutral',
+    suspenso: 'danger',
 };
 
 const clean = (f: Record<string, string | undefined>) =>
@@ -36,70 +33,85 @@ export default function VoluntariosIndex({ voluntarios, filters }: Props) {
     return (
         <>
             <Head title="Voluntários" />
-            <div className="flex flex-col gap-6 p-4">
-                <div className="flex items-center justify-between">
-                    <Heading title="Voluntários" description="Gestão de voluntários" />
-                    <Button asChild>
-                        <Link href={create().url}><Plus className="h-4 w-4" /> Novo Voluntário</Link>
-                    </Button>
+            <div className="section">
+                <div className="page-head">
+                    <div>
+                        <h1 className="page-title">Voluntários</h1>
+                        <p className="page-subtitle">Gestão de voluntários</p>
+                    </div>
+                    <div className="page-actions">
+                        <Link href={create().url} className="btn btn-primary">
+                            <Plus size={14} /> Novo Voluntário
+                        </Link>
+                    </div>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2">
-                    <Select value={filters.status || 'all'} onValueChange={(v) => setFilter('status', v === 'all' ? '' : v)}>
-                        <SelectTrigger className="h-8 w-36"><SelectValue placeholder="Estado" /></SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="all">Todos os estados</SelectItem>
-                            <SelectItem value="activo">Activo</SelectItem>
-                            <SelectItem value="inactivo">Inactivo</SelectItem>
-                            <SelectItem value="suspenso">Suspenso</SelectItem>
-                        </SelectContent>
-                    </Select>
+                <div className="toolbar">
+                    <select
+                        className="input select"
+                        value={filters.status || ''}
+                        onChange={(e) => setFilter('status', e.target.value)}
+                    >
+                        <option value="">Todos os estados</option>
+                        <option value="activo">Activo</option>
+                        <option value="inactivo">Inactivo</option>
+                        <option value="suspenso">Suspenso</option>
+                    </select>
                     {hasFilters && (
-                        <Button variant="ghost" size="sm" onClick={() => router.get(index().url, {})} className="h-8 gap-1 text-muted-foreground">
-                            <X className="h-3 w-3" /> Limpar
-                        </Button>
+                        <button className="btn btn-ghost btn-sm" onClick={() => router.get(index().url, {})}>
+                            <X size={12} /> Limpar
+                        </button>
                     )}
                 </div>
 
-                <div className="overflow-hidden rounded-lg border">
-                    <table className="w-full text-sm">
-                        <thead className="bg-muted/50">
+                <div className="table-wrap">
+                    <table className="tbl">
+                        <thead>
                             <tr>
-                                <th className="px-4 py-3 text-left font-medium">Código</th>
-                                <th className="px-4 py-3 text-left font-medium">Nome</th>
-                                <th className="px-4 py-3 text-left font-medium">Área</th>
-                                <th className="px-4 py-3 text-left font-medium">Horas</th>
-                                <th className="px-4 py-3 text-left font-medium">Estado</th>
-                                <th className="px-4 py-3 text-left font-medium">Mentor</th>
-                                <th className="px-4 py-3 text-right font-medium">Acções</th>
+                                <th>Código</th>
+                                <th>Nome</th>
+                                <th>Área</th>
+                                <th>Horas</th>
+                                <th>Estado</th>
+                                <th>Mentor</th>
+                                <th style={{ textAlign: 'right' }}>Acções</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y">
+                        <tbody>
                             {voluntarios.data.map((v) => (
-                                <tr key={v.id} className="hover:bg-muted/30">
-                                    <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{v.volunteer_code}</td>
-                                    <td className="px-4 py-3 font-medium">{v.nome}</td>
-                                    <td className="px-4 py-3 text-muted-foreground">{v.area_actuacao}</td>
-                                    <td className="px-4 py-3">{parseFloat(v.total_horas).toFixed(0)}h</td>
-                                    <td className="px-4 py-3">
-                                        <Badge variant={statusVariant[v.status] ?? 'secondary'}>{v.status}</Badge>
+                                <tr key={v.id}>
+                                    <td style={{ fontFamily: 'monospace', fontSize: 11, color: 'var(--text-3)' }}>{v.volunteer_code}</td>
+                                    <td>
+                                        <div className="cell-person">
+                                            <BfaAvatar name={v.nome} size={26} />
+                                            <div className="meta">
+                                                <b>{v.nome}</b>
+                                            </div>
+                                        </div>
                                     </td>
-                                    <td className="px-4 py-3 text-muted-foreground">{v.mentor?.name ?? '—'}</td>
-                                    <td className="px-4 py-3">
-                                        <div className="flex items-center justify-end gap-1">
-                                            <Button variant="ghost" size="sm" asChild>
-                                                <Link href={show(v.id).url}><Eye className="h-4 w-4" /></Link>
-                                            </Button>
-                                            <Button variant="ghost" size="sm" onClick={() => handleDelete(v)}>
-                                                <Trash2 className="h-4 w-4 text-destructive" />
-                                            </Button>
+                                    <td style={{ color: 'var(--text-2)' }}>{v.area_actuacao}</td>
+                                    <td>{parseFloat(v.total_horas).toFixed(0)}h</td>
+                                    <td>
+                                        <span className={`pill pill-${statusTone[v.status] ?? 'neutral'}`}>
+                                            {v.status}
+                                        </span>
+                                    </td>
+                                    <td style={{ color: 'var(--text-2)' }}>{v.mentor?.name ?? '—'}</td>
+                                    <td>
+                                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 4 }}>
+                                            <Link href={show(v.id).url} className="btn btn-ghost btn-sm" title="Ver">
+                                                <Eye size={14} />
+                                            </Link>
+                                            <button className="btn btn-ghost btn-sm" onClick={() => handleDelete(v)} title="Apagar">
+                                                <Trash2 size={14} style={{ color: 'var(--danger)' }} />
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
                             ))}
                             {voluntarios.data.length === 0 && (
                                 <tr>
-                                    <td colSpan={7} className="px-4 py-10 text-center text-muted-foreground">
+                                    <td colSpan={7} style={{ padding: 32, textAlign: 'center', color: 'var(--text-3)' }}>
                                         Nenhum voluntário encontrado.
                                     </td>
                                 </tr>

@@ -9,7 +9,9 @@ type Props = {
 };
 
 export function TablePagination({ links, filters = {} }: Props) {
-    if (links.length <= 3) return null;
+    if (links.length <= 3) {
+return null;
+}
 
     const cleanFilters = Object.fromEntries(Object.entries(filters).filter(([, v]) => v));
 

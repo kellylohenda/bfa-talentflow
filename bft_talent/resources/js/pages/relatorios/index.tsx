@@ -1,6 +1,5 @@
-import { Head, usePage } from '@inertiajs/react';
-import Heading from '@/components/heading';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Head } from '@inertiajs/react';
+import { KPI } from '@/components/ui/kpi';
 import { index } from '@/routes/relatorios';
 
 type Stats = {
@@ -15,34 +14,34 @@ type Props = { stats?: Stats };
 
 function StatRow({ label, value }: { label: string; value: string | number }) {
     return (
-        <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">{label}</span>
-            <span className="font-medium">{value}</span>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, padding: '3px 0' }}>
+            <span style={{ color: 'var(--text-3)' }}>{label}</span>
+            <span style={{ fontWeight: 500 }}>{value}</span>
         </div>
     );
 }
 
 function SkeletonRow() {
     return (
-        <div className="flex justify-between">
-            <div className="h-4 w-24 animate-pulse rounded bg-muted" />
-            <div className="h-4 w-10 animate-pulse rounded bg-muted" />
+        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0' }}>
+            <div style={{ height: 14, width: 96, borderRadius: 4, background: 'var(--surface-2)' }} />
+            <div style={{ height: 14, width: 40, borderRadius: 4, background: 'var(--surface-2)' }} />
         </div>
     );
 }
 
 function SkeletonCard({ title }: { title: string }) {
     return (
-        <Card>
-            <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
+        <div className="card">
+            <div className="card-head">
+                <span className="card-title">{title}</span>
+            </div>
+            <div className="card-pad">
                 <SkeletonRow />
                 <SkeletonRow />
                 <SkeletonRow />
-            </CardContent>
-        </Card>
+            </div>
+        </div>
     );
 }
 
@@ -50,62 +49,81 @@ export default function RelatoriosIndex({ stats }: Props) {
     return (
         <>
             <Head title="Relatórios" />
-            <div className="flex flex-col gap-6 p-4">
-                <Heading title="Relatórios" description="Indicadores e métricas do programa" />
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+
+            <div className="section">
+                <div className="page-head">
+                    <div>
+                        <h1 className="page-title">Relatórios</h1>
+                        <p className="page-subtitle">Indicadores e métricas do programa</p>
+                    </div>
+                </div>
+
+                {/* ── KPI Strip ──────────────────────────────────────────── */}
+                {stats && (
+                    <div className="grid cols-5" style={{ marginBottom: 20 }}>
+                        <KPI label="Total Talentos" value={stats.talentos.total} sub={`${stats.talentos.activos} activos`} icon="users" />
+                        <KPI label="Candidaturas" value={stats.candidaturas.total} sub={`${stats.candidaturas.pendentes} pendentes`} icon="funnel" />
+                        <KPI label="Pagamentos" value={stats.pagamentos.total} sub={`${parseFloat(stats.pagamentos.valor_total).toLocaleString('pt-PT')} AOA`} icon="cash" />
+                        <KPI label="Voluntários" value={stats.voluntarios.total} sub={`${stats.voluntarios.activos} activos`} icon="users" />
+                        <KPI label="Workflows" value={stats.workflows.pendentes + stats.workflows.em_aprovacao} sub={`${stats.workflows.pendentes} pendentes`} icon="layers" />
+                    </div>
+                )}
+
+                {/* ── Detail Cards ───────────────────────────────────────── */}
+                <div className="grid cols-3">
                     {stats ? (
                         <>
-                            <Card>
-                                <CardHeader className="pb-2">
-                                    <CardTitle className="text-sm font-medium text-muted-foreground">Talentos</CardTitle>
-                                </CardHeader>
-                                <CardContent className="space-y-2">
+                            <div className="card">
+                                <div className="card-head">
+                                    <span className="card-title">Talentos</span>
+                                </div>
+                                <div className="card-pad">
                                     <StatRow label="Total" value={stats.talentos.total} />
                                     <StatRow label="Activos" value={stats.talentos.activos} />
                                     <StatRow label="Bolseiros" value={stats.talentos.bolseiros} />
                                     <StatRow label="Estagiários" value={stats.talentos.estagiarios} />
-                                </CardContent>
-                            </Card>
-                            <Card>
-                                <CardHeader className="pb-2">
-                                    <CardTitle className="text-sm font-medium text-muted-foreground">Candidaturas</CardTitle>
-                                </CardHeader>
-                                <CardContent className="space-y-2">
+                                </div>
+                            </div>
+                            <div className="card">
+                                <div className="card-head">
+                                    <span className="card-title">Candidaturas</span>
+                                </div>
+                                <div className="card-pad">
                                     <StatRow label="Total" value={stats.candidaturas.total} />
                                     <StatRow label="Pendentes" value={stats.candidaturas.pendentes} />
                                     <StatRow label="Aprovadas" value={stats.candidaturas.aprovadas} />
                                     <StatRow label="Rejeitadas" value={stats.candidaturas.rejeitadas} />
-                                </CardContent>
-                            </Card>
-                            <Card>
-                                <CardHeader className="pb-2">
-                                    <CardTitle className="text-sm font-medium text-muted-foreground">Pagamentos</CardTitle>
-                                </CardHeader>
-                                <CardContent className="space-y-2">
+                                </div>
+                            </div>
+                            <div className="card">
+                                <div className="card-head">
+                                    <span className="card-title">Pagamentos</span>
+                                </div>
+                                <div className="card-pad">
                                     <StatRow label="Total" value={stats.pagamentos.total} />
                                     <StatRow label="Pendentes" value={stats.pagamentos.pendentes} />
                                     <StatRow label="Pagos" value={stats.pagamentos.pagos} />
                                     <StatRow label="Valor Pago" value={`${parseFloat(stats.pagamentos.valor_total).toLocaleString('pt-PT')} AOA`} />
-                                </CardContent>
-                            </Card>
-                            <Card>
-                                <CardHeader className="pb-2">
-                                    <CardTitle className="text-sm font-medium text-muted-foreground">Voluntários</CardTitle>
-                                </CardHeader>
-                                <CardContent className="space-y-2">
+                                </div>
+                            </div>
+                            <div className="card">
+                                <div className="card-head">
+                                    <span className="card-title">Voluntários</span>
+                                </div>
+                                <div className="card-pad">
                                     <StatRow label="Total" value={stats.voluntarios.total} />
                                     <StatRow label="Activos" value={stats.voluntarios.activos} />
-                                </CardContent>
-                            </Card>
-                            <Card>
-                                <CardHeader className="pb-2">
-                                    <CardTitle className="text-sm font-medium text-muted-foreground">Workflows</CardTitle>
-                                </CardHeader>
-                                <CardContent className="space-y-2">
+                                </div>
+                            </div>
+                            <div className="card">
+                                <div className="card-head">
+                                    <span className="card-title">Workflows</span>
+                                </div>
+                                <div className="card-pad">
                                     <StatRow label="Pendentes" value={stats.workflows.pendentes} />
                                     <StatRow label="Em aprovação" value={stats.workflows.em_aprovacao} />
-                                </CardContent>
-                            </Card>
+                                </div>
+                            </div>
                         </>
                     ) : (
                         <>
@@ -122,6 +140,6 @@ export default function RelatoriosIndex({ stats }: Props) {
     );
 }
 
-RelatoriosIndex.layout = (props: { currentTeam?: { slug: string } | null }) => ({
-    breadcrumbs: [{ title: 'Relatórios', href: props.currentTeam ? index(props.currentTeam.slug).url : '/' }],
+RelatoriosIndex.layout = () => ({
+    breadcrumbs: [{ title: 'Relatórios', href: index().url }],
 });

@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\V1\MeController;
 use App\Http\Controllers\Api\V1\MentorSessionController;
 use App\Http\Controllers\Api\V1\MessageController;
 use App\Http\Controllers\Api\V1\PaymentController;
+use App\Http\Controllers\Api\V1\PesquisaController;
 use App\Http\Controllers\Api\V1\RotationController;
 use App\Http\Controllers\Api\V1\TalentController;
 use App\Http\Controllers\Api\V1\TaskController;
@@ -136,4 +137,7 @@ Route::middleware('auth')->prefix('v1')->name('api.v1.')->group(function () {
 
     // Health check
     Route::get('health', fn () => response()->json(['status' => 'ok', 'timestamp' => now()->toIso8601String()]))->name('health');
+
+    // Pesquisa global
+    Route::get('pesquisa', PesquisaController::class)->name('pesquisa');
 });

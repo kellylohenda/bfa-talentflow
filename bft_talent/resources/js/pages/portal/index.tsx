@@ -1,152 +1,105 @@
-import { Head, router } from '@inertiajs/react';
-import { useState } from 'react';
-import { PublicLayout } from '@/components/public-layout';
-import { candidatura } from '@/routes';
-
-const REF_RE = /^BFA-\d{4}-\d{4}$/i;
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+import { Head, useForm, Link } from '@inertiajs/react';
 
 export default function PortalIndex() {
-    const [ref, setRef] = useState('');
-    const [email, setEmail] = useState('');
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
-    const [errors, setErrors] = useState<{ ref?: string; email?: string }>({});
-    const [touched, setTouched] = useState<{ ref?: boolean; email?: boolean }>({});
+    const { data, setData, post, processing, errors } = useForm({
+        ref: '',
+        email: '',
+    });
 
-    const inp: React.CSSProperties = {
-        width: '100%', padding: '11px 13px',
-        border: '1px solid var(--border)', borderRadius: 8,
-        fontSize: 14, fontFamily: 'inherit', color: 'var(--text)',
-        outline: 'none', background: 'var(--surface)',
-        transition: 'border-color 120ms, box-shadow 120ms',
+    const submit = (e: React.FormEvent) => {
+        e.preventDefault();
+        post('/portal');
     };
 
-    const validRef = ref.trim().length > 0 && REF_RE.test(ref.trim());
-    const validEmail = email.trim().length > 0 && EMAIL_RE.test(email.trim());
-    const canSubmit = validRef && validEmail && !loading;
-
-    function validateRef(v: string): string {
-        if (!v.trim()) return 'Referência é obrigatória.';
-        if (!REF_RE.test(v.trim())) return 'Formato inválido (ex: BFA-2026-0001).';
-        return '';
-    }
-
-    function validateEmail(v: string): string {
-        if (!v.trim()) return 'Email é obrigatório.';
-        if (!EMAIL_RE.test(v.trim())) return 'Email inválido.';
-        return '';
-    }
-
-    function handleRefChange(v: string) {
-        setRef(v);
-        setErrors((prev) => ({ ...prev, ref: validateRef(v) }));
-    }
-
-    function handleEmailChange(v: string) {
-        setEmail(v);
-        setErrors((prev) => ({ ...prev, email: validateEmail(v) }));
-    }
-
-    function handleBlur(field: 'ref' | 'email') {
-        setTouched((prev) => ({ ...prev, [field]: true }));
-    }
-
-    function handleSubmit(e: React.FormEvent) {
-        e.preventDefault();
-        const refErr = validateRef(ref);
-        const emailErr = validateEmail(email);
-        setErrors({ ref: refErr, email: emailErr });
-        setTouched({ ref: true, email: true });
-        if (refErr || emailErr) return;
-        setError('');
-        setLoading(true);
-        router.post('/portal', { ref: ref.trim().toUpperCase(), email: email.trim() }, {
-            preserveState: true,
-            onSuccess: (page) => {
-                router.visit(`/portal/${page.props.flash?.ref || ref.trim().toUpperCase()}`);
-            },
-            onError: (errors) => {
-                setError(errors.message || errors.ref?.[0] || errors.email?.[0] || 'Referência ou email inválidos.');
-            },
-            onFinish: () => setLoading(false),
-        });
-    }
-
     return (
-        <PublicLayout>
+        <>
             <Head title="Portal do Candidato — BFA Talento" />
-            <div style={{ padding: 'clamp(64px, 10vw, 120px) clamp(12px, 4vw, 20px) 80px', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', minHeight: '100vh' }}>
-                <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 20, padding: 'clamp(28px, 5vw, 48px)', width: '100%', maxWidth: 500, boxShadow: 'var(--shadow-2)' }}>
-                    <div style={{ width: 64, height: 64, background: 'var(--primary-soft)', borderRadius: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 24 }}>
-                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="1.8" strokeLinecap="round">
-                            <rect x="3" y="11" width="18" height="11" rx="2" />
-                            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                        </svg>
+            
+            <style>{`
+                *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+                body { background: #FAFAF9; color: #1A1A1A; font-family: Inter, system-ui, sans-serif; }
+                .pub-top { position: sticky; top: 0; z-index: 50; background: rgba(255,255,255,0.94); backdrop-filter: blur(12px); border-bottom: 1px solid #E7E5E1; }
+                .pub-top-inner { max-width: 1240px; margin: 0 auto; padding: 16px 32px; display: flex; align-items: center; gap: 32px; }
+                .pub-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: #1A1A1A; font-weight: 700; font-size: 17px; letter-spacing: -0.01em; }
+                .pub-logo { width: 32px; height: 32px; background: #1A1A1A; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; border-radius: 5px; }
+                
+                .main-wrap { min-height: calc(100vh - 65px); display: flex; align-items: center; justify-content: center; padding: 40px 20px; }
+                .login-card { background: #fff; border: 1px solid #E7E5E1; border-radius: 14px; padding: 40px; width: 100%; maxWidth: 440px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
+                .login-icon { width: 56px; height: 56px; background: #FFF0E5; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 24px; color: #FF7607; }
+                .login-card h1 { font-size: 26px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 8px; }
+                .login-card p { font-size: 14px; color: #525252; margin-bottom: 32px; line-height: 1.6; }
+                
+                .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 20px; }
+                .field label { font-size: 12px; font-weight: 500; color: #525252; }
+                .field input { padding: 12px 14px; border: 1px solid #E7E5E1; border-radius: 8px; font-size: 14px; font-family: inherit; outline: none; transition: all 120ms; }
+                .field input:focus { border-color: #FF7607; box-shadow: 0 0 0 3px #FFF0E5; }
+                .error-msg { color: #DC2626; font-size: 12px; margin-top: 4px; }
+                
+                .btn-login { width: 100%; background: #1A1A1A; color: #fff; border: none; padding: 13px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 120ms; margin-top: 8px; }
+                .btn-login:hover { background: #FF7607; }
+                .btn-login:disabled { opacity: 0.5; cursor: not-allowed; }
+                
+                .footer-meta { margin-top: 32px; text-align: center; font-size: 12px; color: #8A8A87; display: flex; align-items: center; gap: 8px; justify-content: center; }
+                .cta-reg { text-align: center; margin-top: 24px; font-size: 13px; color: #525252; }
+                .cta-reg a { color: #FF7607; text-decoration: none; font-weight: 600; }
+            `}</style>
+
+            <div className="pub-top">
+                <div className="pub-top-inner">
+                    <Link href="/" className="pub-brand">
+                        <div className="pub-logo">B</div>
+                        <div>BFA Talento</div>
+                    </Link>
+                </div>
+            </div>
+
+            <div className="main-wrap">
+                <div className="login-card">
+                    <div className="login-icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
                     </div>
-                    <h1 style={{ fontSize: 26, fontWeight: 700, letterSpacing: '-0.02em', marginBottom: 8, color: 'var(--text)' }}>Portal do Candidato</h1>
-                    <p style={{ fontSize: 14, color: 'var(--text-2)', marginBottom: 32, lineHeight: 1.6 }}>
-                        Acompanha o estado da tua candidatura BFA Talento a qualquer momento.
-                    </p>
+                    <h1>Portal do Candidato</h1>
+                    <p>Insere os dados da tua candidatura para acompanhar o estado e resultados do processo.</p>
 
-                    {error && (
-                        <div style={{ background: 'var(--danger-bg)', color: 'var(--danger)', padding: '12px 16px', borderRadius: 10, fontSize: 13, marginBottom: 20, lineHeight: 1.5 }}>{error}</div>
-                    )}
+                    <form onSubmit={submit}>
+                        <div className="field">
+                            <label>Referência da Candidatura</label>
+                            <input 
+                                type="text" 
+                                value={data.ref} 
+                                onChange={e => setData('ref', e.target.value.toUpperCase())} 
+                                placeholder="BFA-2026-XXXX" 
+                                required 
+                            />
+                            {errors.ref && <div className="error-msg">{errors.ref}</div>}
+                        </div>
+                        <div className="field">
+                            <label>Email de Candidatura</label>
+                            <input 
+                                type="email" 
+                                value={data.email} 
+                                onChange={e => setData('email', e.target.value)} 
+                                placeholder="oseu@email.ao" 
+                                required 
+                            />
+                            {errors.email && <div className="error-msg">{errors.email}</div>}
+                        </div>
 
-                    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                            <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-2)' }}>Referência da candidatura</label>
-                            <input
-                                style={{ ...inp, borderColor: touched.ref && errors.ref ? 'var(--danger)' : 'var(--border)' }}
-                                type="text"
-                                placeholder="BFA-2026-0001"
-                                value={ref}
-                                onChange={(e) => handleRefChange(e.target.value.toUpperCase())}
-                                onBlur={() => handleBlur('ref')}
-                                required
-                            />
-                            {touched.ref && errors.ref && <div style={{ fontSize: 12, color: 'var(--danger)', lineHeight: 1.4 }}>{errors.ref}</div>}
-                        </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                            <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-2)' }}>Email</label>
-                            <input
-                                style={{ ...inp, borderColor: touched.email && errors.email ? 'var(--danger)' : 'var(--border)' }}
-                                type="email"
-                                placeholder="o.teu@email.com"
-                                value={email}
-                                onChange={(e) => handleEmailChange(e.target.value)}
-                                onBlur={() => handleBlur('email')}
-                                required
-                            />
-                            {touched.email && errors.email && <div style={{ fontSize: 12, color: 'var(--danger)', lineHeight: 1.4 }}>{errors.email}</div>}
-                        </div>
-                        <button
-                            style={{
-                                width: '100%', background: canSubmit ? 'var(--text)' : 'var(--disabled)',
-                                color: canSubmit ? 'var(--bg)' : 'var(--text-3)',
-                                border: 'none', padding: 14, borderRadius: 10,
-                                fontSize: 15, fontWeight: 600, cursor: canSubmit ? 'pointer' : 'not-allowed',
-                                fontFamily: 'inherit', transition: 'background 120ms',
-                            }}
-                            disabled={!canSubmit}
-                            onMouseEnter={(e) => { if (canSubmit) e.currentTarget.style.background = 'var(--primary)'; }}
-                            onMouseLeave={(e) => { if (canSubmit) e.currentTarget.style.background = 'var(--text)'; }}
-                        >
-                            {loading ? 'A verificar…' : 'Entrar no portal →'}
+                        <button type="submit" className="btn-login" disabled={processing}>
+                            {processing ? 'A verificar...' : 'Entrar no Portal →'}
                         </button>
                     </form>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, justifyContent: 'center', marginTop: 24, fontSize: 12, color: 'var(--text-3)' }}>
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
-                        Dados encriptados · Lei 22/11 (APD)
+                    <div className="footer-meta">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
+                        Conformidade APD · Lei 22/11
                     </div>
-
-                    <p style={{ fontSize: 13, color: 'var(--text-3)', textAlign: 'center', marginTop: 20 }}>
-                        Ainda não te candidataste?{' '}
-                        <a href={candidatura().url} style={{ color: 'var(--primary)', textDecoration: 'none', fontWeight: 600 }}>Candidata-te agora</a>
-                    </p>
+                    
+                    <div className="cta-reg">
+                        Ainda não se candidatou? <Link href="/candidatura">Candidatar agora</Link>
+                    </div>
                 </div>
             </div>
-        </PublicLayout>
+        </>
     );
 }

@@ -1,18 +1,12 @@
-import { Head, router, usePage } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import { Bell, BellRing, Check, CheckCheck } from 'lucide-react';
 import { TablePagination } from '@/components/table-pagination';
-import Heading from '@/components/heading';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { index } from '@/routes/notificacoes';
 import type { Notification, Paginated } from '@/types';
 
 type Props = { notificacoes: Paginated<Notification>; naoLidasCount: number };
 
 export default function NotificacoesIndex({ notificacoes, naoLidasCount }: Props) {
-    const { props } = usePage<{ currentTeam: { slug: string } }>();
-    const team = props.currentTeam.slug;
-
     function markAsRead(id: number) {
         router.patch(`/notificacoes/${id}`, { read_at: new Date().toISOString() });
     }
@@ -24,57 +18,68 @@ export default function NotificacoesIndex({ notificacoes, naoLidasCount }: Props
     return (
         <>
             <Head title="Notificações" />
-            <div className="flex flex-col gap-6 p-4">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <Heading title="Notificações" description="Centro de notificações" />
+            <div className="section">
+                <div className="page-head">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                        <div>
+                            <h1 className="page-title">Notificações</h1>
+                            <p className="page-subtitle">Centro de notificações</p>
+                        </div>
                         {naoLidasCount > 0 && (
-                            <Badge variant="destructive">{naoLidasCount} não lidas</Badge>
+                            <span className="pill pill-danger">{naoLidasCount} não lidas</span>
                         )}
                     </div>
                     {naoLidasCount > 0 && (
-                        <Button variant="outline" size="sm" onClick={markAllAsRead} className="gap-1.5">
-                            <CheckCheck className="h-4 w-4" /> Marcar todas como lidas
-                        </Button>
+                        <div className="page-actions">
+                            <button className="btn btn-ghost btn-sm" onClick={markAllAsRead}>
+                                <CheckCheck size={14} /> Marcar todas como lidas
+                            </button>
+                        </div>
                     )}
                 </div>
 
-                <div className="space-y-2">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                     {notificacoes.data.map((n) => {
                         const isUnread = !n.read_at;
+
                         return (
                             <div
                                 key={n.id}
-                                className={`flex items-start gap-3 rounded-lg border p-4 ${
-                                    isUnread ? 'bg-muted/10' : ''
-                                }`}
+                                className="card"
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'flex-start',
+                                    gap: 12,
+                                    padding: 16,
+                                    background: isUnread ? 'var(--primary-muted)' : undefined,
+                                }}
                             >
-                                <div className="mt-0.5">
+                                <div style={{ marginTop: 2 }}>
                                     {isUnread ? (
-                                        <BellRing className="h-4 w-4 text-primary" />
+                                        <BellRing size={16} style={{ color: 'var(--primary)' }} />
                                     ) : (
-                                        <Bell className="h-4 w-4 text-muted-foreground" />
+                                        <Bell size={16} style={{ color: 'var(--text-3)' }} />
                                     )}
                                 </div>
-                                <div className="min-w-0 flex-1">
-                                    <div className="flex items-center justify-between gap-2">
-                                        <span className={`text-sm ${isUnread ? 'font-medium' : ''}`}>{n.title}</span>
-                                        <span className="shrink-0 text-xs text-muted-foreground">
+                                <div style={{ minWidth: 0, flex: 1 }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+                                        <span style={{ fontSize: 14, fontWeight: isUnread ? 500 : undefined }}>{n.title}</span>
+                                        <span style={{ flexShrink: 0, fontSize: 12, color: 'var(--text-3)' }}>
                                             {new Date(n.created_at).toLocaleDateString('pt-PT')}
                                         </span>
                                     </div>
-                                    <p className="mt-0.5 text-xs text-muted-foreground">{n.message}</p>
+                                    <p style={{ marginTop: 2, fontSize: 12, color: 'var(--text-3)' }}>{n.message}</p>
                                 </div>
                                 {isUnread && (
-                                    <Button variant="ghost" size="sm" onClick={() => markAsRead(n.id)} className="shrink-0">
-                                        <Check className="h-4 w-4" />
-                                    </Button>
+                                    <button className="btn btn-ghost btn-sm" onClick={() => markAsRead(n.id)} style={{ flexShrink: 0 }}>
+                                        <Check size={14} />
+                                    </button>
                                 )}
                             </div>
                         );
                     })}
                     {notificacoes.data.length === 0 && (
-                        <div className="py-10 text-center text-muted-foreground">
+                        <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-3)' }}>
                             Nenhuma notificação.
                         </div>
                     )}
@@ -86,6 +91,6 @@ export default function NotificacoesIndex({ notificacoes, naoLidasCount }: Props
     );
 }
 
-NotificacoesIndex.layout = (props: { currentTeam?: { slug: string } | null }) => ({
-    breadcrumbs: [{ title: 'Notificações', href: props.currentTeam ? index(props.currentTeam.slug).url : '/' }],
+NotificacoesIndex.layout = () => ({
+    breadcrumbs: [{ title: 'Notificações', href: index().url }],
 });
