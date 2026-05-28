@@ -293,6 +293,27 @@ export default function Welcome({ programs, stats, faqs, processSteps }: Props) 
                 </div>
             </section>
 
+            <section className="pub-section pattern-sona" style={{ background: '#fff', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)' }}>
+                <div className="pub-container" style={{ position: 'relative', zIndex: 2 }}>
+                    <span className="pub-eyebrow">Responsabilidade Social</span>
+                    <h2 className="pub-h2">Um banco presente<br/>no coração de Angola.</h2>
+                    <div className="grid cols-2" style={{ marginTop: 40, gap: 40 }}>
+                        <div>
+                            <h3 style={{ fontSize: 20, fontWeight: 700, marginBottom: 12, color: 'var(--primary)' }}>Fundo Social BFA</h3>
+                            <p style={{ fontSize: 15, lineHeight: 1.6, color: 'var(--text-2)' }}>
+                                Atuamos em três áreas críticas: <b>Educação, Saúde e Solidariedade Social</b>. Apoiamos escolas, centros de nutrição e projetos comunitários que garantem a inclusão das camadas mais vulneráveis da população angolana.
+                            </p>
+                        </div>
+                        <div>
+                            <h3 style={{ fontSize: 20, fontWeight: 700, marginBottom: 12, color: 'var(--primary)' }}>Voluntariado Corporativo</h3>
+                            <p style={{ fontSize: 15, lineHeight: 1.6, color: 'var(--text-2)' }}>
+                                O espírito BFA vai além das agências. Os nossos colaboradores são incentivados a participar em ações de apoio humanitário e doações, fortalecendo o laço entre a instituição e a comunidade que servimos.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <section className="testimonial-section" id="testemunho">
                 <div className="t-grid">
                     <div className="t-portrait">

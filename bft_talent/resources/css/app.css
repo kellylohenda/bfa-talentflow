@@ -938,3 +938,23 @@
   .tb-env { display: none; }
   .tb-divider { display: none; }
 }
+
+/* ─── Cultural Patterns ──────────────────────────── */
+.pattern-sona {
+  background-color: var(--bg);
+  background-image: radial-gradient(var(--border) 1px, transparent 1px);
+  background-size: 32px 32px;
+  position: relative;
+}
+
+.pattern-sona::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(45deg, var(--primary-glow) 1px, transparent 1px),
+    linear-gradient(-45deg, var(--primary-glow) 1px, transparent 1px);
+  background-size: 64px 64px;
+  opacity: 0.4;
+  pointer-events: none;
+}
