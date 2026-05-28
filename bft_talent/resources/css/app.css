@@ -49,13 +49,14 @@
   --disabled: #E7E5E1;
 
   /* Brand */
-  --primary: #FF7607;
-  --primary-deep: #9C4500;
-  --primary-glow: rgba(255, 118, 7, 0.16);
-  --primary-soft: #FFF0E5;
+  --primary: #FF6600; /* BFA Orange precisely from logo */
+  --primary-deep: #D95700;
+  --primary-glow: rgba(255, 102, 0, 0.12);
+  --primary-soft: #FFF5F0;
+  --brand-navy: #231F5E; /* BFA Navy from logo for high contrast */
 
   /* Neutrals — light */
-  --bg: #F7F7F6;
+  --bg: #F9F9F8;
   --surface: #FFFFFF;
   --surface-2: #FAFAF9;
   --surface-3: #F2F2F0;
