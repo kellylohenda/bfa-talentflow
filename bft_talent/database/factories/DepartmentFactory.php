@@ -20,7 +20,7 @@ class DepartmentFactory extends Factory
         static $seq = 1;
 
         return [
-            'name' => fake()->randomElement(['Tecnologia', 'Finanças', 'RH', 'Operações', 'Risco', 'Compliance', 'Auditoria']),
+            'name' => fake()->unique()->company() . ' ' . $seq,
             'codigo' => 'DEP-'.str_pad($seq++, 3, '0', STR_PAD_LEFT),
             'activo' => true,
         ];

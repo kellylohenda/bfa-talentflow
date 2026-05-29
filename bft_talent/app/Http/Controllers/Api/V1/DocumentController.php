@@ -10,6 +10,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class DocumentController extends Controller
 {
@@ -32,7 +33,7 @@ class DocumentController extends Controller
         $year = now()->format('Y');
         $seq = str_pad(Document::whereYear('created_at', $year)->count() + 1, 5, '0', STR_PAD_LEFT);
 
-        $path = Storage::disk('s3')->put(
+        $path = Storage::disk(config('filesystems.default'))->put(
             "documents/{$request->validated('owner_type')}/{$request->validated('owner_id')}",
             $file
         );
@@ -73,13 +74,29 @@ class DocumentController extends Controller
             'observacoes' => $request->input('observacoes'),
         ]);
 
+        if ($uploader = $document->uploadedBy) {
+            $uploader->notify(new \App\Notifications\DocumentReviewed($document));
+        }
+
         return DocumentResource::make($document->fresh(['uploadedBy', 'reviewedBy']));
+    }
+
+    public function download(Document $document): JsonResponse
+    {
+        $this->authorize('view', $document);
+        
+        $url = Storage::disk(config('filesystems.default'))->temporaryUrl(
+            $document->storage_path, 
+            now()->addMinutes(30)
+        );
+
+        return response()->json(['url' => $url]);
     }
 
     public function destroy(Document $document): JsonResponse
     {
         abort_unless(request()->user()->isRh(), 403, 'Acesso negado.');
-        Storage::disk('s3')->delete($document->storage_path);
+        Storage::disk(config('filesystems.default'))->delete($document->storage_path);
         $document->delete();
 
         return response()->json(null, 204);

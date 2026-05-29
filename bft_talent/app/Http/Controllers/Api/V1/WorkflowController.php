@@ -80,6 +80,11 @@ class WorkflowController extends Controller
             $workflow->update(['status' => 'em_aprovacao']);
         }
 
+        // Notificar talento se tiver user associado
+        if ($user = $workflow->talent?->user) {
+            $user->notify(new \App\Notifications\WorkflowStatusChanged($workflow));
+        }
+
         return WorkflowResource::make($workflow->fresh(['steps']));
     }
 
@@ -101,6 +106,11 @@ class WorkflowController extends Controller
         ]);
 
         $workflow->update(['status' => 'rejeitado']);
+
+        // Notificar talento se tiver user associado
+        if ($user = $workflow->talent?->user) {
+            $user->notify(new \App\Notifications\WorkflowStatusChanged($workflow));
+        }
 
         return WorkflowResource::make($workflow->fresh(['steps']));
     }

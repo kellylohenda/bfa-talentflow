@@ -47,26 +47,26 @@ class PaymentController extends Controller
         return PaymentResource::make($payment->load('talent'))->response()->setStatusCode(201);
     }
 
-    public function show(Payment $payment): PaymentResource
+    public function show(Payment $pagamento): PaymentResource
     {
-        $this->authorize('view', $payment);
+        $this->authorize('view', $pagamento);
 
-        return PaymentResource::make($payment->load(['talent', 'workflow']));
+        return PaymentResource::make($pagamento->load(['talent', 'workflow']));
     }
 
-    public function update(UpdatePaymentRequest $request, Payment $payment): PaymentResource|JsonResponse
+    public function update(UpdatePaymentRequest $request, Payment $pagamento): PaymentResource|JsonResponse
     {
-        $this->authorize('update', $payment);
-        $payment->update($request->validated());
+        $this->authorize('update', $pagamento);
+        $pagamento->update($request->validated());
 
-        return PaymentResource::make($payment->fresh());
+        return PaymentResource::make($pagamento->fresh());
     }
 
     public function marcarPago(MarcarPagoRequest $request, Payment $payment): PaymentResource|JsonResponse
     {
         $this->authorize('update', $payment);
 
-        if ($payment->workflow && $payment->workflow->status->value !== 'aprovado') {
+        if ($payment->workflow && $payment->workflow->status !== \App\Enums\WorkflowStatus::Aprovado) {
             return response()->json(['message' => 'O workflow associado ainda não está aprovado.'], 422);
         }
 
@@ -75,10 +75,10 @@ class PaymentController extends Controller
         return PaymentResource::make($payment->fresh());
     }
 
-    public function destroy(Payment $payment): JsonResponse
+    public function destroy(Payment $pagamento): JsonResponse
     {
-        $this->authorize('delete', $payment);
-        $payment->delete();
+        $this->authorize('delete', $pagamento);
+        $pagamento->delete();
 
         return response()->json(null, 204);
     }

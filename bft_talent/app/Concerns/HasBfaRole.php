@@ -6,7 +6,7 @@ use App\Enums\BfaRole;
 
 trait HasBfaRole
 {
-    public function bfaRole(): ?BfaRole
+    public function getBfaRole(): ?BfaRole
     {
         return $this->bfa_role;
     }

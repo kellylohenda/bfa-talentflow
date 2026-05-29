@@ -46,6 +46,7 @@ Route::middleware('auth')->prefix('v1')->name('api.v1.')->group(function () {
         ->name('candidaturas.rejeitar');
 
     // Talentos (bolseiros + estagiários)
+    Route::get('talentos/exportar', [TalentController::class, 'exportCSV'])->name('talentos.exportar');
     Route::apiResource('talentos', TalentController::class);
 
     // Atalhos por tipo de talento
@@ -120,6 +121,7 @@ Route::middleware('auth')->prefix('v1')->name('api.v1.')->group(function () {
         ->name('actividades.inscrever');
 
     // Documentos
+    Route::get('documentos/{document}/download', [DocumentController::class, 'download'])->name('documentos.download');
     Route::apiResource('documentos', DocumentController::class);
     Route::post('documentos/{document}/revisar', [DocumentController::class, 'revisar'])
         ->name('documentos.revisar');

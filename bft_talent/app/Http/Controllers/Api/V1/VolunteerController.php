@@ -43,27 +43,27 @@ class VolunteerController extends Controller
         return VolunteerResource::make($volunteer->load('mentor'))->response()->setStatusCode(201);
     }
 
-    public function show(Request $request, Volunteer $volunteer): VolunteerResource
+    public function show(Request $request, Volunteer $voluntario): VolunteerResource
     {
-        $this->authorize('view', $volunteer);
+        $this->authorize('view', $voluntario);
         $includes = array_filter(explode(',', $request->input('include', '')));
         $allowed = ['mentor', 'activityInscricoes', 'hoursEntries', 'eventoInscricoes'];
         $with = array_values(array_intersect($includes, $allowed)) ?: ['mentor'];
 
-        return VolunteerResource::make($volunteer->load($with));
+        return VolunteerResource::make($voluntario->load($with));
     }
 
-    public function update(UpdateVolunteerRequest $request, Volunteer $volunteer): VolunteerResource
+    public function update(UpdateVolunteerRequest $request, Volunteer $voluntario): VolunteerResource
     {
-        $volunteer->update($request->validated());
+        $voluntario->update($request->validated());
 
-        return VolunteerResource::make($volunteer->fresh('mentor'));
+        return VolunteerResource::make($voluntario->fresh('mentor'));
     }
 
-    public function destroy(Volunteer $volunteer): JsonResponse
+    public function destroy(Volunteer $voluntario): JsonResponse
     {
         $this->authorize('gerir-voluntarios');
-        $volunteer->delete();
+        $voluntario->delete();
 
         return response()->json(null, 204);
     }

@@ -2,29 +2,29 @@
 
 namespace Database\Factories;
 
-use App\Enums\ProgramCode;
 use App\Models\Program;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends Factory<Program>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Program>
  */
 class ProgramFactory extends Factory
 {
+    protected $model = Program::class;
+
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
     public function definition(): array
     {
-        $code = fake()->randomElement(ProgramCode::cases());
-
         return [
-            'code' => $code->value,
-            'name' => $code->label(),
-            'descricao' => fake()->sentence(),
+            'code' => $this->faker->unique()->lexify('PROG-???'),
+            'name' => $this->faker->sentence(3),
+            'tag' => $this->faker->word(),
+            'descricao' => $this->faker->paragraph(),
             'activo' => true,
         ];
-    }
-
-    public function inactive(): static
-    {
-        return $this->state(['activo' => false]);
     }
 }

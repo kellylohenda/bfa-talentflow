@@ -15,23 +15,27 @@ class DashboardController extends Controller
     public function __invoke(Request $request)
     {
         $user = $request->user();
-        $role = $user->bfaRole;
+        $role = $user->bfa_role;
 
-        if ($role?->isBolseiro() || $role?->isEstagiario()) {
+        if ($user->isBolseiro() || $user->isEstagiario()) {
             return redirect()->route('bolseiro.index');
         }
-        if ($role?->isVoluntario()) {
+        if ($user->isVoluntario()) {
             return redirect()->route('voluntario.index');
         }
 
-        abort_unless($role?->isStaff(), 403);
+        abort_unless($user->isStaff(), 403);
 
-        $totalTalents = Talent::count();
-        $activeTalents = Talent::where('status', 'activo')->count();
-        $totalApplications = Application::count();
-        $totalPayments = Payment::count();
-        $totalVolunteers = Volunteer::count();
-        $totalEvents = Evento::count();
+        $stats = \Illuminate\Support\Facades\Cache::remember('dashboard_stats', 600, function () {
+            return [
+                'totalTalents' => Talent::count(),
+                'activeTalents' => Talent::where('status', 'activo')->count(),
+                'totalApplications' => Application::count(),
+                'totalPayments' => Payment::count(),
+                'totalVolunteers' => Volunteer::count(),
+                'totalEvents' => Evento::count(),
+            ];
+        });
 
         $talentsByProgram = Talent::selectRaw('program_id, count(*) as total')
             ->groupBy('program_id')
@@ -71,7 +75,8 @@ class DashboardController extends Controller
                 'created_at' => $p->created_at->diffForHumans(),
             ]);
 
-        $topTalents = Talent::where('status', 'activo')
+        $topTalents = Talent::with('program')
+            ->where('status', 'activo')
             ->orderByDesc('perf')
             ->take(5)
             ->get()
@@ -85,14 +90,7 @@ class DashboardController extends Controller
             ]);
 
         return Inertia::render('dashboard', [
-            'stats' => [
-                'totalTalents' => $totalTalents,
-                'activeTalents' => $activeTalents,
-                'totalApplications' => $totalApplications,
-                'totalPayments' => $totalPayments,
-                'totalVolunteers' => $totalVolunteers,
-                'totalEvents' => $totalEvents,
-            ],
+            'stats' => $stats,
             'talentsByProgram' => $talentsByProgram,
             'talentsByStatus' => $talentsByStatus,
             'recentApplications' => $recentApplications,

@@ -40,4 +40,20 @@ class WorkflowFactory extends Factory
     {
         return $this->state(['status' => WorkflowStatus::EmAprovacao]);
     }
+
+    public function configure(): static
+    {
+        return $this->afterCreating(function (Workflow $workflow) {
+            \App\Models\WorkflowStep::factory()->create([
+                'workflow_id' => $workflow->id,
+                'step_number' => 1,
+                'approver_role' => 'rh',
+            ]);
+            \App\Models\WorkflowStep::factory()->create([
+                'workflow_id' => $workflow->id,
+                'step_number' => 2,
+                'approver_role' => 'direcao',
+            ]);
+        });
+    }
 }

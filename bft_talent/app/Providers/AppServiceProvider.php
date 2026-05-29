@@ -12,6 +12,8 @@ use App\Policies\ApplicationPolicy;
 use App\Policies\PaymentPolicy;
 use App\Policies\TalentPolicy;
 use App\Policies\WorkflowPolicy;
+use App\Models\Volunteer;
+use App\Policies\VolunteerPolicy;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
@@ -27,6 +29,7 @@ class AppServiceProvider extends ServiceProvider
         Payment::class => PaymentPolicy::class,
         Talent::class => TalentPolicy::class,
         Workflow::class => WorkflowPolicy::class,
+        Volunteer::class => VolunteerPolicy::class,
     ];
 
     public function register(): void

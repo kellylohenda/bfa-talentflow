@@ -49,7 +49,7 @@ describe('aprovar', function () {
 
         $this->actingAs($this->rh)
             ->postJson("/api/v1/workflows/{$workflow->id}/aprovar", [
-                'comentarios' => 'Aprovado conforme análise.',
+                'comentario' => 'Aprovado conforme análise.',
             ])
             ->assertOk();
 
@@ -61,7 +61,7 @@ describe('aprovar', function () {
 
         $this->actingAs($this->direcao)
             ->postJson("/api/v1/workflows/{$workflow->id}/aprovar", [
-                'comentarios' => 'Conforme.',
+                'comentario' => 'Conforme.',
             ])
             ->assertOk();
     });
@@ -81,7 +81,7 @@ describe('rejeitar', function () {
 
         $this->actingAs($this->rh)
             ->postJson("/api/v1/workflows/{$workflow->id}/rejeitar", [
-                'motivo' => 'Documentação incompleta.',
+                'comentario' => 'Documentação incompleta.',
             ])
             ->assertOk();
 

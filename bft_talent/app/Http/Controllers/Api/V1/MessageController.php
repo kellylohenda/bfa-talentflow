@@ -42,6 +42,10 @@ class MessageController extends Controller
             'from_user_id' => $request->user()->id,
         ]);
 
+        if ($recipient = $message->to) {
+            $recipient->notify(new \App\Notifications\NewMessageReceived($message));
+        }
+
         return MessageResource::make($message->load(['from', 'to']))->response()->setStatusCode(201);
     }
 

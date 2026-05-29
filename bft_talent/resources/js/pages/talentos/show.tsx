@@ -56,6 +56,10 @@ export default function TalentosShow({ talent, canEdit }: Props) {
         owner_id: talentId ?? 0,
     });
 
+    if (!talent) {
+        return <div className="card card-pad">Erro: Talento não encontrado.</div>;
+    }
+
     const handleUpload = (e: React.FormEvent) => {
         e.preventDefault();
         post('/api/v1/documentos', {
@@ -66,10 +70,6 @@ export default function TalentosShow({ talent, canEdit }: Props) {
             forceFormData: true,
         });
     };
-
-    if (!talent) {
-return <div className="card card-pad">Erro: Talento não encontrado.</div>;
-}
 
     return (
         <>

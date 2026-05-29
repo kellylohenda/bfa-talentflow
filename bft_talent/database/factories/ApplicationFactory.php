@@ -27,7 +27,7 @@ class ApplicationFactory extends Factory
             'university_id' => University::factory(),
             'tipo' => fake()->randomElement(['bolseiro', 'estagiario']),
             'stage' => ApplicationStage::Analise,
-            'score' => null,
+            'score' => 0,
             'observacoes' => null,
             'converted_talent_id' => null,
         ];

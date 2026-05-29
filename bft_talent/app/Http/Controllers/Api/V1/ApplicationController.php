@@ -44,19 +44,19 @@ class ApplicationController extends Controller
         return ApplicationResource::make($application->load(['program', 'university']))->response()->setStatusCode(201);
     }
 
-    public function show(Application $application): ApplicationResource
+    public function show(Application $candidatura): ApplicationResource
     {
-        $this->authorize('view', $application);
+        $this->authorize('view', $candidatura);
 
-        return ApplicationResource::make($application->load(['program', 'university', 'convertedTalent']));
+        return ApplicationResource::make($candidatura->load(['program', 'university', 'convertedTalent']));
     }
 
-    public function update(UpdateApplicationRequest $request, Application $application): ApplicationResource
+    public function update(UpdateApplicationRequest $request, Application $candidatura): ApplicationResource
     {
-        $this->authorize('update', $application);
-        $application->update($request->validated());
+        $this->authorize('update', $candidatura);
+        $candidatura->update($request->validated());
 
-        return ApplicationResource::make($application->fresh(['program', 'university']));
+        return ApplicationResource::make($candidatura->fresh(['program', 'university']));
     }
 
     public function avancar(Request $request, Application $application): ApplicationResource|JsonResponse
@@ -97,10 +97,10 @@ class ApplicationController extends Controller
         return ApplicationResource::make($application->fresh());
     }
 
-    public function destroy(Application $application): JsonResponse
+    public function destroy(Application $candidatura): JsonResponse
     {
-        $this->authorize('delete', $application);
-        $application->delete();
+        $this->authorize('delete', $candidatura);
+        $candidatura->delete();
 
         return response()->json(null, 204);
     }
