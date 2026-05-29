@@ -49,13 +49,13 @@ export default function Security({
 
     return (
         <>
-            <Head title="Security settings" />
+            <Head title="Definições de segurança" />
 
             <div className="section">
                 <div className="page-head">
                     <div>
-                        <h1 className="page-title">Update password</h1>
-                        <p className="page-subtitle">Ensure your account is using a long, random password to stay secure</p>
+                        <h1 className="page-title">Actualizar palavra-passe</h1>
+                        <p className="page-subtitle">Certifique-se de que a sua palavra-passe é longa e aleatória para manter a segurança</p>
                     </div>
                 </div>
 
@@ -86,7 +86,7 @@ export default function Security({
                                 <>
                                     <div className="form-group">
                                         <label className="form-label" htmlFor="current_password">
-                                            Current password
+                                            Palavra-passe actual
                                         </label>
                                         <PasswordInput
                                             id="current_password"
@@ -99,7 +99,7 @@ export default function Security({
                                     </div>
 
                                     <div className="form-group">
-                                        <label className="form-label" htmlFor="password">New password</label>
+                                        <label className="form-label" htmlFor="password">Nova palavra-passe</label>
                                         <PasswordInput
                                             id="password"
                                             ref={passwordInput}
@@ -112,7 +112,7 @@ export default function Security({
 
                                     <div className="form-group">
                                         <label className="form-label" htmlFor="password_confirmation">
-                                            Confirm password
+                                            Confirmar palavra-passe
                                         </label>
                                         <PasswordInput
                                             id="password_confirmation"
@@ -131,7 +131,7 @@ export default function Security({
                                             data-test="update-password-button"
                                         >
                                             {processing && <Spinner />}
-                                            Save password
+                                            Guardar palavra-passe
                                         </button>
                                     </div>
                                 </>
@@ -145,8 +145,8 @@ export default function Security({
                 <div className="section">
                     <div className="page-head">
                         <div>
-                            <h1 className="page-title">Two-factor authentication</h1>
-                            <p className="page-subtitle">Manage your two-factor authentication settings</p>
+                            <h1 className="page-title">Autenticação de dois factores</h1>
+                            <p className="page-subtitle">Gerir as definições de autenticação de dois factores</p>
                         </div>
                     </div>
 
@@ -167,7 +167,7 @@ export default function Security({
                                                 className="btn btn-danger"
                                                 disabled={processing}
                                             >
-                                                Disable 2FA
+                                                Desactivar 2FA
                                             </button>
                                         )}
                                     </Form>
@@ -211,7 +211,7 @@ export default function Security({
                                                     disabled={processing}
                                                 >
                                                     {processing && <Spinner />}
-                                                    Enable 2FA
+                                                    Activar 2FA
                                                 </button>
                                             )}
                                         </Form>
@@ -241,7 +241,7 @@ export default function Security({
 Security.layout = {
     breadcrumbs: [
         {
-            title: 'Security settings',
+            title: 'Definições de segurança',
             href: edit(),
         },
     ],

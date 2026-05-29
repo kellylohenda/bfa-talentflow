@@ -1,12 +1,5 @@
 import { Head, Link, useForm } from '@inertiajs/react';
-import { ArrowLeft } from 'lucide-react';
-import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { index, store } from '@/routes/pagamentos';
 import type { Talent } from '@/types';
 
@@ -29,71 +22,65 @@ export default function PagamentosCreate({ talents }: Props) {
     return (
         <>
             <Head title="Novo Pagamento" />
-            <div className="flex flex-col gap-6 p-4">
-                <div className="flex items-center gap-4">
-                    <Button variant="ghost" size="sm" asChild>
-                        <Link href={index().url}><ArrowLeft className="h-4 w-4" /></Link>
-                    </Button>
-                    <Heading title="Novo Pagamento" description="Registar bolsa ou subsídio" />
+
+            <div className="section">
+                <div className="page-head">
+                    <h1>Novo Pagamento</h1>
+                    <p>Registar bolsa ou subsídio</p>
                 </div>
-                <Card className="max-w-lg">
-                    <CardContent className="pt-6">
-                        <form onSubmit={submit} className="space-y-4">
-                            <div className="space-y-1">
-                                <Label htmlFor="talent_id">Talento *</Label>
-                                <Select value={data.talent_id} onValueChange={(v) => setData('talent_id', v)}>
-                                    <SelectTrigger id="talent_id"><SelectValue placeholder="Seleccionar talento" /></SelectTrigger>
-                                    <SelectContent>
-                                        {talents.map((t) => (
-                                            <SelectItem key={t.id} value={String(t.id)}>
-                                                {t.name} — {t.talent_code}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
+
+                <div className="card" style={{ maxWidth: 600 }}>
+                    <div className="card-pad">
+                        <form onSubmit={submit}>
+                            <div className="form-group">
+                                <label className="form-label">Talento *</label>
+                                <select className="input select" value={data.talent_id} onChange={e => setData('talent_id', e.target.value)}>
+                                    <option value="">Seleccionar talento</option>
+                                    {talents.map(t => <option key={t.id} value={String(t.id)}>{t.name} — {t.talent_code}</option>)}
+                                </select>
                                 <InputError message={errors.talent_id} />
                             </div>
-                            <div className="grid gap-4 sm:grid-cols-2">
-                                <div className="space-y-1">
-                                    <Label htmlFor="type">Tipo *</Label>
-                                    <Select value={data.type} onValueChange={(v) => setData('type', v)}>
-                                        <SelectTrigger id="type"><SelectValue /></SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="bolsa">Bolsa</SelectItem>
-                                            <SelectItem value="subsidio_alimentacao">Subsídio de Alimentação</SelectItem>
-                                            <SelectItem value="ajuda_custo">Ajuda de Custo</SelectItem>
-                                            <SelectItem value="outro">Outro</SelectItem>
-                                        </SelectContent>
-                                    </Select>
+
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+                                <div className="form-group">
+                                    <label className="form-label">Tipo *</label>
+                                    <select className="input select" value={data.type} onChange={e => setData('type', e.target.value)}>
+                                        <option value="bolsa">Bolsa</option>
+                                        <option value="subsidio_alimentacao">Subsídio de Alimentação</option>
+                                        <option value="ajuda_custo">Ajuda de Custo</option>
+                                        <option value="outro">Outro</option>
+                                    </select>
                                     <InputError message={errors.type} />
                                 </div>
-                                <div className="space-y-1">
-                                    <Label htmlFor="period">Período *</Label>
-                                    <Input id="period" type="month" value={data.period} onChange={(e) => setData('period', e.target.value)} />
+                                <div className="form-group">
+                                    <label className="form-label">Período *</label>
+                                    <input className="input" type="month" value={data.period} onChange={e => setData('period', e.target.value)} />
                                     <InputError message={errors.period} />
                                 </div>
                             </div>
-                            <div className="grid gap-4 sm:grid-cols-2">
-                                <div className="space-y-1">
-                                    <Label htmlFor="amount">Valor *</Label>
-                                    <Input id="amount" type="number" min="0" step="0.01" value={data.amount} onChange={(e) => setData('amount', e.target.value)} />
+
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+                                <div className="form-group">
+                                    <label className="form-label">Valor *</label>
+                                    <input className="input" type="number" min="0" step="0.01" value={data.amount} onChange={e => setData('amount', e.target.value)} />
                                     <InputError message={errors.amount} />
                                 </div>
-                                <div className="space-y-1">
-                                    <Label htmlFor="currency">Moeda</Label>
-                                    <Input id="currency" value={data.currency} onChange={(e) => setData('currency', e.target.value)} maxLength={3} />
+                                <div className="form-group">
+                                    <label className="form-label">Moeda</label>
+                                    <input className="input" value={data.currency} onChange={e => setData('currency', e.target.value)} maxLength={3} />
                                     <InputError message={errors.currency} />
                                 </div>
                             </div>
-                            <div className="flex gap-2 pt-2">
-                                <Button type="submit" disabled={processing}>Criar Pagamento</Button>
-                                <Button type="button" variant="outline" asChild>
-                                    <Link href={index().url}>Cancelar</Link>
-                                </Button>
+
+                            <div style={{ display: 'flex', gap: 12, marginTop: 24, paddingTop: 24, borderTop: '1px solid #F5F5F5' }}>
+                                <button type="submit" className="btn btn-primary" disabled={processing}>
+                                    {processing ? 'A gravar...' : 'Criar Pagamento'}
+                                </button>
+                                <Link href={index().url} className="btn btn-outline">Cancelar</Link>
                             </div>
                         </form>
-                    </CardContent>
-                </Card>
+                    </div>
+                </div>
             </div>
         </>
     );

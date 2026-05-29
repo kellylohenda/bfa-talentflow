@@ -18,9 +18,9 @@ import {
     Building2,
     Briefcase
 } from 'lucide-react';
+import { useState } from 'react';
 import { index, edit as editRoute } from '@/routes/talentos';
 import type { Talent, Program, University, Department, Mentor, Document } from '@/types';
-import { useState } from 'react';
 
 type Props = {
     talent: Talent & { documents?: Document[] };
@@ -29,14 +29,11 @@ type Props = {
 
 export default function TalentosShow({ talent, canEdit }: Props) {
     const [uploading, setUploading] = useState(false);
-    
-    if (!talent) return <div className="card card-pad">Erro: Talento não encontrado.</div>;
 
-    const talentId = talent.id;
-    const riskScore = parseFloat(String(talent.risk_score ?? '0'));
+    const talentId = talent?.id;
+    const riskScore = parseFloat(String(talent?.risk_score ?? '0'));
     const riskTone = riskScore >= 0.6 ? 'danger' : riskScore >= 0.3 ? 'warn' : 'success';
 
-    // Cálculo de completude
     const fields = [
         { key: 'email', label: 'E-mail' },
         { key: 'program', label: 'Programa' },
@@ -47,8 +44,8 @@ export default function TalentosShow({ talent, canEdit }: Props) {
         { key: 'perf', label: 'Performance' },
         { key: 'start_date', label: 'Data Início' },
     ];
-    const filledFields = fields.filter(f => talent[f.key as keyof Talent]);
-    const missingFields = fields.filter(f => !talent[f.key as keyof Talent]);
+    const filledFields = talent ? fields.filter(f => talent[f.key as keyof Talent]) : [];
+    const missingFields = talent ? fields.filter(f => !talent[f.key as keyof Talent]) : fields;
     const completeness = Math.round((filledFields.length / fields.length) * 100);
 
     const { data, setData, post, processing, reset } = useForm({
@@ -56,7 +53,7 @@ export default function TalentosShow({ talent, canEdit }: Props) {
         name: '',
         category: 'identidade',
         owner_type: 'App\\Models\\Talent',
-        owner_id: talentId,
+        owner_id: talentId ?? 0,
     });
 
     const handleUpload = (e: React.FormEvent) => {
@@ -69,6 +66,10 @@ export default function TalentosShow({ talent, canEdit }: Props) {
             forceFormData: true,
         });
     };
+
+    if (!talent) {
+return <div className="card card-pad">Erro: Talento não encontrado.</div>;
+}
 
     return (
         <>
@@ -164,7 +165,7 @@ export default function TalentosShow({ talent, canEdit }: Props) {
                                             <tr key={doc.id}>
                                                 <td>
                                                     <div className="row" style={{ gap: 8 }}>
-                                                        <FileText size={16} className="text-blue-500" />
+                                                        <FileText size={16} style={{ color: 'var(--info)' }} />
                                                         <span style={{ fontWeight: 500 }}>{doc.name}</span>
                                                     </div>
                                                 </td>
@@ -172,7 +173,7 @@ export default function TalentosShow({ talent, canEdit }: Props) {
                                                 <td className="muted">{new Date(doc.created_at).toLocaleDateString()}</td>
                                                 <td>
                                                     <div className="row" style={{ justifyContent: 'flex-end', gap: 4 }}>
-                                                        <a href={doc.storage_path} target="_blank" className="btn btn-ghost btn-sm"><Download size={14} /></a>
+                                                        <a href={doc.storage_path ?? undefined} target="_blank" className="btn btn-ghost btn-sm"><Download size={14} /></a>
                                                     </div>
                                                 </td>
                                             </tr>

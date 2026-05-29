@@ -1,7 +1,8 @@
-import { Head } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import { Clock, MapPin, Users } from 'lucide-react';
 import { useState } from 'react';
 import { index } from '@/routes/agenda';
+import { show } from '@/routes/eventos';
 import type { Evento } from '@/types';
 
 type Props = { eventos: Evento[]; mesAtual: string };
@@ -104,7 +105,7 @@ export default function AgendaIndex({ eventos, mesAtual }: Props) {
                                     </span>
                                 </div>
                                 <div style={{ minWidth: 0, flex: 1 }}>
-                                    <div style={{ fontWeight: 500 }}>{e.titulo}</div>
+                                    <Link href={show(e.id).url} style={{ fontWeight: 500, color: 'var(--text)', textDecoration: 'none' }}>{e.titulo}</Link>
                                     <div style={{ marginTop: 4, display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 12, fontSize: 12, color: 'var(--text-3)' }}>
                                         <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                                             <Clock size={12} />

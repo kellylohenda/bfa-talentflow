@@ -51,7 +51,7 @@ export default function FaltasIndex({ faltas, filters }: Props) {
                 </div>
 
                 <div className="toolbar">
-                    <select className="select" value={filters.status || ''} onChange={(e) => setFilter('status', e.target.value)}>
+                    <select className="input select" value={filters.status || ''} onChange={(e) => setFilter('status', e.target.value)}>
                         <option value="">Todos os estados</option>
                         <option value="pendente">Pendente</option>
                         <option value="aprovado">Aprovado</option>
@@ -95,7 +95,7 @@ export default function FaltasIndex({ faltas, filters }: Props) {
                                     </td>
                                     <td>
                                         {f.justificado ? (
-                                            <Check className="text-green-600" size={16} />
+                                                        <Check size={16} style={{ color: 'var(--success)' }} />
                                         ) : (
                                             <XCircle className="muted" size={16} />
                                         )}
@@ -104,14 +104,14 @@ export default function FaltasIndex({ faltas, filters }: Props) {
                                         <span className={pillClass[f.status] ?? 'pill pill-neutral'}>{f.status}</span>
                                     </td>
                                     <td>
-                                        <div className="flex items-center justify-end gap-1">
+                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 4 }}>
                                             {f.status === 'pendente' && (
                                                 <>
                                                     <button type="button" className="btn btn-ghost btn-sm" onClick={() => handleApprove(f)}>
-                                                        <Check className="text-green-600" size={16} />
+                                            <Check size={16} style={{ color: 'var(--success)' }} />
                                                     </button>
                                                     <button type="button" className="btn btn-ghost btn-sm" onClick={() => handleReject(f)}>
-                                                        <XCircle className="text-red-600" size={16} />
+                                                        <XCircle size={16} style={{ color: 'var(--danger)' }} />
                                                     </button>
                                                 </>
                                             )}
@@ -121,7 +121,7 @@ export default function FaltasIndex({ faltas, filters }: Props) {
                             ))}
                             {faltas.data.length === 0 && (
                                 <tr>
-                                    <td colSpan={7} className="text-center muted" style={{ padding: '2rem 0' }}>
+                                    <td colSpan={7} className="muted" style={{ textAlign: 'center', padding: '2rem 0' }}>
                                         Nenhuma falta encontrada.
                                     </td>
                                 </tr>

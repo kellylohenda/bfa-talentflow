@@ -1,5 +1,4 @@
 import { Head, Link } from '@inertiajs/react';
-import { candidatura, portal } from '@/routes';
 import { 
     GraduationCap, 
     Heart, 
@@ -15,6 +14,7 @@ import {
     Calendar,
     Briefcase
 } from 'lucide-react';
+import { candidatura, portal } from '@/routes';
 
 export default function Welcome() {
     return (

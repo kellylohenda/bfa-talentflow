@@ -12,7 +12,6 @@ type Props = {
 };
 
 export default function TalentosEdit({ talent, programs, universities, departments, mentors }: Props) {
-    console.log('Talent Edit Data:', talent);
     const talentId = talent.id || (talent as any).talento_id;
 
     const { data, setData, patch, processing, errors } = useForm({
@@ -33,6 +32,7 @@ export default function TalentosEdit({ talent, programs, universities, departmen
 
     function submit(e: React.FormEvent) {
         e.preventDefault();
+
         if (talentId) {
             patch(update(talentId).url);
         }

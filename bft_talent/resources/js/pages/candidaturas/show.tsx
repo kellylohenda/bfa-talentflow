@@ -1,11 +1,13 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { ArrowLeft, Mail, Phone, MapPin, GraduationCap, Briefcase, Calendar, Info, Clock } from 'lucide-react';
+import { useState } from 'react';
 import { index } from '@/routes/candidaturas';
 import type { Application } from '@/types';
 
 type Props = { candidatura: Application };
 
 export default function CandidaturasShow({ candidatura }: Props) {
+    const [notes, setNotes] = useState(candidatura.observacoes || '');
     const initials = candidatura.name
         .split(' ')
         .map((n) => n[0])
@@ -40,7 +42,7 @@ export default function CandidaturasShow({ candidatura }: Props) {
                                     <span className="pill pill-info" style={{ textTransform: 'uppercase', fontSize: 10, letterSpacing: '0.05em', fontWeight: 700 }}>
                                         {candidatura.stage}
                                     </span>
-                                    <span className="muted" style={{ fontSize: 13 }}>ID: {candidatura.talent_code || 'BFA-' + (1000 + (candidatura.id % 9000))}</span>
+                                    <span className="muted" style={{ fontSize: 13 }}>ID: {candidatura.application_ref || 'BFA-' + (1000 + (candidatura.id % 9000))}</span>
                                 </div>
                             </div>
                         </div>
@@ -75,13 +77,13 @@ export default function CandidaturasShow({ candidatura }: Props) {
                                 </div>
                                 <div className="field-group">
                                     <label className="muted" style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', marginBottom: 4, display: 'block' }}>Gênero / BI</label>
-                                    <div style={{ fontSize: 14, fontWeight: 500 }}>{candidatura.gender || '—'} · {candidatura.bi_number || '—'}</div>
+                                    <div style={{ fontSize: 14, fontWeight: 500 }}>{candidatura.tipo || '—'}</div>
                                 </div>
                                 <div className="field-group">
                                     <label className="muted" style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', marginBottom: 4, display: 'block' }}>Localização</label>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, fontWeight: 500 }}>
                                         <MapPin style={{ width: 14, height: 14, color: 'var(--text-3)' }} />
-                                        {candidatura.location || '—'}
+                                        {candidatura.university?.name || '—'}
                                     </div>
                                 </div>
                             </div>
@@ -100,11 +102,11 @@ export default function CandidaturasShow({ candidatura }: Props) {
                                 </div>
                                 <div className="field-group">
                                     <label className="muted" style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', marginBottom: 4, display: 'block' }}>Curso</label>
-                                    <div style={{ fontSize: 14, fontWeight: 500 }}>{candidatura.course || candidatura.tipo || '—'}</div>
+                                    <div style={{ fontSize: 14, fontWeight: 500 }}>{candidatura.tipo || '—'}</div>
                                 </div>
                                 <div className="field-group">
                                     <label className="muted" style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', marginBottom: 4, display: 'block' }}>Grau / Nível de Graduação</label>
-                                    <div style={{ fontSize: 14, fontWeight: 500 }}>{candidatura.academic_degree || '—'}</div>
+                                    <div style={{ fontSize: 14, fontWeight: 500 }}>{candidatura.observacoes || '—'}</div>
                                 </div>
                             </div>
                         </div>
@@ -117,7 +119,7 @@ export default function CandidaturasShow({ candidatura }: Props) {
                             </div>
                             <div className="card-pad">
                                 <p style={{ fontSize: 14, lineHeight: 1.6, color: 'var(--text-2)', background: 'var(--surface-sunken)', padding: 16, borderRadius: 8, border: '1px solid var(--border)' }}>
-                                    {candidatura.motivation || candidatura.observacoes || 'Nenhuma motivação ou observação fornecida pelo candidato.'}
+                                    {candidatura.observacoes || 'Nenhuma motivação ou observação fornecida pelo candidato.'}
                                 </p>
                             </div>
                         </div>
@@ -153,10 +155,18 @@ export default function CandidaturasShow({ candidatura }: Props) {
                                 </div>
                             </div>
                             <div style={{ padding: '0 24px 24px' }}>
-                                <button className="btn btn-primary" style={{ width: '100%', padding: '12px 0', fontSize: 13 }}>
+                                <button
+                                    className="btn btn-primary"
+                                    style={{ width: '100%', padding: '12px 0', fontSize: 13 }}
+                                    onClick={() => alert('Funcionalidade de gestão de candidatura em desenvolvimento.')}
+                                >
                                     Gerir Candidatura
                                 </button>
-                                <button className="btn btn-ghost" style={{ width: '100%', marginTop: 8, padding: '10px 0', fontSize: 12 }}>
+                                <button
+                                    className="btn btn-ghost"
+                                    style={{ width: '100%', marginTop: 8, padding: '10px 0', fontSize: 12 }}
+                                    onClick={() => alert('Descarga de CV em desenvolvimento.')}
+                                >
                                     Descarregar CV (PDF)
                                 </button>
                             </div>
@@ -167,6 +177,8 @@ export default function CandidaturasShow({ candidatura }: Props) {
                                 <p style={{ fontSize: 12, color: 'var(--text-3)', marginBottom: 12 }}>Zona de Notas Internas</p>
                                 <textarea 
                                     placeholder="Adicionar nota..." 
+                                    value={notes}
+                                    onChange={(e) => setNotes(e.target.value)}
                                     style={{ width: '100%', background: '#fff', border: '1px solid var(--border)', borderRadius: 6, padding: 8, fontSize: 12, minHeight: 80, outline: 'none' }}
                                 />
                             </div>

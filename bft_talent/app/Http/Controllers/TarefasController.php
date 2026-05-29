@@ -41,6 +41,9 @@ class TarefasController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        $role = $request->user()->bfa_role;
+        abort_unless($role?->isStaff(), 403);
+
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:2000'],
@@ -95,6 +98,9 @@ class TarefasController extends Controller
 
     public function update(Request $request, Task $tarefa): RedirectResponse
     {
+        $role = $request->user()->bfa_role;
+        abort_unless($role?->isStaff(), 403);
+
         $validated = $request->validate([
             'title' => ['sometimes', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:2000'],
@@ -140,6 +146,9 @@ class TarefasController extends Controller
 
     public function destroy(Request $request, Task $tarefa): RedirectResponse
     {
+        $role = $request->user()->bfa_role;
+        abort_unless($role?->isStaff(), 403);
+
         $tarefa->delete();
 
         return redirect()->route('tarefas.index', $request->route('current_team'))

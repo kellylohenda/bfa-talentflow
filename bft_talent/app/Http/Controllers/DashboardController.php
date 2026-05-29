@@ -15,7 +15,16 @@ class DashboardController extends Controller
     public function __invoke(Request $request)
     {
         $user = $request->user();
-        $role = $user->bfa_role ?? 'rh';
+        $role = $user->bfaRole;
+
+        if ($role?->isBolseiro() || $role?->isEstagiario()) {
+            return redirect()->route('bolseiro.index');
+        }
+        if ($role?->isVoluntario()) {
+            return redirect()->route('voluntario.index');
+        }
+
+        abort_unless($role?->isStaff(), 403);
 
         $totalTalents = Talent::count();
         $activeTalents = Talent::where('status', 'activo')->count();

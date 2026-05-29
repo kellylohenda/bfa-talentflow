@@ -1,7 +1,7 @@
 import { Link, usePage } from '@inertiajs/react';
+import { ShieldCheck, BadgeCheck } from 'lucide-react';
 import { home } from '@/routes';
 import type { AuthLayoutProps } from '@/types';
-import { ShieldCheck, BadgeCheck } from 'lucide-react';
 
 export default function AuthSplitLayout({
     children,

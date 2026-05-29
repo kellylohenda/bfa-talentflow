@@ -14,6 +14,9 @@ class VoluntariosController extends Controller
 {
     public function index(Request $request): Response
     {
+        $role = $request->user()->bfa_role;
+        abort_unless(in_array($role?->value, ['rh', 'direcao']), 403);
+
         $volunteers = Volunteer::query()
             ->with(['mentor'])
             ->when($request->input('status'), fn ($q, $v) => $q->where('status', $v))
@@ -69,8 +72,11 @@ class VoluntariosController extends Controller
 
     public function show(Request $request, Volunteer $voluntario): Response
     {
+        $role = $request->user()->bfa_role;
+        abort_unless(in_array($role?->value, ['rh', 'direcao']), 403);
+
         return Inertia::render('voluntarios/show', [
-            'voluntario' => $voluntario->load(['mentor', 'hoursEntries', 'eventoInscricoes']),
+            'voluntario' => $voluntario->load(['mentor', 'hoursEntries', 'activityInscricoes.activity']),
         ]);
     }
 

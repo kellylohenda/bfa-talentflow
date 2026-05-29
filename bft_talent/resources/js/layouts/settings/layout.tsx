@@ -31,6 +31,7 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
                 <nav className="col" style={{ gap: 4 }}>
                     {sidebarNavItems.map((item, index) => {
                         const active = isCurrentOrParentUrl(item.href);
+
                         return (
                             <Link
                                 key={`${toUrl(item.href)}-${index}`}

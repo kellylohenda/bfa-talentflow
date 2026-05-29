@@ -17,13 +17,13 @@ export default function Profile({
 
     return (
         <>
-            <Head title="Profile settings" />
+            <Head title="Definições do perfil" />
 
             <div className="section">
                 <div className="page-head">
                     <div>
-                        <h1 className="page-title">Profile information</h1>
-                        <p className="page-subtitle">Update your name and email address</p>
+                        <h1 className="page-title">Informações do Perfil</h1>
+                        <p className="page-subtitle">Actualizar o seu nome e email</p>
                     </div>
                 </div>
 
@@ -38,7 +38,7 @@ export default function Profile({
                             {({ processing, errors }) => (
                                 <>
                                     <div className="form-group">
-                                        <label className="form-label" htmlFor="name">Name</label>
+                                        <label className="form-label" htmlFor="name">Nome</label>
                                         <input
                                             className="input"
                                             id="name"
@@ -52,7 +52,7 @@ export default function Profile({
                                     </div>
 
                                     <div className="form-group">
-                                        <label className="form-label" htmlFor="email">Email address</label>
+                                        <label className="form-label" htmlFor="email">Endereço de email</label>
                                         <input
                                             className="input"
                                             id="email"
@@ -70,14 +70,14 @@ export default function Profile({
                                         auth.user.email_verified_at === null && (
                                             <div>
                                                 <p className="muted">
-                                                    Your email address is unverified.{' '}
+                                                    O seu email não foi verificado.{' '}
                                                     <Link
                                                         href={send()}
                                                         as="button"
                                                         className="btn btn-ghost btn-sm"
                                                     >
-                                                        Click here to resend the
-                                                        verification email.
+                                                        Clique aqui para reenviar o
+                                                        email de verificação.
                                                     </Link>
                                                 </p>
 
@@ -85,8 +85,8 @@ export default function Profile({
                                                     'verification-link-sent' && (
                                                     <div style={{ marginTop: 4 }}>
                                                         <span className="pill pill-success">
-                                                            A new verification link has been
-                                                            sent to your email address.
+                                                            Foi enviado um novo link de verificação
+                                                            para o seu email.
                                                         </span>
                                                     </div>
                                                 )}
@@ -101,7 +101,7 @@ export default function Profile({
                                             data-test="update-profile-button"
                                         >
                                             {processing && <Spinner />}
-                                            Save
+                                            Guardar
                                         </button>
                                     </div>
                                 </>
@@ -119,7 +119,7 @@ export default function Profile({
 Profile.layout = {
     breadcrumbs: [
         {
-            title: 'Profile settings',
+            title: 'Definições do perfil',
             href: edit(),
         },
     ],

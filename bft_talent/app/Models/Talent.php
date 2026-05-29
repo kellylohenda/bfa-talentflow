@@ -11,10 +11,15 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
 
 class Talent extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, LogsActivity, SoftDeletes;
+
+    protected static $logAttributes = ['name', 'email', 'kind', 'status', 'program_id', 'university_id', 'department_id', 'mentor_user_id', 'stipend', 'perf', 'risk_score'];
+
+    protected static $logOnlyDirty = true;
 
     protected $table = 'talents';
 

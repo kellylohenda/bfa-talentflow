@@ -1,11 +1,5 @@
 import { Head, Link, useForm } from '@inertiajs/react';
-import { ArrowLeft } from 'lucide-react';
-import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { index, store } from '@/routes/workflows';
 import type { Talent } from '@/types';
 
@@ -26,64 +20,52 @@ export default function WorkflowsCreate({ talents }: Props) {
     return (
         <>
             <Head title="Novo Workflow" />
-            <div className="flex flex-col gap-6 p-4">
-                <div className="flex items-center gap-4">
-                    <Button variant="ghost" size="sm" asChild>
-                        <Link href={index().url}><ArrowLeft className="h-4 w-4" /></Link>
-                    </Button>
-                    <Heading title="Novo Workflow" description="Iniciar processo de aprovação" />
+
+            <div className="section">
+                <div className="page-head">
+                    <h1>Novo Workflow</h1>
+                    <p>Iniciar processo de aprovação</p>
                 </div>
-                <Card className="max-w-lg">
-                    <CardContent className="pt-6">
-                        <form onSubmit={submit} className="space-y-4">
-                            <div className="space-y-1">
-                                <Label htmlFor="talent_id">Talento *</Label>
-                                <Select value={data.talent_id} onValueChange={(v) => setData('talent_id', v)}>
-                                    <SelectTrigger id="talent_id"><SelectValue placeholder="Seleccionar talento" /></SelectTrigger>
-                                    <SelectContent>
-                                        {talents.map((t) => (
-                                            <SelectItem key={t.id} value={String(t.id)}>
-                                                {t.name} — {t.talent_code}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
+
+                <div className="card" style={{ maxWidth: 600 }}>
+                    <div className="card-pad">
+                        <form onSubmit={submit}>
+                            <div className="form-group">
+                                <label className="form-label">Talento *</label>
+                                <select className="input select" value={data.talent_id} onChange={e => setData('talent_id', e.target.value)}>
+                                    <option value="">Seleccionar talento</option>
+                                    {talents.map(t => <option key={t.id} value={String(t.id)}>{t.name} — {t.talent_code}</option>)}
+                                </select>
                                 <InputError message={errors.talent_id} />
                             </div>
-                            <div className="space-y-1">
-                                <Label htmlFor="type">Tipo *</Label>
-                                <Select value={data.type} onValueChange={(v) => setData('type', v)}>
-                                    <SelectTrigger id="type"><SelectValue /></SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="pagamento">Pagamento</SelectItem>
-                                        <SelectItem value="contrato">Contrato</SelectItem>
-                                        <SelectItem value="renovacao">Renovação</SelectItem>
-                                        <SelectItem value="rescisao">Rescisão</SelectItem>
-                                        <SelectItem value="outro">Outro</SelectItem>
-                                    </SelectContent>
-                                </Select>
+
+                            <div className="form-group">
+                                <label className="form-label">Tipo *</label>
+                                <select className="input select" value={data.type} onChange={e => setData('type', e.target.value)}>
+                                    <option value="pagamento">Pagamento</option>
+                                    <option value="contrato">Contrato</option>
+                                    <option value="renovacao">Renovação</option>
+                                    <option value="rescisao">Rescisão</option>
+                                    <option value="outro">Outro</option>
+                                </select>
                                 <InputError message={errors.type} />
                             </div>
-                            <div className="space-y-1">
-                                <Label htmlFor="descricao">Descrição</Label>
-                                <textarea
-                                    id="descricao"
-                                    rows={3}
-                                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                                    value={data.descricao}
-                                    onChange={(e) => setData('descricao', e.target.value)}
-                                />
+
+                            <div className="form-group">
+                                <label className="form-label">Descrição</label>
+                                <textarea className="input" rows={3} value={data.descricao} onChange={e => setData('descricao', e.target.value)} />
                                 <InputError message={errors.descricao} />
                             </div>
-                            <div className="flex gap-2 pt-2">
-                                <Button type="submit" disabled={processing}>Criar Workflow</Button>
-                                <Button type="button" variant="outline" asChild>
-                                    <Link href={index().url}>Cancelar</Link>
-                                </Button>
+
+                            <div style={{ display: 'flex', gap: 12, marginTop: 24, paddingTop: 24, borderTop: '1px solid #F5F5F5' }}>
+                                <button type="submit" className="btn btn-primary" disabled={processing}>
+                                    {processing ? 'A gravar...' : 'Criar Workflow'}
+                                </button>
+                                <Link href={index().url} className="btn btn-outline">Cancelar</Link>
                             </div>
                         </form>
-                    </CardContent>
-                </Card>
+                    </div>
+                </div>
             </div>
         </>
     );

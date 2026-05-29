@@ -1,4 +1,5 @@
-import { Head } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
+import { Download } from 'lucide-react';
 import { KPI } from '@/components/ui/kpi';
 import { index } from '@/routes/relatorios';
 
@@ -11,6 +12,18 @@ type Stats = {
 };
 
 type Props = { stats?: Stats };
+
+function ExportButton({ type, label }: { type: string; label: string }) {
+    return (
+        <a
+            href={`/relatorios/export?type=${type}`}
+            className="btn btn-ghost btn-sm"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}
+        >
+            <Download size={14} /> {label}
+        </a>
+    );
+}
 
 function StatRow({ label, value }: { label: string; value: string | number }) {
     return (
@@ -76,6 +89,7 @@ export default function RelatoriosIndex({ stats }: Props) {
                             <div className="card">
                                 <div className="card-head">
                                     <span className="card-title">Talentos</span>
+                                    <ExportButton type="talentos" label="Exportar CSV" />
                                 </div>
                                 <div className="card-pad">
                                     <StatRow label="Total" value={stats.talentos.total} />
@@ -87,6 +101,7 @@ export default function RelatoriosIndex({ stats }: Props) {
                             <div className="card">
                                 <div className="card-head">
                                     <span className="card-title">Candidaturas</span>
+                                    <ExportButton type="candidaturas" label="Exportar CSV" />
                                 </div>
                                 <div className="card-pad">
                                     <StatRow label="Total" value={stats.candidaturas.total} />
@@ -98,6 +113,7 @@ export default function RelatoriosIndex({ stats }: Props) {
                             <div className="card">
                                 <div className="card-head">
                                     <span className="card-title">Pagamentos</span>
+                                    <ExportButton type="pagamentos" label="Exportar CSV" />
                                 </div>
                                 <div className="card-pad">
                                     <StatRow label="Total" value={stats.pagamentos.total} />
@@ -109,6 +125,7 @@ export default function RelatoriosIndex({ stats }: Props) {
                             <div className="card">
                                 <div className="card-head">
                                     <span className="card-title">Voluntários</span>
+                                    <ExportButton type="voluntarios" label="Exportar CSV" />
                                 </div>
                                 <div className="card-pad">
                                     <StatRow label="Total" value={stats.voluntarios.total} />
@@ -118,6 +135,7 @@ export default function RelatoriosIndex({ stats }: Props) {
                             <div className="card">
                                 <div className="card-head">
                                     <span className="card-title">Workflows</span>
+                                    <ExportButton type="workflows" label="Exportar CSV" />
                                 </div>
                                 <div className="card-pad">
                                     <StatRow label="Pendentes" value={stats.workflows.pendentes} />

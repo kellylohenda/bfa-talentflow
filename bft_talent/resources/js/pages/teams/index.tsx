@@ -18,18 +18,18 @@ type Props = {
 export default function TeamsIndex({ teams }: Props) {
     return (
         <>
-            <Head title="Teams" />
+            <Head title="Equipas" />
 
             <div className="section">
                 <div className="page-head">
                     <div>
-                        <h1 className="page-title">Teams</h1>
-                        <p className="page-subtitle">Manage your teams and team memberships</p>
+                        <h1 className="page-title">Equipas</h1>
+                        <p className="page-subtitle">Gerir equipas e membros</p>
                     </div>
                     <div className="page-actions">
                         <CreateTeamModal>
                             <button className="btn btn-primary" data-test="teams-new-team-button">
-                                <Plus size={14} /> New team
+                                <Plus size={14} /> Nova equipa
                             </button>
                         </CreateTeamModal>
                     </div>
@@ -51,7 +51,7 @@ export default function TeamsIndex({ teams }: Props) {
                                         </span>
                                         {team.isPersonal ? (
                                             <Badge variant="secondary">
-                                                Personal
+                                                Pessoal
                                             </Badge>
                                         ) : null}
                                     </div>
@@ -74,7 +74,7 @@ export default function TeamsIndex({ teams }: Props) {
                                                     </Link>
                                                 </TooltipTrigger>
                                                 <TooltipContent>
-                                                    <p>View team</p>
+                                                    <p>Ver equipa</p>
                                                 </TooltipContent>
                                             </Tooltip>
                                         ) : (
@@ -89,7 +89,7 @@ export default function TeamsIndex({ teams }: Props) {
                                                     </Link>
                                                 </TooltipTrigger>
                                                 <TooltipContent>
-                                                    <p>Edit team</p>
+                                                    <p>Editar equipa</p>
                                                 </TooltipContent>
                                             </Tooltip>
                                         )}
@@ -101,7 +101,7 @@ export default function TeamsIndex({ teams }: Props) {
 
                     {teams.length === 0 ? (
                         <p className="muted" style={{ padding: 32, textAlign: 'center' }}>
-                            You don't belong to any teams yet.
+                            Ainda não pertence a nenhuma equipa.
                         </p>
                     ) : null}
                 </div>
@@ -113,7 +113,7 @@ export default function TeamsIndex({ teams }: Props) {
 TeamsIndex.layout = {
     breadcrumbs: [
         {
-            title: 'Teams',
+            title: 'Equipas',
             href: index(),
         },
     ],

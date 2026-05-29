@@ -9,6 +9,7 @@ use App\Http\Controllers\ChatController;
 use App\Http\Controllers\ComplianceController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Documentos\DocumentosController;
+use App\Http\Controllers\EstagiarioController;
 use App\Http\Controllers\EstagiariosController;
 use App\Http\Controllers\Eventos\EventosController;
 use App\Http\Controllers\FaltasController;
@@ -26,6 +27,7 @@ use App\Http\Controllers\RoiController;
 use App\Http\Controllers\SucessaoController;
 use App\Http\Controllers\Talentos\TalentosController;
 use App\Http\Controllers\TarefasController;
+use App\Http\Controllers\VoluntarioController;
 use App\Http\Controllers\Voluntarios\VoluntariosController;
 use App\Http\Controllers\Workflows\WorkflowsController;
 use Illuminate\Support\Facades\Route;
@@ -68,6 +70,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Relatórios
     Route::get('relatorios', [RelatoriosController::class, 'index'])->name('relatorios.index');
+    Route::get('relatorios/export', [RelatoriosController::class, 'export'])->name('relatorios.export');
 
     // ── Novos módulos (Inertia pages) ──
     Route::get('bolseiro', [BolseiroController::class, 'index'])->name('bolseiro.index');
@@ -89,6 +92,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('retencao', [RetencaoController::class, 'index'])->name('retencao.index');
     Route::get('sucessao', [SucessaoController::class, 'index'])->name('sucessao.index');
     Route::get('relatorios-voluntariado', [RelatoriosVoluntariadoController::class, 'index'])->name('relatorios-voluntariado.index');
+});
+
+// ─── Participant Portals ────────────────────────────
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('voluntario', [VoluntarioController::class, 'index'])->name('voluntario.index');
+    Route::post('voluntario/horas', [VoluntarioController::class, 'storeHoras'])->name('voluntario.horas.store');
+
+    Route::get('estagiario', [EstagiarioController::class, 'index'])->name('estagiario.index');
 });
 
 require __DIR__.'/settings.php';

@@ -1,6 +1,7 @@
-import { Head } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import { Calendar, Clock, MapPin, Users } from 'lucide-react';
 import { index } from '@/routes/actividades';
+import { inscrever } from '@/routes/api/v1/actividades';
 import type { VolunteerActivity } from '@/types';
 
 type Props = { actividades: VolunteerActivity[] };
@@ -47,7 +48,13 @@ export default function ActividadesIndex({ actividades }: Props) {
                                         </span>
                                     )}
                                 </div>
-                                <button className="btn btn-primary" style={{ marginTop: 8, width: '100%' }}>Inscrever-me</button>
+                                <button
+                                    className="btn btn-primary"
+                                    style={{ marginTop: 8, width: '100%' }}
+                                    onClick={() => router.post(inscrever.url(a.id))}
+                                >
+                                    Inscrever-me
+                                </button>
                             </div>
                         </div>
                     ))}

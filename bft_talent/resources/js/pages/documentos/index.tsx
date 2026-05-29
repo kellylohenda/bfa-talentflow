@@ -41,7 +41,7 @@ export default function DocumentosIndex({ documentos, filters }: Props) {
                 </div>
 
                 <div className="toolbar">
-                    <select className="select" value={filters.status || ''} onChange={(e) => setFilter('status', e.target.value)}>
+                    <select className="input select" value={filters.status || ''} onChange={(e) => setFilter('status', e.target.value)}>
                         <option value="">Todos os estados</option>
                         <option value="pendente">Pendente</option>
                         <option value="aprovado">Aprovado</option>
@@ -79,12 +79,12 @@ export default function DocumentosIndex({ documentos, filters }: Props) {
                                         {new Date(d.created_at).toLocaleDateString('pt-PT')}
                                     </td>
                                     <td>
-                                        <div className="flex items-center justify-end gap-1">
+                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 4 }}>
                                             <Link href={show({ documento: d.id }).url} className="btn btn-ghost btn-sm">
                                                 <Eye size={16} />
                                             </Link>
                                             <button type="button" className="btn btn-ghost btn-sm" onClick={() => handleDelete(d)}>
-                                                <Trash2 size={16} className="text-red-600" />
+                                                <Trash2 size={16} style={{ color: 'var(--danger)' }} />
                                             </button>
                                         </div>
                                     </td>
@@ -92,7 +92,7 @@ export default function DocumentosIndex({ documentos, filters }: Props) {
                             ))}
                             {documentos.data.length === 0 && (
                                 <tr>
-                                    <td colSpan={6} className="text-center muted" style={{ padding: '2rem 0' }}>
+                                    <td colSpan={6} className="muted" style={{ textAlign: 'center', padding: '2rem 0' }}>
                                         Nenhum documento encontrado.
                                     </td>
                                 </tr>

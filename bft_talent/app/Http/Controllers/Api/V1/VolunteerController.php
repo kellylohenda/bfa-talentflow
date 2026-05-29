@@ -15,6 +15,7 @@ class VolunteerController extends Controller
 {
     public function index(Request $request): AnonymousResourceCollection
     {
+        $this->authorize('viewAny', Volunteer::class);
         $volunteers = Volunteer::query()
             ->with(['mentor'])
             ->when($request->input('filter.status'), fn ($q, $v) => $q->where('status', $v))
@@ -44,6 +45,7 @@ class VolunteerController extends Controller
 
     public function show(Request $request, Volunteer $volunteer): VolunteerResource
     {
+        $this->authorize('view', $volunteer);
         $includes = array_filter(explode(',', $request->input('include', '')));
         $allowed = ['mentor', 'activityInscricoes', 'hoursEntries', 'eventoInscricoes'];
         $with = array_values(array_intersect($includes, $allowed)) ?: ['mentor'];

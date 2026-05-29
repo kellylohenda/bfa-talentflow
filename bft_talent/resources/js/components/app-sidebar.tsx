@@ -148,7 +148,17 @@ export function AppSidebar({ collapsed }: { collapsed: boolean }) {
             { title: 'Mensagens', href: '/mensagens', icon: Mail },
             { title: 'Notificações', href: '/notificacoes', icon: Activity },
         );
-    } else if (isParticipant) {
+    } else if (isParticipant && role === 'estagiario') {
+        operacao.push(
+            { title: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+            { title: 'O Meu Programa', href: '/estagiario', icon: BookOpen },
+            { title: 'Agenda', href: '/agenda', icon: Calendar },
+            { title: 'As Minhas Tarefas', href: '/tarefas', icon: CheckSquare },
+            { title: 'Faltas', href: '/faltas', icon: XCircle },
+            { title: 'Documentos', href: '/documentos', icon: FileText },
+            { title: 'Mensagens', href: '/mensagens', icon: MessageSquare },
+        );
+    } else if (isParticipant && role === 'bolseiro') {
         operacao.push(
             { title: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
             { title: 'O Meu Programa', href: '/bolseiro', icon: BookOpen },
@@ -161,7 +171,7 @@ export function AppSidebar({ collapsed }: { collapsed: boolean }) {
     } else if (isVoluntario) {
         operacao.push(
             { title: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-            { title: 'O Meu Perfil', href: '/bolseiro', icon: UserCheck },
+            { title: 'O Meu Perfil', href: '/voluntario', icon: UserCheck },
             { title: 'Agenda', href: '/agenda', icon: Calendar },
             { title: 'Actividades', href: '/actividades', icon: HandHeart },
             { title: 'As Minhas Horas', href: '/horas', icon: Clock },

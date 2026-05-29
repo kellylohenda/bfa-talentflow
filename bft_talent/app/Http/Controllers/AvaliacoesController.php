@@ -35,6 +35,9 @@ class AvaliacoesController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        $role = $request->user()->bfa_role;
+        abort_unless($role?->isStaff(), 403);
+
         $validated = $request->validate([
             'target_id' => ['required', 'integer', 'exists:talents,id'],
             'reviewer_id' => ['required', 'integer', 'exists:users,id'],

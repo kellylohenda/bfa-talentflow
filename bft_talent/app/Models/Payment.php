@@ -9,11 +9,17 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
 
 class Payment extends Model
 {
     use HasFactory;
+    use LogsActivity;
     use SoftDeletes;
+
+    protected static $logAttributes = ['payment_ref', 'talent_id', 'type', 'amount', 'currency', 'status', 'method', 'paid_at'];
+
+    protected static $logOnlyDirty = true;
 
     protected $fillable = [
         'payment_ref', 'idempotency_key', 'talent_id', 'workflow_id',

@@ -58,8 +58,8 @@ export default function TeamEdit({
     const pageTitle = useMemo(
         () =>
             permissions.canUpdateTeam
-                ? `Edit ${team.name}`
-                : `View ${team.name}`,
+                ? `Editar ${team.name}`
+                : `Ver ${team.name}`,
         [permissions.canUpdateTeam, team.name],
     );
 
@@ -89,8 +89,8 @@ export default function TeamEdit({
                     <>
                         <div className="page-head">
                             <div>
-                                <h1 className="page-title">Team settings</h1>
-                                <p className="page-subtitle">Update your team name and settings</p>
+                                <h1 className="page-title">Definições da equipa</h1>
+                                <p className="page-subtitle">Actualizar o nome e definições da equipa</p>
                             </div>
                         </div>
 
@@ -103,7 +103,7 @@ export default function TeamEdit({
                                         <>
                                             <div className="form-group">
                                                 <label className="form-label" htmlFor="name">
-                                                    Team name
+                                                    Nome da equipa
                                                 </label>
                                                 <input
                                                     className="input"
@@ -123,7 +123,7 @@ export default function TeamEdit({
                                                     data-test="team-save-button"
                                                     disabled={processing}
                                                 >
-                                                    Save
+                                                    Guardar
                                                 </button>
                                             </div>
                                         </>
@@ -144,9 +144,9 @@ export default function TeamEdit({
 
                 <div className="page-head">
                     <div>
-                        <h1 className="page-title">Team members</h1>
+                        <h1 className="page-title">Membros da equipa</h1>
                         {permissions.canCreateInvitation && (
-                            <p className="page-subtitle">Manage who belongs to this team</p>
+                            <p className="page-subtitle">Gerir quem pertence a esta equipa</p>
                         )}
                     </div>
                     {permissions.canCreateInvitation && (
@@ -156,7 +156,7 @@ export default function TeamEdit({
                                 data-test="invite-member-button"
                                 onClick={() => setInviteDialogOpen(true)}
                             >
-                                <UserPlus size={14} /> Invite member
+                                <UserPlus size={14} /> Convidar membro
                             </button>
                         </div>
                     )}
@@ -237,7 +237,7 @@ export default function TeamEdit({
                                                     </button>
                                                 </TooltipTrigger>
                                                 <TooltipContent>
-                                                    <p>Remove member</p>
+                                                    <p>Remover membro</p>
                                                 </TooltipContent>
                                             </Tooltip>
                                         </TooltipProvider>
@@ -252,8 +252,8 @@ export default function TeamEdit({
                     <>
                         <div className="page-head">
                             <div>
-                                <h1 className="page-title">Pending invitations</h1>
-                                <p className="page-subtitle">Invitations that haven't been accepted yet</p>
+                                <h1 className="page-title">Convites pendentes</h1>
+                                <p className="page-subtitle">Convites que ainda não foram aceites</p>
                             </div>
                         </div>
 
@@ -297,7 +297,7 @@ export default function TeamEdit({
                                                         </button>
                                                     </TooltipTrigger>
                                                     <TooltipContent>
-                                                        <p>Cancel invitation</p>
+                                                        <p>Cancelar convite</p>
                                                     </TooltipContent>
                                                 </Tooltip>
                                             </TooltipProvider>
@@ -313,18 +313,18 @@ export default function TeamEdit({
                     <>
                         <div className="page-head">
                             <div>
-                                <h1 className="page-title">Delete team</h1>
-                                <p className="page-subtitle">Permanently delete your team</p>
+                                <h1 className="page-title">Eliminar equipa</h1>
+                                <p className="page-subtitle">Eliminar permanentemente a equipa</p>
                             </div>
                         </div>
 
                         <div className="card" style={{ borderColor: 'var(--danger-border)', background: 'var(--danger-bg)' }}>
                             <div className="card-pad">
                                 <div style={{ marginBottom: 12 }}>
-                                    <p style={{ fontWeight: 500, color: 'var(--danger)' }}>Warning</p>
+                                    <p style={{ fontWeight: 500, color: 'var(--danger)' }}>Aviso</p>
                                     <p className="muted">
-                                        Please proceed with caution, this cannot be
-                                        undone.
+                                        Proceda com cuidado, esta acção não pode ser
+                                        desfeita.
                                     </p>
                                 </div>
                                 <button
@@ -332,7 +332,7 @@ export default function TeamEdit({
                                     data-test="delete-team-button"
                                     onClick={() => setDeleteDialogOpen(true)}
                                 >
-                                    Delete team
+                                    Eliminar equipa
                                 </button>
                             </div>
                         </div>
@@ -375,5 +375,5 @@ export default function TeamEdit({
 }
 
 TeamEdit.layout = {
-    breadcrumbs: [{ title: 'Teams' }],
+    breadcrumbs: [{ title: 'Equipas' }],
 };

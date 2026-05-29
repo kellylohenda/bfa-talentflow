@@ -7,11 +7,17 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
 
 class Application extends Model
 {
     use HasFactory;
+    use LogsActivity;
     use SoftDeletes;
+
+    protected static $logAttributes = ['application_ref', 'name', 'email', 'phone', 'program_id', 'university_id', 'tipo', 'stage', 'score'];
+
+    protected static $logOnlyDirty = true;
 
     protected $fillable = [
         'application_ref', 'name', 'email', 'phone',

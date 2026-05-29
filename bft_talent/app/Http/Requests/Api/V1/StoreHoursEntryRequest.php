@@ -8,7 +8,12 @@ class StoreHoursEntryRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()->isStaff() || $this->user()->isVoluntario();
+        $user = $this->user();
+        if ($user->isStaff()) {
+            return true;
+        }
+
+        return $user->volunteer_id === $this->input('volunteer_id');
     }
 
     public function rules(): array

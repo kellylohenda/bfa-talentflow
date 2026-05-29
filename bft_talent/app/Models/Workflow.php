@@ -10,11 +10,17 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
 
 class Workflow extends Model
 {
     use HasFactory;
+    use LogsActivity;
     use SoftDeletes;
+
+    protected static $logAttributes = ['workflow_code', 'talent_id', 'type', 'amount', 'urgency', 'status', 'current_step', 'total_steps'];
+
+    protected static $logOnlyDirty = true;
 
     protected $fillable = [
         'workflow_code', 'talent_id', 'type', 'amount',

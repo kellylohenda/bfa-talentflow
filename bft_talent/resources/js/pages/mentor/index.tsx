@@ -1,7 +1,8 @@
-import { Head } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import { BfaAvatar } from '@/components/ui/avatar';
 import { KPI } from '@/components/ui/kpi';
 import { index } from '@/routes/mentor';
+import { show } from '@/routes/talentos';
 import type { Talent } from '@/types';
 
 type Props = {
@@ -59,6 +60,7 @@ export default function MentorIndex({ mentees, kpis }: Props) {
                                         <div className="muted" style={{ fontSize: 11 }}>Avaliação</div>
                                     </div>
                                     <span className={`pill pill-${statusTone[m.status] ?? 'neutral'}`}>{m.status}</span>
+                                    <Link href={show(m.id).url} className="btn btn-ghost btn-sm">Ver ficha</Link>
                                 </div>
                             </div>
                         ))}

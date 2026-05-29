@@ -1,8 +1,9 @@
-import { Head, router } from '@inertiajs/react';
-import { Building, Calendar, X } from 'lucide-react';
+import { Head, Link, router } from '@inertiajs/react';
+import { Building, Calendar, Eye, X } from 'lucide-react';
 import { TablePagination } from '@/components/table-pagination';
 import { BfaAvatar } from '@/components/ui/avatar';
 import { index } from '@/routes/estagiarios';
+import { show } from '@/routes/talentos';
 import type { Paginated, Talent, Rotation } from '@/types';
 
 type Filters = { status?: string; department_id?: string };
@@ -65,7 +66,10 @@ export default function EstagiariosIndex({ estagiarios, filters }: Props) {
                                             <div style={{ fontSize: 12, color: 'var(--text-3)' }}>{e.talent_code}</div>
                                         </div>
                                     </div>
-                                    <span className={`pill pill-${statusTone[e.status] ?? 'neutral'}`}>{e.status}</span>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                        <span className={`pill pill-${statusTone[e.status] ?? 'neutral'}`}>{e.status}</span>
+                                        <Link href={show(e.id).url} className="btn btn-ghost btn-sm"><Eye size={14} /></Link>
+                                    </div>
                                 </div>
                                 {e.rotations.length > 0 && (
                                     <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>

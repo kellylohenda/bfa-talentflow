@@ -187,6 +187,34 @@ export type Absence = {
     updated_at: string;
 };
 
+export type MentorSession = {
+    id: number;
+    session_code: string;
+    talent_id: number;
+    mentor_user_id: number;
+    scheduled_at: string | null;
+    duracao_min: number;
+    status: 'agendada' | 'realizada' | 'cancelada';
+    formato: string;
+    notas: string | null;
+    accoes: string | null;
+    created_at: string;
+    updated_at: string;
+};
+
+export type Presenca = {
+    id: number;
+    talent_id: number;
+    department_id: number | null;
+    data: string;
+    status: 'presente' | 'ausente' | 'justificado' | 'ferias';
+    hora_entrada: string | null;
+    hora_saida: string | null;
+    observacoes: string | null;
+    created_at: string;
+    updated_at: string;
+};
+
 export type Avaliacao = {
     id: number;
     score: number | null;

@@ -9,7 +9,7 @@ import { store } from '@/routes/register';
 export default function Register() {
     return (
         <>
-            <Head title="Register" />
+            <Head title="Registar" />
             <Form
                 {...store.form()}
                 resetOnSuccess={['password', 'password_confirmation']}
@@ -18,7 +18,7 @@ export default function Register() {
                 {({ processing, errors }) => (
                     <>
                         <div className="form-group">
-                            <label className="form-label" htmlFor="name">Name</label>
+                            <label className="form-label" htmlFor="name">Nome</label>
                             <input
                                 className="input"
                                 id="name"
@@ -34,7 +34,7 @@ export default function Register() {
                         </div>
 
                         <div className="form-group">
-                            <label className="form-label" htmlFor="email">Email address</label>
+                            <label className="form-label" htmlFor="email">Endereço de email</label>
                             <input
                                 className="input"
                                 id="email"
@@ -49,7 +49,7 @@ export default function Register() {
                         </div>
 
                         <div className="form-group">
-                            <label className="form-label" htmlFor="password">Password</label>
+                            <label className="form-label" htmlFor="password">Palavra-passe</label>
                             <PasswordInput
                                 id="password"
                                 required
@@ -63,7 +63,7 @@ export default function Register() {
 
                         <div className="form-group">
                             <label className="form-label" htmlFor="password_confirmation">
-                                Confirm password
+                                Confirmar palavra-passe
                             </label>
                             <PasswordInput
                                 id="password_confirmation"
@@ -84,13 +84,13 @@ export default function Register() {
                             data-test="register-user-button"
                         >
                             {processing && <Spinner />}
-                            Create account
+                            Criar conta
                         </button>
 
                         <div style={{ textAlign: 'center', marginTop: 12 }}>
-                            <span className="muted">Already have an account? </span>
+                            <span className="muted">Já tem conta? </span>
                             <TextLink href={login()} tabIndex={6}>
-                                Log in
+                                Iniciar sessão
                             </TextLink>
                         </div>
                     </>
@@ -101,6 +101,6 @@ export default function Register() {
 }
 
 Register.layout = {
-    title: 'Create an account',
-    description: 'Enter your details below to create your account',
+    title: 'Criar uma conta',
+    description: 'Introduza os seus dados abaixo para criar a sua conta',
 };

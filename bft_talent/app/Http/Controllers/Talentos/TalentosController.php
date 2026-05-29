@@ -88,7 +88,7 @@ class TalentosController extends Controller
             'rotations', 'payments', 'tasks', 'absences', 'evaluations', 'documents',
         ])->find($id);
 
-        if (!$talent) {
+        if (! $talent) {
             abort(404);
         }
 
@@ -101,11 +101,6 @@ class TalentosController extends Controller
             'departments' => Department::orderBy('name')->get(['id', 'name']),
             'mentors' => User::where('bfa_role', 'mentor')->orderBy('name')->get(['id', 'name']),
             'canEdit' => $request->user()->can('update', $talent),
-            'debugAuth' => [
-                'role' => $request->user()->bfa_role,
-                'id' => $request->user()->id,
-                'can_view' => $request->user()->can('view', $talent),
-            ]
         ]);
     }
 
@@ -129,6 +124,8 @@ class TalentosController extends Controller
         $validated = $request->validate([
             'name' => ['sometimes', 'string', 'max:255'],
             'email' => ['nullable', 'email', 'max:255'],
+            'program_id' => ['sometimes', 'exists:programs,id'],
+            'university_id' => ['sometimes', 'exists:universities,id'],
             'department_id' => ['nullable', 'integer', 'exists:departments,id'],
             'mentor_user_id' => ['nullable', 'integer', 'exists:users,id'],
             'stipend' => ['nullable', 'numeric', 'min:0'],

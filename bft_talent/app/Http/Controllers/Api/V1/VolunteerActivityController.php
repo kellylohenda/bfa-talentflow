@@ -52,6 +52,10 @@ class VolunteerActivityController extends Controller
             return response()->json(['message' => 'Utilizador sem perfil de voluntário.'], 422);
         }
 
+        if (in_array($volunteerActivity->status, ['cancelada', 'concluida'])) {
+            return response()->json(['message' => 'Não é possível inscrever-se nesta actividade.'], 422);
+        }
+
         if ($volunteerActivity->vagas_total && $volunteerActivity->inscritos_count >= $volunteerActivity->vagas_total) {
             return response()->json(['message' => 'Actividade sem vagas disponíveis.'], 422);
         }

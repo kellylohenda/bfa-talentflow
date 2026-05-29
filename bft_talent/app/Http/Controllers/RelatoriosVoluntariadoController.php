@@ -34,6 +34,12 @@ class RelatoriosVoluntariadoController extends Controller
                 'voluntarios' => $r->voluntarios,
             ]);
 
+        $totalHorasAll = $porArea->sum('horas');
+        $porArea = $porArea->map(fn ($item) => [
+            ...$item,
+            'percentagem' => $totalHorasAll > 0 ? round(($item['horas'] / $totalHorasAll) * 100, 1) : 0,
+        ]);
+
         $historico = DB::table('hours_entries')
             ->selectRaw("strftime('%Y-%m', data) as mes, sum(horas) as total_horas")
             ->groupBy('mes')

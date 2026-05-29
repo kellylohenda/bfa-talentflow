@@ -4,15 +4,14 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Notifications\DatabaseNotification;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class NotificacoesController extends Controller
 {
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        $notificacoes = DatabaseNotification::query()
+        $notificacoes = $request->user()->notifications()
             ->latest()
             ->paginate(25)
             ->withQueryString()
@@ -29,7 +28,7 @@ class NotificacoesController extends Controller
                 ];
             });
 
-        $naoLidasCount = DatabaseNotification::whereNull('read_at')->count();
+        $naoLidasCount = $request->user()->notifications()->whereNull('read_at')->count();
 
         return Inertia::render('notificacoes/index', [
             'notificacoes' => $notificacoes,
@@ -39,14 +38,14 @@ class NotificacoesController extends Controller
 
     public function markAsRead(Request $request, string $id): RedirectResponse
     {
-        DatabaseNotification::where('id', $id)->update(['read_at' => now()]);
+        $request->user()->notifications()->where('id', $id)->firstOrFail()->update(['read_at' => now()]);
 
         return redirect()->back();
     }
 
     public function markAllAsRead(Request $request): RedirectResponse
     {
-        DatabaseNotification::whereNull('read_at')->update(['read_at' => now()]);
+        $request->user()->notifications()->unread()->update(['read_at' => now()]);
 
         return redirect()->back();
     }

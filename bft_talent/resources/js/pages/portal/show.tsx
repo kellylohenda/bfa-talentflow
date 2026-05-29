@@ -36,8 +36,15 @@ const CFG: Record<string, any> = {
 
 export default function PortalShow({ application }: { application: Application }) {
     let sk = 'pendente';
-    if (['integrado', 'oferta'].includes(application.stage)) sk = 'aprovada';
-    if (['rejeitado', 'recusada'].includes(application.stage)) sk = 'recusada';
+
+    if (['integrado', 'oferta'].includes(application.stage)) {
+sk = 'aprovada';
+}
+
+    if (['rejeitado', 'recusada'].includes(application.stage)) {
+sk = 'recusada';
+}
+
     const c = CFG[sk];
 
     return (

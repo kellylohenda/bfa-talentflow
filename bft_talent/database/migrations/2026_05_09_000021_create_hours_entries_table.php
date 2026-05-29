@@ -16,7 +16,7 @@ return new class extends Migration
             $table->date('data');
             $table->decimal('horas', 6, 2);
             $table->string('descricao')->nullable();
-            $table->boolean('validado')->default(false);
+            $table->boolean('validado')->nullable();
             $table->foreignId('validado_por_user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamp('validado_at')->nullable();
             $table->timestamps();

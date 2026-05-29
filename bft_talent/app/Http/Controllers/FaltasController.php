@@ -36,6 +36,9 @@ class FaltasController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        $role = $request->user()->bfa_role;
+        abort_unless($role?->isStaff(), 403);
+
         $validated = $request->validate([
             'talent_id' => ['required', 'integer', 'exists:talents,id'],
             'motivo' => ['required', 'string', 'max:500'],
@@ -44,7 +47,14 @@ class FaltasController extends Controller
             'tipo' => ['required', 'string', 'in:justificada,injustificada,licenca'],
         ]);
 
-        Absence::create($validated);
+        Absence::create([
+            'talent_id' => $validated['talent_id'],
+            'motivo' => $validated['motivo'],
+            'date_start' => $validated['data_inicio'],
+            'date_end' => $validated['data_fim'] ?? null,
+            'tipo' => $validated['tipo'],
+            'status' => 'pendente',
+        ]);
 
         return redirect()->route('faltas.index', $request->route('current_team'))
             ->with('success', 'Falta registada com sucesso.');
@@ -59,6 +69,9 @@ class FaltasController extends Controller
 
     public function update(Request $request, Absence $falta): RedirectResponse
     {
+        $role = $request->user()->bfa_role;
+        abort_unless($role?->isStaff(), 403);
+
         $validated = $request->validate([
             'motivo' => ['sometimes', 'string', 'max:500'],
             'data_inicio' => ['sometimes', 'date'],
@@ -68,7 +81,27 @@ class FaltasController extends Controller
             'aprovado_por' => ['nullable', 'integer', 'exists:users,id'],
         ]);
 
-        $falta->update($validated);
+        $updateData = [];
+        if (isset($validated['motivo'])) {
+            $updateData['motivo'] = $validated['motivo'];
+        }
+        if (isset($validated['data_inicio'])) {
+            $updateData['date_start'] = $validated['data_inicio'];
+        }
+        if (array_key_exists('data_fim', $validated)) {
+            $updateData['date_end'] = $validated['data_fim'];
+        }
+        if (isset($validated['tipo'])) {
+            $updateData['tipo'] = $validated['tipo'];
+        }
+        if (isset($validated['status'])) {
+            $updateData['status'] = $validated['status'];
+        }
+        if (isset($validated['aprovado_por'])) {
+            $updateData['approved_by_user_id'] = $validated['aprovado_por'];
+        }
+
+        $falta->update($updateData);
 
         return redirect()->route('faltas.index', $request->route('current_team'))
             ->with('success', 'Falta actualizada com sucesso.');
@@ -76,6 +109,9 @@ class FaltasController extends Controller
 
     public function destroy(Request $request, Absence $falta): RedirectResponse
     {
+        $role = $request->user()->bfa_role;
+        abort_unless($role?->isStaff(), 403);
+
         $falta->delete();
 
         return redirect()->route('faltas.index', $request->route('current_team'))

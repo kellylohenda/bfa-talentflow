@@ -13,11 +13,20 @@ class BolseiroController extends Controller
     {
         $user = $request->user();
 
-        $bolseiro = Talent::where('user_id', $user->id)->first();
+        $bolseiro = Talent::where('user_id', $user->id)
+            ->with([
+                'program', 'university', 'department', 'mentor',
+                'payments', 'tasks', 'absences', 'documents',
+                'mentorSessions', 'presencas',
+            ])
+            ->first();
 
-        $payments = $bolseiro?->payments()->latest()->get() ?? collect();
-        $tasks = $bolseiro?->tasks()->latest()->get() ?? collect();
-        $mentorSessions = $bolseiro?->mentorSessions()->latest()->get() ?? collect();
+        $payments = $bolseiro?->payments ?? collect();
+        $tasks = $bolseiro?->tasks ?? collect();
+        $mentorSessions = $bolseiro?->mentorSessions ?? collect();
+        $absences = $bolseiro?->absences ?? collect();
+        $documents = $bolseiro?->documents ?? collect();
+        $presencas = $bolseiro?->presencas ?? collect();
 
         $tarefasPendentes = $tasks->where('status', '!=', 'concluida')->count();
         $pagamentosPendentes = $payments->where('status', 'pendente')->count();
@@ -33,9 +42,14 @@ class BolseiroController extends Controller
                 'sessoesMes' => $sessoesMes,
                 'desempenho' => $desempenho,
             ],
+            'bolseiro' => $bolseiro,
             'mentor' => $bolseiro?->mentor,
             'tarefas' => $tasks,
             'pagamentos' => $payments,
+            'absences' => $absences,
+            'documents' => $documents,
+            'mentorSessions' => $mentorSessions,
+            'presencas' => $presencas,
         ]);
     }
 }

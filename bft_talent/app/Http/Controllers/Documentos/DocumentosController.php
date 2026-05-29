@@ -14,8 +14,11 @@ class DocumentosController extends Controller
 {
     public function index(Request $request): Response
     {
+        $isStaff = $request->user()->bfa_role?->isStaff() ?? false;
+
         $documentos = Document::query()
             ->with(['owner'])
+            ->when(! $isStaff, fn ($q) => $q->where('user_id', $request->user()->id))
             ->when($request->input('status'), fn ($q, $v) => $q->where('status', $v))
             ->when($request->input('category'), fn ($q, $v) => $q->where('category', $v))
             ->latest()
@@ -30,6 +33,9 @@ class DocumentosController extends Controller
 
     public function show(Request $request, Document $documento): Response
     {
+        $isStaff = $request->user()->bfa_role?->isStaff() ?? false;
+        abort_unless($isStaff || $documento->user_id === $request->user()->id, 403);
+
         return Inertia::render('documentos/show', [
             'documento' => $documento->load('owner'),
         ]);

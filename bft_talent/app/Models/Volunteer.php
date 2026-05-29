@@ -9,11 +9,17 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
 
 class Volunteer extends Model
 {
     use HasFactory;
+    use LogsActivity;
     use SoftDeletes;
+
+    protected static $logAttributes = ['volunteer_code', 'nome', 'email', 'phone', 'status', 'area_actuacao', 'total_horas', 'mentor_user_id'];
+
+    protected static $logOnlyDirty = true;
 
     protected $fillable = [
         'volunteer_code', 'nome', 'email', 'phone',

@@ -1,7 +1,7 @@
 # Plano de Migração: Layout Legacy → bft_talent
 
 > **Data início:** 28 Mai 2026
-> **Data conclusão:** 28 Mai 2026
+> **Data conclusão:** 29 Mai 2026
 > **Estado:** ✅ Completo
 > **Responsável:** opencode
 
@@ -9,7 +9,7 @@
 
 ## Objectivo
 
-Migrar o layout visual do protótipo Next.js legacy (`_legacy/`) para o frontend Laravel/Inertia (`bft_talent/`), sem alterar a lógica de negócio existente.
+Migrar o layout visual do protótipo Next.js legacy (`_legacy/`) para o frontend Laravel/Inertia (`bft_talent/`), corrigir bugs críticos, adicionar funcionalidades novas e melhorar todas as páginas de detalhe.
 
 ## Decisões Técnicas
 
@@ -18,233 +18,154 @@ Migrar o layout visual do protótipo Next.js legacy (`_legacy/`) para o frontend
 | Role Switcher | **Removido** — cada utilizador tem role fixo via `bfa_role` |
 | Pesquisa Global | **Híbrida** — client-side (instantânea) + API (cross-module) |
 | Notificações | **Híbridas** — DB (tabela notifications) + client-side (regras live) |
-| UI Components | **Migrar do legacy** — KPI, Charts, Avatar, Pill |
-| Páginas | **Manter bft_talent** — atualizar apenas o visual |
+| UI Components | **Migrados do legacy** — KPI, Charts, Avatar, Pill |
+| Páginas | **Mantidas do bft_talent** — visual actualizado |
+| Activity Log | **spatie/laravel-activitylog** — ligado a 5 models |
+| CSV Export | **RelatoriosController::export()** — 5 tipos de relatório |
 
 ---
 
-## FASE 1: Sidebar — User Footer
+## Fases Completadas
 
-**Estado:** ✅ Completo
-**Ficheiro:** `resources/js/components/app-sidebar.tsx`
+### FASE 1: Sidebar — User Footer ✅
+- `ROLE_LABELS` map com subtítulos PT-PT por role
+- Footer mostra nome + subtítulo do role + email
+- Clock importado de lucide-react
 
-### Tarefas
-- [x] Adicionar `ROLE_LABELS` map (subtítulos PT-PT por role)
-- [x] Atualizar footer `sb-user` para mostrar subtítulo do role
-- [x] Verificar todas as 6 labels
-- [x] Remover Clock SVG custom (usar lucide-react)
+### FASE 2: Topbar — Pesquisa + Notificações + Breadcrumbs ✅
+- Pesquisa global com debounce 300ms + API endpoint
+- Notificações por role (DB + client-side)
+- Breadcrumbs com 36 paths traduzidos para PT-PT
+- `PesquisaController.php` criado
 
-### Notas
-- Subtítulos: Gestora de Programa — RH, Direcção de RH, Director — Banca de Empresas, etc.
-- Footer agora mostra: Nome + Subtítulo do Role + Email + Botão Logout
+### FASE 3: UI Components ✅
+- `ui/kpi.tsx` — KPI tile com label, value, delta, icon
+- `ui/charts.tsx` — Spark, Donut, HBar, VBars
+- `ui/avatar.tsx` — BfaAvatar com iniciais + cor
+- `ui/badge.tsx` — 6 variantes (success, warn, danger, info, neutral, primary)
 
----
+### FASE 4: CSS Design System ✅
+- Gap analysis: bft_talent já tinha ~95% do CSS do legacy
+- Classe `chip-filter` adicionada
+- Media queries completas (768px, 480px)
 
-## FASE 2a: Topbar — Pesquisa Global
+### FASE 5: Mobile Responsiveness ✅
+- Sidebar drawer em mobile
+- Overlay escuro
+- Search hidden em mobile
+- Grids adaptam
 
-**Estado:** ✅ Completo
-**Ficheiro:** `resources/js/components/app-sidebar-header.tsx`
-**Endpoint:** `GET /api/v1/pesquisa?q={query}`
+### FASE 6: Todas as Páginas Actualizadas ✅
+- 64 páginas modificadas
+- Todas usam BFA CSS classes
+- Páginas de detalhe (show) reescritas com KPIs + acções
 
-### Tarefas
-- [x] Criar estado `searchQuery`, `searchResults`, `searchOpen` no header
-- [x] Implementar debounce 300ms
-- [x] Criar `PesquisaController` no backend
-- [x] Criar rota `GET /api/v1/pesquisa` no `routes/api.php`
-- [x] Implementar pesquisa via API (cross-module)
-- [x] Criar dropdown de resultados agrupados por categoria
-- [x] Navegação: Enter → primeiro resultado, Escape → fecha
-- [x] Click outside fecha dropdown
+### FASE 7: Segurança ✅
+- 7 controllers com auth adicionada
+- Notificações scoped ao user actual
+- Documentos com owner check
 
-### Ficheiros criados
-- `app/Http/Controllers/Api/V1/PesquisaController.php`
-- Rota adicionada em `routes/api.php`
+### FASE 8: Bugs Críticos ✅
+- debugAuth removido
+- program_id/university_id salvos no update
+- Column mismatch Absence corrigido
+- Buttons mortos activados
+- Activity Log ligado (5 models)
 
----
-
-## FASE 2b: Topbar — Notificações
-
-**Estado:** ✅ Completo
-**Ficheiro:** `resources/js/components/app-sidebar-header.tsx`
-
-### Tarefas
-- [x] Criar componente `NotificationsDropdown` (inline)
-- [x] Gerar notificações client-side (regras live por role)
-- [x] Badge vermelho com contagem de não lidas
-- [x] Dropdown com lista de notificações
-- [x] Click outside fecha dropdown
-
-### Regras implementadas
-| Role | Regra | Tipo |
-|------|-------|------|
-| rh/direcao | Pagamentos pendentes | warn |
-| rh/direcao | Candidaturas em análise | info |
-| rh/direcao | Talentos em risco (risk_score >= 0.4) | danger |
-| mentor | Tarefas em atraso (mentees) | danger |
-| bolseiro/estagiario | Pagamentos pendentes próprio | info |
+### FASE 9: Funcionalidades Novas ✅
+- Candidatura pública completada (passos 3-5)
+- Activity Log com spatie/activitylog
+- CSV Export (5 tipos de relatório)
+- Tradução settings para PT
+- Drill-down links em todas as show pages
 
 ---
 
-## FASE 2c: Topbar — Breadcrumbs
+## Estado Actual das Show Pages
 
-**Estado:** ✅ Completo
-**Ficheiro:** `resources/js/components/app-sidebar-header.tsx`
-
-### Tarefas
-- [x] Completar mapa `PATH_LABELS` com todos os 34 paths do legacy
-- [x] Verificar mapeamento correto de cada path
-
----
-
-## FASE 3a: Componente UI — KPI Tile
-
-**Estado:** ✅ Completo
-**Ficheiro:** `resources/js/components/ui/kpi.tsx` (NOVO)
-
-### Tarefas
-- [x] Criar componente `KPI` com interface do legacy
-- [x] Props: `label`, `value`, `sub`, `delta`, `deltaTone`, `icon`
-- [x] Usar classes CSS `.kpi`, `.kpi-label`, `.kpi-value`, `.kpi-sub`, `.kpi-delta`
-- [x] Suportar variantes `up`, `down`, `flat` para delta
+| Página | KPIs | Detalhes | Acções | Estado |
+|--------|------|----------|--------|--------|
+| talentos/show | ✅ | ✅ | Editar, Upload doc | ✅ |
+| candidaturas/show | ✅ | ✅ | Gerir, Download CV, Notas | ✅ |
+| pagamentos/show | ✅ | ✅ | Marcar Pago, Cancelar | ✅ |
+| workflows/show | ✅ | ✅ | Aprovar, Rejeitar | ✅ |
+| tarefas/show | ✅ | ✅ | Editar, Iniciar, Concluir, Eliminar | ✅ |
+| faltas/show | ✅ | ✅ | Aprovar, Rejeitar | ✅ |
+| documentos/show | ✅ | ✅ | Descarregar, Aprovar, Rejeitar | ✅ |
+| voluntarios/show | ✅ | ✅ | Editar, Inactivar | ✅ |
+| eventos/show | ✅ | ✅ | Editar, Inscrever-me | ✅ |
+| mensagens/show | ✅ | ✅ | Responder, Eliminar, Marcar Lida | ✅ |
 
 ---
 
-## FASE 3b: Componente UI — Charts
+## Dados na DB
 
-**Estado:** ✅ Completo
-**Ficheiro:** `resources/js/components/ui/charts.tsx` (NOVO)
-
-### Tarefas
-- [x] Migrar `Spark` do legacy (sparkline SVG)
-- [x] Migrar `Donut` do legacy (gráfico circular)
-- [x] Migrar `HBar` do legacy (barras horizontais)
-- [x] Migrar `VBars` do legacy (barras verticais)
-
----
-
-## FASE 3c: Componente UI — Avatar
-
-**Estado:** ✅ Completo
-**Ficheiro:** `resources/js/components/ui/avatar.tsx` (modificado)
-
-### Tarefas
-- [x] Criar componente `BfaAvatar` com iniciais + cor
-- [x] Função `avatarColor()` com paleta de 8 cores
-- [x] Função `initials()` para extrair iniciais do nome
-- [x] Manter componentes Radix existentes (Avatar, AvatarImage, AvatarFallback)
-
----
-
-## FASE 3d: Componente UI — Pill/Badge
-
-**Estado:** ✅ Completo
-**Ficheiro:** `resources/js/components/ui/badge.tsx` (modificado)
-
-### Tarefas
-- [x] Adicionar variantes: success, warn, danger, info, neutral, primary
-- [x] Usar variáveis CSS do design system (--success-bg, --warn-bg, etc.)
-
----
-
-## FASE 4: CSS Design System
-
-**Estado:** ✅ Completo
-**Ficheiro:** `resources/css/app.css`
-
-### Tarefas
-- [x] Comparar `globals.css` (legacy) com `app.css` (bft_talent)
-- [x] Adicionar classe `chip-filter` em falta
-- [x] Verificar media queries de responsividade (768px, 480px)
-- [x] Confirmar que todas as classes CSS principais estão presentes
-
-### Resultado
-- bft_talent já tinha ~95% do CSS do legacy
-- Adicionada classe `chip-filter` para filtros em pills
-- Sidebar, topbar, buttons, cards, KPI, pills, tables, tabs, modal, grid — todos presentes
-
----
-
-## FASE 5: Mobile Responsiveness
-
-**Estado:** ✅ Completo (verificado na FASE 4)
-
-### Tarefas
-- [x] Sidebar como drawer em mobile (data-mobile-open)
-- [x] Overlay escuro (.sb-overlay)
-- [x] Search hidden em mobile (.tb-search display:none)
-- [x] Grids adaptam (.cols-4 → 2 colunas em 768px, 1 coluna em 480px)
-- [x] Page padding reduzido em mobile
-- [x] Sidebar sempre full-width em mobile (override icon mode)
-
----
-
-## FASE 6: Páginas — Atualizar Visual
-
-**Estado:** ⏳ Pendente (próxima fase)
-**Esforço estimado:** 4-6h
-
-### Prioridade
-| Prioridade | Páginas |
-|------------|---------|
-| ALTA | dashboard, talentos, candidaturas |
-| ALTA | pagamentos, workflows |
-| MÉDIA | bolseiro, mentor, voluntario |
-| MÉDIA | tarefas, faltas, documentos |
-| BAIXA | geografia, roi, compliance, sucessao |
-| BAIXA | chat, notificacoes, actividades, horas |
-
-### Nota
-As páginas do bft_talent já existem e estão ligadas ao backend.
-A Fase 6 consiste em atualizar o design visual para usar os novos componentes (KPI, Charts, Badge variants, BfaAvatar).
-
----
-
-## FASE 7: Limpeza
-
-**Estado:** ⏳ Pendente (após Fase 6)
-**Esforço estimado:** 0.5h
-
-### Tarefas
-- [ ] Remover `nav-main.tsx`
-- [ ] Remover `nav-user.tsx`
-- [ ] Remover `nav-footer.tsx`
-- [ ] Remover `breadcrumbs.tsx`
-- [ ] Remover `team-switcher.tsx`
-- [ ] Remover `app-header.tsx`
-- [ ] Remover `app-shell.tsx`
-- [ ] Remover `app-content.tsx`
-- [ ] Remover `app-logo.tsx`
+| Entidade | Quantidade |
+|----------|-----------|
+| Talentos | 18 (0 com email) |
+| Utilizadores | 12 |
+| Programas | 5 |
+| Universidades | 10 |
+| Departamentos | 11 |
+| Candidaturas | 14 |
+| Pagamentos | 12 |
+| Voluntários | 15 |
+| Eventos | 10 |
+| Workflows | 6 |
+| Documentos | 0 |
+| Activity Log | 0 |
 
 ---
 
 ## Ficheiros Criados/Modificados
 
-| Ficheiro | Acção | Fase |
-|----------|-------|------|
-| `resources/js/components/app-sidebar.tsx` | Modificado | 1 |
-| `resources/js/components/app-sidebar-header.tsx` | Reescrito | 2 |
-| `resources/js/components/ui/kpi.tsx` | **Criado** | 3a |
-| `resources/js/components/ui/charts.tsx` | **Criado** | 3b |
-| `resources/js/components/ui/avatar.tsx` | Modificado | 3c |
-| `resources/js/components/ui/badge.tsx` | Modificado | 3d |
-| `resources/css/app.css` | Modificado | 4 |
-| `app/Http/Controllers/Api/V1/PesquisaController.php` | **Criado** | 2a |
-| `routes/api.php` | Modificado | 2a |
-| `PLANO_MIGRACAO.md` | **Criado** | Tracking |
+### Novos
+- `app/Http/Controllers/Api/V1/PesquisaController.php`
+- `resources/js/components/ui/kpi.tsx`
+- `resources/js/components/ui/charts.tsx`
+- `config/activitylog.php` (publicado)
+
+### Layout
+- `resources/js/components/app-sidebar.tsx`
+- `resources/js/components/app-sidebar-header.tsx`
+- `resources/js/layouts/settings/layout.tsx`
+- `resources/css/app.css`
+
+### Páginas (64 total)
+Todas as páginas em `resources/js/pages/` foram modificadas.
+
+### Backend
+- 7 controllers com auth corrigida
+- 5 models com LogsActivity
+- Rota de pesquisa + export CSV
 
 ---
 
-## Histórico
+## Comandos Úteis
 
-| Data | Fase | Estado | Notas |
-|------|------|--------|-------|
-| 28 Mai 2026 | FASE 1 | ✅ | Sidebar subtitle + Clock import |
-| 28 Mai 2026 | FASE 2a | ✅ | Pesquisa global + PesquisaController |
-| 28 Mai 2026 | FASE 2b | ✅ | Notificações híbridas |
-| 28 Mai 2026 | FASE 2c | ✅ | Breadcrumbs 34 paths |
-| 28 Mai 2026 | FASE 3a | ✅ | KPI tile component |
-| 28 Mai 2026 | FASE 3b | ✅ | Charts (Spark, Donut, HBar, VBars) |
-| 28 Mai 2026 | FASE 3c | ✅ | BfaAvatar (iniciais + cor) |
-| 28 Mai 2026 | FASE 3d | ✅ | Badge variants (6 tons) |
-| 28 Mai 2026 | FASE 4 | ✅ | CSS gap analysis + chip-filter |
-| 28 Mai 2026 | FASE 5 | ✅ | Mobile responsiveness verificada |
+```bash
+# Dev server
+npm run dev
+
+# Build
+npm run build
+
+# TypeScript check
+npm run types:check
+
+# Laravel server
+php artisan serve --port=8080
+
+# Login
+# mariana.quissama@bfa.ao / password
+```
+
+---
+
+## Próximos Passos (se necessário)
+
+1. Melhorar candidatura pública (upload de documentos)
+2. Signed URLs para download de documentos
+3. mais dados na DB (preencher emails dos talentos)
+4. Testes automatizados (Pest)
+5. Deploy em produção
